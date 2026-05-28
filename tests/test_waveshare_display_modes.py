@@ -1,0 +1,152 @@
+from __future__ import annotations
+
+import unittest
+
+from PIL import Image
+
+from app.display.waveshare_display import MODE_FULL, MODE_PARTIAL, WaveshareDisplay
+
+
+class FakeEpd:
+    width = 600
+    height = 448
+
+    def __init__(self, calls: list[str] | None = None) -> None:
+        self.calls: list[str] = calls if calls is not None else []
+
+    def init(self) -> None:
+        self.calls.append("init")
+
+    def init_Part(self) -> None:
+        self.calls.append("init_Part")
+
+    def Clear(self) -> None:
+        self.calls.append("Clear")
+
+    def getbuffer(self, image: Image.Image) -> str:
+        self.calls.append(f"getbuffer:{image.size[0]}x{image.size[1]}")
+        return "buffer"
+
+    def display(self, buffer: str) -> None:
+        self.calls.append(f"display:{buffer}")
+
+    def display_Partial(self, buffer: str) -> None:
+        self.calls.append(f"display_Partial:{buffer}")
+
+    def sleep(self) -> None:
+        self.calls.append("sleep")
+
+
+class FakeDriver:
+    EPD_WIDTH = 600
+    EPD_HEIGHT = 448
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    def EPD(self) -> FakeEpd:
+        self.calls.append("EPD")
+        return FakeEpd(self.calls)
+
+
+class WaveshareDisplayModeTest(unittest.TestCase):
+    def make_display(self, *, disable_partial: bool = False) -> tuple[WaveshareDisplay, FakeEpd]:
+        epd = FakeEpd()
+        display = WaveshareDisplay(
+            partial_update_enabled=True,
+            disable_partial=disable_partial,
+            full_clear_interval=0,
+        )
+        display._epd = epd
+        display._initialized = True
+        display._display_mode = MODE_FULL
+        display.width = epd.width
+        display.height = epd.height
+        return display, epd
+
+    def test_partial_update_switches_to_partial_lut_and_uses_display_partial(self) -> None:
+        display, epd = self.make_display()
+
+        display.partial_update(Image.new("1", (600, 448), 1), reason="menu_navigation")
+
+        self.assertEqual(display._display_mode, MODE_PARTIAL)
+        self.assertEqual(epd.calls, ["init_Part", "getbuffer:600x448", "display_Partial:buffer"])
+
+    def test_clean_full_update_switches_from_partial_to_full_before_clear_and_display(self) -> None:
+        display, epd = self.make_display()
+        display._display_mode = MODE_PARTIAL
+
+        display.full_update(
+            Image.new("1", (600, 448), 1),
+            reason="major_layout_transition",
+            clean_refresh=True,
+        )
+
+        self.assertEqual(display._display_mode, MODE_FULL)
+        self.assertEqual(epd.calls, ["init", "Clear", "getbuffer:600x448", "display:buffer"])
+
+    def test_any_full_update_from_partial_mode_forces_clean_clear(self) -> None:
+        display, epd = self.make_display()
+        display._display_mode = MODE_PARTIAL
+
+        display.full_update(
+            Image.new("1", (600, 448), 1),
+            reason="source_change",
+            clean_refresh=False,
+        )
+
+        self.assertEqual(display._display_mode, MODE_FULL)
+        self.assertEqual(epd.calls, ["init", "Clear", "getbuffer:600x448", "display:buffer"])
+
+    def test_disable_partial_never_calls_partial_driver_methods(self) -> None:
+        display, epd = self.make_display(disable_partial=True)
+
+        display.partial_update(Image.new("1", (600, 448), 1), reason="clock_refresh")
+
+        self.assertEqual(display._display_mode, MODE_FULL)
+        self.assertEqual(epd.calls, ["getbuffer:600x448", "display:buffer"])
+
+    def test_full_update_wakes_panel_if_previous_one_shot_slept(self) -> None:
+        display, epd = self.make_display(disable_partial=True)
+        display._sleeping = True
+        display._display_mode = MODE_FULL
+
+        display.full_update(Image.new("1", (600, 448), 1), reason="clock_refresh")
+
+        self.assertFalse(display._sleeping)
+        self.assertEqual(epd.calls, ["init", "Clear", "getbuffer:600x448", "display:buffer"])
+
+    def test_one_shot_render_path_matches_manual_push_lifecycle(self) -> None:
+        driver = FakeDriver()
+        display = WaveshareDisplay(full_clear_interval=0)
+        display._epd_module = driver
+        path = self._write_preview_image()
+
+        self.assertTrue(
+            display.one_shot_render_path(
+                str(path),
+                reason="major_layout_transition",
+                displayed_hash="abc123",
+            )
+        )
+
+        self.assertEqual(
+            driver.calls,
+            ["EPD", "init", "getbuffer:600x448", "display:buffer", "sleep"],
+        )
+        self.assertTrue(display._sleeping)
+        self.assertEqual(display._display_mode, MODE_FULL)
+
+    def _write_preview_image(self):
+        import tempfile
+        from pathlib import Path
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "latest_screen.png"
+        Image.new("1", (600, 448), 1).save(path)
+        return path
+
+
+if __name__ == "__main__":
+    unittest.main()

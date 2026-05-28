@@ -1,0 +1,199 @@
+from __future__ import annotations
+
+import tempfile
+import time
+import unittest
+from pathlib import Path
+
+from app.display.base import DisplayAdapter
+from app.media_library import MediaLibrary
+from app.models import InputEvent, MediaItem, PlaybackState, PlaybackStatus, RenderState, UIMode
+from app.playback.mock_player import MockPlayer
+from app.services.controller import NightstandController
+from app.state_store import StateStore
+
+
+class MemoryDisplay(DisplayAdapter):
+    def __init__(self) -> None:
+        self.last_state: RenderState | None = None
+
+    def render(self, state: RenderState, reason: str | None = None) -> None:
+        self.last_state = state
+
+
+class PlaybackStreamsTest(unittest.TestCase):
+    def make_controller(self, tmp: str) -> NightstandController:
+        store = StateStore(Path(tmp) / "test.sqlite")
+        store.upsert_media_items(
+            [
+                MediaItem(
+                    source_id="button-1",
+                    file_path="demo://bible/001",
+                    title="Day 001",
+                    sort_key="001",
+                    duration_seconds=1,
+                ),
+                MediaItem(
+                    source_id="button-1",
+                    file_path="demo://bible/002",
+                    title="Day 002",
+                    sort_key="002",
+                    duration_seconds=60,
+                ),
+                MediaItem(
+                    source_id="button-1",
+                    file_path="demo://bible/003",
+                    title="Day 003",
+                    sort_key="003",
+                    duration_seconds=60,
+                ),
+            ]
+        )
+        library = MediaLibrary(Path(tmp) / "media", store)
+        return NightstandController(
+            store=store,
+            library=library,
+            player=MockPlayer(),
+            display=MemoryDisplay(),
+            menu_timeout_seconds=15,
+        )
+
+    def make_podcast_controller(self, tmp: str) -> NightstandController:
+        metadata_dir = Path(tmp) / "media" / "buttons" / "button-1"
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        (metadata_dir / ".source.json").write_text(
+            '{"display_name":"Daily Podcast","source_type":"podcast"}',
+            encoding="utf-8",
+        )
+        return self.make_controller(tmp)
+
+    def test_source_button_resumes_persistent_playlist_session_after_restart(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            controller.handle_event(InputEvent("source", "button-1"))
+            first = controller.player.status()
+            controller.player.pause()
+            controller.store.save_playback_session(
+                controller.store.get_playback_session("button-1")
+            )
+            controller.store.update_playback_position(first.item_id, 0.3, completed=False)
+            controller._save_session("button-1", first.item_id, 0, 0.3, is_playing=False)
+
+            restarted = self.make_controller(tmp)
+            restarted.handle_event(InputEvent("source", "button-1"))
+            status = restarted.player.status()
+
+            self.assertEqual(status.item_id, first.item_id)
+            self.assertGreaterEqual(status.position_seconds, 0.3)
+
+    def test_completion_advances_to_next_track_in_queue(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            controller.handle_event(InputEvent("source", "button-1"))
+            first_id = controller.player.status().item_id
+
+            time.sleep(1.1)
+            controller.tick()
+            status = controller.player.status()
+
+            self.assertNotEqual(status.item_id, first_id)
+            self.assertEqual(status.title, "Day 002")
+            self.assertEqual(status.state, PlaybackState.PLAYING)
+
+    def test_double_press_next_and_triple_press_restart_or_previous(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            controller.handle_event(InputEvent("source", "button-1"))
+            controller.handle_event(InputEvent("press"))
+            controller.handle_event(InputEvent("press"))
+            controller._flush_pending_home_press(force=True)
+
+            self.assertEqual(controller.player.status().title, "Day 002")
+
+            controller.player.status().position_seconds = 10
+            controller.handle_event(InputEvent("press"))
+            controller.handle_event(InputEvent("press"))
+            controller.handle_event(InputEvent("press"))
+            controller._flush_pending_home_press(force=True)
+            self.assertLess(controller.player.status().position_seconds, 1)
+
+            controller.handle_event(InputEvent("press"))
+            controller.handle_event(InputEvent("press"))
+            controller.handle_event(InputEvent("press"))
+            controller._flush_pending_home_press(force=True)
+            self.assertEqual(controller.player.status().title, "Day 001")
+
+    def test_progress_label_shows_time_without_repeating_track_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            status = PlaybackStatus(
+                state=PlaybackState.PLAYING,
+                position_seconds=125,
+                track_index=1,
+                queue_length=3,
+            )
+
+            self.assertEqual(controller._progress_label(status), "2:05")
+
+            status.duration_seconds = 300
+            self.assertEqual(controller._progress_label(status), "2:05 / 5:00")
+
+    def test_menu_track_selection_moves_cursor_and_plays_selected_track(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            controller.handle_event(InputEvent("long_press"))
+            self.assertEqual(controller.nav.current_mode, UIMode.MENU)
+
+            controller.handle_event(InputEvent("turn", 1))
+            controller.handle_event(InputEvent("press"))
+            self.assertEqual(controller.nav.menu_source_id, "button-1")
+
+            controller.handle_event(InputEvent("turn", 2))
+            controller.handle_event(InputEvent("press"))
+            status = controller.player.status()
+
+            self.assertEqual(status.title, "Day 003")
+            self.assertEqual(controller.nav.current_mode, UIMode.HOME)
+            self.assertEqual(
+                controller.store.get_playback_session("button-1").current_track_index,
+                2,
+            )
+
+    def test_loop_enabled_source_wraps_at_playlist_end(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            metadata_dir = Path(tmp) / "media" / "buttons" / "button-1"
+            metadata_dir.mkdir(parents=True, exist_ok=True)
+            (metadata_dir / ".source.json").write_text('{"loop_enabled": true}', encoding="utf-8")
+            controller.library._metadata_cache = {}
+            controller._start_track_at_index("button-1", 2)
+            controller.player._started_monotonic = None
+            controller.player.status().position_seconds = 60
+            controller.tick()
+
+            self.assertEqual(controller.player.status().title, "Day 001")
+
+    def test_completed_podcast_stops_and_requires_intentional_restart(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_podcast_controller(tmp)
+            queue = controller.library.get_queue("button-1")
+            for item in queue:
+                controller.store.update_playback_position(item.id, item.duration_seconds or 60, True)
+
+            controller.handle_event(InputEvent("source", "button-1"))
+            state = controller.build_render_state()
+
+            self.assertTrue(state.source_complete)
+            self.assertEqual(state.completed_count, 3)
+            self.assertEqual(controller.player.status().state, PlaybackState.STOPPED)
+
+            controller.open_track_menu("button-1")
+            self.assertEqual(controller.nav.current_menu[0].label, "Restart Playlist")
+            controller.handle_event(InputEvent("press"))
+
+            self.assertFalse(controller.library.is_source_complete("button-1"))
+            self.assertEqual(controller.player.status().title, "Day 001")
+
+
+if __name__ == "__main__":
+    unittest.main()

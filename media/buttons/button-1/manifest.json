@@ -1,0 +1,2564 @@
+{
+  "source": "The Bible in a Year (with Fr. Mike Schmitz)",
+  "feed_url": "https://feeds.fireside.fm/bibleinayear/rss",
+  "year": 2025,
+  "episode_count": 365,
+  "generated_at": "2026-05-28T02:56:25.036168+00:00",
+  "episodes": [
+    {
+      "title": "In the Beginning",
+      "day_number": 1,
+      "url": "https://bibleinayear.fireside.fm/day-1-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b96eaea0-8e74-4ceb-9c6d-9dc3a0d77f10.mp3",
+      "filename": "001 - Day 1 - In the Beginning.mp3"
+    },
+    {
+      "title": "The Fall of Adam and Eve",
+      "day_number": 2,
+      "url": "https://bibleinayear.fireside.fm/day-2-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/531ed5c2-8412-4733-8328-24f6984ce715.mp3",
+      "filename": "002 - Day 2 - The Fall of Adam and Eve.mp3"
+    },
+    {
+      "title": "Noah's Ark",
+      "day_number": 3,
+      "url": "https://bibleinayear.fireside.fm/day-3-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/87f925bb-d43b-49c0-b48e-d9a837932ff8.mp3",
+      "filename": "003 - Day 3 - Noah's Ark.mp3"
+    },
+    {
+      "title": "The Flood",
+      "day_number": 4,
+      "url": "https://bibleinayear.fireside.fm/day-4-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/aaa52c11-ef58-4b4b-a1cf-e636d3a9ee2b.mp3",
+      "filename": "004 - Day 4 - The Flood.mp3"
+    },
+    {
+      "title": "Tower of Babel",
+      "day_number": 5,
+      "url": "https://bibleinayear.fireside.fm/day-5-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/87f14233-4ea3-4e54-ac59-b7846ea6df26.mp3",
+      "filename": "005 - Day 5 - Tower of Babel.mp3"
+    },
+    {
+      "title": "Trust in the Lord",
+      "day_number": 6,
+      "url": "https://bibleinayear.fireside.fm/day-6-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/40b4c2db-4a46-4b7c-935e-930739472476.mp3",
+      "filename": "006 - Day 6 - Trust in the Lord.mp3"
+    },
+    {
+      "title": "God's Covenant with Abram",
+      "day_number": 7,
+      "url": "https://bibleinayear.fireside.fm/day-7-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/25b39a27-8870-4d7a-98fd-9592a0dd56f9.mp3",
+      "filename": "007 - Day 7 - God's Covenant with Abram.mp3"
+    },
+    {
+      "title": "The Surrender of Abraham",
+      "day_number": 8,
+      "url": "https://bibleinayear.fireside.fm/day-8-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/931c09db-e3ae-4c2f-a696-888c588b1cd7.mp3",
+      "filename": "008 - Day 8 - The Surrender of Abraham.mp3"
+    },
+    {
+      "title": "Sodom and Gomorrah",
+      "day_number": 9,
+      "url": "https://bibleinayear.fireside.fm/day-9-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9dcb2280-fa6f-4667-8aec-e8a0a3cc1c2b.mp3",
+      "filename": "009 - Day 9 - Sodom and Gomorrah.mp3"
+    },
+    {
+      "title": "Hagar and Ishmael",
+      "day_number": 10,
+      "url": "https://bibleinayear.fireside.fm/day-10-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a9a93c84-f162-4225-a70a-3cd307229463.mp3",
+      "filename": "010 - Day 10 - Hagar and Ishmael.mp3"
+    },
+    {
+      "title": "The Sacrifice of Isaac",
+      "day_number": 11,
+      "url": "https://bibleinayear.fireside.fm/day-11-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0604f207-1b87-4ee2-b882-84b384de89f1.mp3",
+      "filename": "011 - Day 11 - The Sacrifice of Isaac.mp3"
+    },
+    {
+      "title": "Isaac and Rebekah",
+      "day_number": 12,
+      "url": "https://bibleinayear.fireside.fm/day-12-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/398d5f57-4fd6-46eb-a3f6-83b548e8623e.mp3",
+      "filename": "012 - Day 12 - Isaac and Rebekah.mp3"
+    },
+    {
+      "title": "Esau Sells His Birthright",
+      "day_number": 13,
+      "url": "https://bibleinayear.fireside.fm/day-13-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a57ece94-15d6-435e-96b7-40c11cf12760.mp3",
+      "filename": "013 - Day 13 - Esau Sells His Birthright.mp3"
+    },
+    {
+      "title": "Isaac Blesses Jacob",
+      "day_number": 14,
+      "url": "https://bibleinayear.fireside.fm/day-14-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b1632be8-f0fa-4f57-9a50-43f8619b6b2f.mp3",
+      "filename": "014 - Day 14 - Isaac Blesses Jacob.mp3"
+    },
+    {
+      "title": "Leah Feels Unloved",
+      "day_number": 15,
+      "url": "https://bibleinayear.fireside.fm/day-15-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/84083aa7-7713-4f39-adf9-8c28811ed76a.mp3",
+      "filename": "015 - Day 15 - Leah Feels Unloved.mp3"
+    },
+    {
+      "title": "The Suffering of Job",
+      "day_number": 16,
+      "url": "https://bibleinayear.fireside.fm/day-16-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/af324ad3-4ce3-4ba2-b9a8-0c19591c6bd6.mp3",
+      "filename": "016 - Day 16 - The Suffering of Job.mp3"
+    },
+    {
+      "title": "Jacob Meets Esau",
+      "day_number": 17,
+      "url": "https://bibleinayear.fireside.fm/day-17-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/daa11c70-de26-489a-b76c-a8bd31355623.mp3",
+      "filename": "017 - Day 17 - Jacob Meets Esau.mp3"
+    },
+    {
+      "title": "The Heart of Israel",
+      "day_number": 18,
+      "url": "https://bibleinayear.fireside.fm/day-18-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f11ace75-db78-47e6-87da-4375851142cd.mp3",
+      "filename": "018 - Day 18 - The Heart of Israel.mp3"
+    },
+    {
+      "title": "Joseph and His Brothers",
+      "day_number": 19,
+      "url": "https://bibleinayear.fireside.fm/day-19-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6f15f1ff-543f-4cb4-a0c4-9856ad9df00e.mp3",
+      "filename": "019 - Day 19 - Joseph and His Brothers.mp3"
+    },
+    {
+      "title": "Judah and Tamar",
+      "day_number": 20,
+      "url": "https://bibleinayear.fireside.fm/day-20-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a4ee2c2f-c5b7-4800-ba20-1c522464c58b.mp3",
+      "filename": "020 - Day 20 - Judah and Tamar.mp3"
+    },
+    {
+      "title": "Walking with God",
+      "day_number": 21,
+      "url": "https://bibleinayear.fireside.fm/day-21-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0abf6198-6272-4697-9193-952f6f21e327.mp3",
+      "filename": "021 - Day 21 - Walking with God.mp3"
+    },
+    {
+      "title": "Go to Joseph",
+      "day_number": 22,
+      "url": "https://bibleinayear.fireside.fm/day-22-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/04c52da1-8c5d-4de9-9c4f-305256af6653.mp3",
+      "filename": "022 - Day 22 - Go to Joseph.mp3"
+    },
+    {
+      "title": "Judah Changes",
+      "day_number": 23,
+      "url": "https://bibleinayear.fireside.fm/day-23-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/acb04455-da57-46ae-a696-7625214780cc.mp3",
+      "filename": "023 - Day 23 - Judah Changes.mp3"
+    },
+    {
+      "title": "Tears of Joy",
+      "day_number": 24,
+      "url": "https://bibleinayear.fireside.fm/day-24-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8c0ccd7e-8d81-4ccb-a89b-264db4e3ece3.mp3",
+      "filename": "024 - Day 24 - Tears of Joy.mp3"
+    },
+    {
+      "title": "Job's Questioning",
+      "day_number": 25,
+      "url": "https://bibleinayear.fireside.fm/day-25-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/09acacce-9b72-4fd0-8805-a05c64124087.mp3",
+      "filename": "025 - Day 25 - Job's Questioning.mp3"
+    },
+    {
+      "title": "God Responds to Job",
+      "day_number": 26,
+      "url": "https://bibleinayear.fireside.fm/day-26-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ec41adcf-27b7-495f-b750-88d632ea6c86.mp3",
+      "filename": "026 - Day 26 - God Responds to Job.mp3"
+    },
+    {
+      "title": "The Birth of Moses",
+      "day_number": 27,
+      "url": "https://bibleinayear.fireside.fm/day-27-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/dbd7e2b1-4bbf-406b-880f-27a7aaf0eb99.mp3",
+      "filename": "027 - Day 27 - The Birth of Moses.mp3"
+    },
+    {
+      "title": "The Burning Bush",
+      "day_number": 28,
+      "url": "https://bibleinayear.fireside.fm/day-28-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2411e045-5160-4cc9-a59f-ced4ee766327.mp3",
+      "filename": "028 - Day 28 - The Burning Bush.mp3"
+    },
+    {
+      "title": "Moses Returns to Egypt",
+      "day_number": 29,
+      "url": "https://bibleinayear.fireside.fm/day-29-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8266bb1a-9857-42be-b83a-7e167be37709.mp3",
+      "filename": "029 - Day 29 - Moses Returns to Egypt.mp3"
+    },
+    {
+      "title": "Nile Turned to Blood",
+      "day_number": 30,
+      "url": "https://bibleinayear.fireside.fm/day-30-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/dd538a2b-f1b7-4aba-86e4-c40370ffe2fb.mp3",
+      "filename": "030 - Day 30 - Nile Turned to Blood.mp3"
+    },
+    {
+      "title": "Frogs, Gnats, and Flies",
+      "day_number": 31,
+      "url": "https://bibleinayear.fireside.fm/day-31-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/99c6cf17-e3bc-436e-aa2d-faf710803dab.mp3",
+      "filename": "031 - Day 31 - Frogs, Gnats, and Flies.mp3"
+    },
+    {
+      "title": "Cattle, Boils, and Hail",
+      "day_number": 32,
+      "url": "https://bibleinayear.fireside.fm/day-32-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/46e46f1f-7387-4b60-99ec-4c1797d7263c.mp3",
+      "filename": "032 - Day 32 - Cattle, Boils, and Hail.mp3"
+    },
+    {
+      "title": "Locusts, Darkness, and Death of the Firstborn",
+      "day_number": 33,
+      "url": "https://bibleinayear.fireside.fm/day-33-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2c01db65-77f9-45de-8d1e-de4c1fa9572a.mp3",
+      "filename": "033 - Day 33 - Locusts, Darkness, and Death of the Firstborn.mp3"
+    },
+    {
+      "title": "The Passover Instituted",
+      "day_number": 34,
+      "url": "https://bibleinayear.fireside.fm/day-34-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8b370ac4-3f79-43ae-b162-d3afbc6dc789.mp3",
+      "filename": "034 - Day 34 - The Passover Instituted.mp3"
+    },
+    {
+      "title": "Crossing the Red Sea",
+      "day_number": 35,
+      "url": "https://bibleinayear.fireside.fm/day-35-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bac1faaa-575a-4422-8d42-aad1bcb24864.mp3",
+      "filename": "035 - Day 35 - Crossing the Red Sea.mp3"
+    },
+    {
+      "title": "Manna from Heaven",
+      "day_number": 36,
+      "url": "https://bibleinayear.fireside.fm/day-36-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3b89db0c-8b00-4d05-95ad-268cdd07074c.mp3",
+      "filename": "036 - Day 36 - Manna from Heaven.mp3"
+    },
+    {
+      "title": "The Mystical Works of God",
+      "day_number": 37,
+      "url": "https://bibleinayear.fireside.fm/day-37-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2bda00ea-6d8b-4276-8cfc-62e26bc312ca.mp3",
+      "filename": "037 - Day 37 - The Mystical Works of God.mp3"
+    },
+    {
+      "title": "The Ten Commandments",
+      "day_number": 38,
+      "url": "https://bibleinayear.fireside.fm/day-38-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bc5c6959-ced4-4a02-81d2-906ceeb346a0.mp3",
+      "filename": "038 - Day 38 - The Ten Commandments.mp3"
+    },
+    {
+      "title": "Slavery in the Old Testament",
+      "day_number": 39,
+      "url": "https://bibleinayear.fireside.fm/day-39-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/dc9a2181-e66e-4852-8227-e1c5aad08393.mp3",
+      "filename": "039 - Day 39 - Slavery in the Old Testament.mp3"
+    },
+    {
+      "title": "Laws of Justice",
+      "day_number": 40,
+      "url": "https://bibleinayear.fireside.fm/day-40-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6014d143-ac32-43db-88c7-24e573e5d2b1.mp3",
+      "filename": "040 - Day 40 - Laws of Justice.mp3"
+    },
+    {
+      "title": "The Day of Atonement",
+      "day_number": 41,
+      "url": "https://bibleinayear.fireside.fm/day-41-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5d6f5477-0163-4b0f-91fd-8cd4add9bef6.mp3",
+      "filename": "041 - Day 41 - The Day of Atonement.mp3"
+    },
+    {
+      "title": "Moral Laws",
+      "day_number": 42,
+      "url": "https://bibleinayear.fireside.fm/day-42-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/86f5ff70-9cac-4f95-b15f-f6b3228d6cce.mp3",
+      "filename": "042 - Day 42 - Moral Laws.mp3"
+    },
+    {
+      "title": "The Ark of the Covenant",
+      "day_number": 43,
+      "url": "https://bibleinayear.fireside.fm/day-43-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/58c6dec7-58e5-4d25-a0d7-571fbd34e6b1.mp3",
+      "filename": "043 - Day 43 - The Ark of the Covenant.mp3"
+    },
+    {
+      "title": "Priestly Garments",
+      "day_number": 44,
+      "url": "https://bibleinayear.fireside.fm/day-44-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/323d61ce-53d2-46bb-80c3-81d50b160634.mp3",
+      "filename": "044 - Day 44 - Priestly Garments.mp3"
+    },
+    {
+      "title": "Pray for Priests",
+      "day_number": 45,
+      "url": "https://bibleinayear.fireside.fm/day-45-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0e9d1681-0753-4e54-81bc-fb1796b49e43.mp3",
+      "filename": "045 - Day 45 - Pray for Priests.mp3"
+    },
+    {
+      "title": "Set Apart for God",
+      "day_number": 46,
+      "url": "https://bibleinayear.fireside.fm/day-46-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/85aafc59-7ffa-4641-a711-4c138023770a.mp3",
+      "filename": "046 - Day 46 - Set Apart for God.mp3"
+    },
+    {
+      "title": "The Golden Calf",
+      "day_number": 47,
+      "url": "https://bibleinayear.fireside.fm/day-47-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6c511c9b-429f-46a5-bc4f-d37f232feeb8.mp3",
+      "filename": "047 - Day 47 - The Golden Calf.mp3"
+    },
+    {
+      "title": "God's Presence",
+      "day_number": 48,
+      "url": "https://bibleinayear.fireside.fm/day-48-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/18f842b1-8826-43fd-9bc8-745dc51b6fca.mp3",
+      "filename": "048 - Day 48 - God's Presence.mp3"
+    },
+    {
+      "title": "The Year of Jubilee",
+      "day_number": 49,
+      "url": "https://bibleinayear.fireside.fm/day-49-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cc8da555-051c-41e8-bc74-edbaeee2079c.mp3",
+      "filename": "049 - Day 49 - The Year of Jubilee.mp3"
+    },
+    {
+      "title": "Sacrificial Offerings",
+      "day_number": 50,
+      "url": "https://bibleinayear.fireside.fm/day-50-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/69e4078b-0599-4bab-8d59-a7126de15aca.mp3",
+      "filename": "050 - Day 50 - Sacrificial Offerings.mp3"
+    },
+    {
+      "title": "Israel's Worship of God",
+      "day_number": 51,
+      "url": "https://bibleinayear.fireside.fm/day-51-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a00a4264-24e5-4fa9-9bc0-2ed1a67c9386.mp3",
+      "filename": "051 - Day 51 - Israel's Worship of God.mp3"
+    },
+    {
+      "title": "Israel Continues to Journey",
+      "day_number": 52,
+      "url": "https://bibleinayear.fireside.fm/day-52-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/caded761-c57f-48f8-a0b6-50d4a43f2d56.mp3",
+      "filename": "052 - Day 52 - Israel Continues to Journey.mp3"
+    },
+    {
+      "title": "The Twelve Tribes of Israel",
+      "day_number": 53,
+      "url": "https://bibleinayear.fireside.fm/day-53-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/817ef0c0-9733-402c-bad8-1b80ee4fea08.mp3",
+      "filename": "053 - Day 53 - The Twelve Tribes of Israel.mp3"
+    },
+    {
+      "title": "The Tribe of Levi",
+      "day_number": 54,
+      "url": "https://bibleinayear.fireside.fm/day-54-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f97f9fd2-28c6-404f-8e43-f2966ea6434d.mp3",
+      "filename": "054 - Day 54 - The Tribe of Levi.mp3"
+    },
+    {
+      "title": "Obedience to God",
+      "day_number": 55,
+      "url": "https://bibleinayear.fireside.fm/day-55-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7e17a71e-98ef-47ac-999a-09d0a9d2a869.mp3",
+      "filename": "055 - Day 55 - Obedience to God.mp3"
+    },
+    {
+      "title": "Jealous Husbands",
+      "day_number": 56,
+      "url": "https://bibleinayear.fireside.fm/day-56-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/33f43a4f-e7bb-4045-a696-30cf5e494282.mp3",
+      "filename": "056 - Day 56 - Jealous Husbands.mp3"
+    },
+    {
+      "title": "Hear, O Israel",
+      "day_number": 57,
+      "url": "https://bibleinayear.fireside.fm/day-57-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d4ad6f4d-14cb-4533-bd8c-569370847587.mp3",
+      "filename": "057 - Day 57 - Hear, O Israel.mp3"
+    },
+    {
+      "title": "A Chosen People",
+      "day_number": 58,
+      "url": "https://bibleinayear.fireside.fm/day-58-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/137a16e9-da7a-42a2-afe3-f8b7d6acf4b1.mp3",
+      "filename": "058 - Day 58 - A Chosen People.mp3"
+    },
+    {
+      "title": "Obligations to God",
+      "day_number": 59,
+      "url": "https://bibleinayear.fireside.fm/day-59-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e62abced-20de-458e-a225-e2a14f83afbd.mp3",
+      "filename": "059 - Day 59 - Obligations to God.mp3"
+    },
+    {
+      "title": "Intercessory Prayer",
+      "day_number": 60,
+      "url": "https://bibleinayear.fireside.fm/day-60-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d87c6886-c5b3-448b-9fdd-7ac39e0b385a.mp3",
+      "filename": "060 - Day 60 - Intercessory Prayer.mp3"
+    },
+    {
+      "title": "Complaining in the Desert",
+      "day_number": 61,
+      "url": "https://bibleinayear.fireside.fm/day-61-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/18032e82-2ee9-4beb-8146-88b2d29dbd40.mp3",
+      "filename": "061 - Day 61 - Complaining in the Desert.mp3"
+    },
+    {
+      "title": "Spies Sent to Canaan",
+      "day_number": 62,
+      "url": "https://bibleinayear.fireside.fm/day-62-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5b9097d2-b3d5-4f44-9ed6-4ec00e4170dd.mp3",
+      "filename": "062 - Day 62 - Spies Sent to Canaan.mp3"
+    },
+    {
+      "title": "Israel's Rebellion",
+      "day_number": 63,
+      "url": "https://bibleinayear.fireside.fm/day-63-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/20023899-8cf2-47b7-8ac5-eb8e5ad38504.mp3",
+      "filename": "063 - Day 63 - Israel's Rebellion.mp3"
+    },
+    {
+      "title": "Consequences of Sin",
+      "day_number": 64,
+      "url": "https://bibleinayear.fireside.fm/day-64-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d0b55ca4-c931-49d6-b1ff-e5e030ae3d26.mp3",
+      "filename": "064 - Day 64 - Consequences of Sin.mp3"
+    },
+    {
+      "title": "Revolt Against Moses",
+      "day_number": 65,
+      "url": "https://bibleinayear.fireside.fm/day-65-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b2c3f636-0edf-4f7e-9334-590649a13bd5.mp3",
+      "filename": "065 - Day 65 - Revolt Against Moses.mp3"
+    },
+    {
+      "title": "Forbidden Forms of Worship",
+      "day_number": 66,
+      "url": "https://bibleinayear.fireside.fm/day-66-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/149360bd-615b-4ee7-953b-15e7de45fc2b.mp3",
+      "filename": "066 - Day 66 - Forbidden Forms of Worship.mp3"
+    },
+    {
+      "title": "God's Justice and Refuge",
+      "day_number": 67,
+      "url": "https://bibleinayear.fireside.fm/day-67-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3ebc73a0-e79d-4d96-87e4-1a17e20f826e.mp3",
+      "filename": "067 - Day 67 - God's Justice and Refuge.mp3"
+    },
+    {
+      "title": "The Waters of Meribah",
+      "day_number": 68,
+      "url": "https://bibleinayear.fireside.fm/day-68-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ef744556-6791-4919-897f-718bc76d56fc.mp3",
+      "filename": "068 - Day 68 - The Waters of Meribah.mp3"
+    },
+    {
+      "title": "The Bronze Serpent",
+      "day_number": 69,
+      "url": "https://bibleinayear.fireside.fm/day-69-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bf0b78b2-8b83-4b4f-adb9-3613dc1afa97.mp3",
+      "filename": "069 - Day 69 - The Bronze Serpent.mp3"
+    },
+    {
+      "title": "The Offense of Balaam",
+      "day_number": 70,
+      "url": "https://bibleinayear.fireside.fm/day-70-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ba68d086-055e-4115-8630-ef12d03212a2.mp3",
+      "filename": "070 - Day 70 - The Offense of Balaam.mp3"
+    },
+    {
+      "title": "The Source of the Law",
+      "day_number": 71,
+      "url": "https://bibleinayear.fireside.fm/day-71-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e5e74cc2-0584-48f7-8f87-8adb96b071aa.mp3",
+      "filename": "071 - Day 71 - The Source of the Law.mp3"
+    },
+    {
+      "title": "The Plains of Moab",
+      "day_number": 72,
+      "url": "https://bibleinayear.fireside.fm/day-72-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/55703bc8-2f0a-4cda-b553-786e0b298ce7.mp3",
+      "filename": "072 - Day 72 - The Plains of Moab.mp3"
+    },
+    {
+      "title": "Inheritance of Land",
+      "day_number": 73,
+      "url": "https://bibleinayear.fireside.fm/day-73-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6f34d7e7-f0ff-41dd-9442-c3eb6362f335.mp3",
+      "filename": "073 - Day 73 - Inheritance of Land.mp3"
+    },
+    {
+      "title": "Joshua Appointed",
+      "day_number": 74,
+      "url": "https://bibleinayear.fireside.fm/day-74-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5b403c7d-9a35-48f5-b008-f425e3289aff.mp3",
+      "filename": "074 - Day 74 - Joshua Appointed.mp3"
+    },
+    {
+      "title": "The Keeping of Vows",
+      "day_number": 75,
+      "url": "https://bibleinayear.fireside.fm/day-75-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f49395ad-2a61-44a7-b5e2-69dbaaf966c7.mp3",
+      "filename": "075 - Day 75 - The Keeping of Vows.mp3"
+    },
+    {
+      "title": "War Against Midian",
+      "day_number": 76,
+      "url": "https://bibleinayear.fireside.fm/day-76-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7caf9642-45ef-417a-871e-51a093fc70d3.mp3",
+      "filename": "076 - Day 76 - War Against Midian.mp3"
+    },
+    {
+      "title": "God Is Faithful",
+      "day_number": 77,
+      "url": "https://bibleinayear.fireside.fm/day-77-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cd73ebb8-973d-4a39-b2e7-7b7e86f362f6.mp3",
+      "filename": "077 - Day 77 - God Is Faithful.mp3"
+    },
+    {
+      "title": "The Song of Moses",
+      "day_number": 78,
+      "url": "https://bibleinayear.fireside.fm/day-78-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ded6e303-6399-47a2-8c8d-ece1915affae.mp3",
+      "filename": "078 - Day 78 - The Song of Moses.mp3"
+    },
+    {
+      "title": "Psalms of Ascent",
+      "day_number": 79,
+      "url": "https://bibleinayear.fireside.fm/day-79-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/17a137cc-2647-4ad6-9286-ffca67a67f9f.mp3",
+      "filename": "079 - Day 79 - Psalms of Ascent.mp3"
+    },
+    {
+      "title": "Cities of Refuge",
+      "day_number": 80,
+      "url": "https://bibleinayear.fireside.fm/day-80-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/87ab1e58-7203-4845-92c0-ab21be81a474.mp3",
+      "filename": "080 - Day 80 - Cities of Refuge.mp3"
+    },
+    {
+      "title": "Israel Crosses the Jordan",
+      "day_number": 81,
+      "url": "https://bibleinayear.fireside.fm/day-81-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/89303964-524b-43ee-a29a-9ef2b6ada1b0.mp3",
+      "filename": "081 - Day 81 - Israel Crosses the Jordan.mp3"
+    },
+    {
+      "title": "The Valley of Achor",
+      "day_number": 82,
+      "url": "https://bibleinayear.fireside.fm/day-82-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/24dd12ee-65ae-40cc-87c4-8ec98b491886.mp3",
+      "filename": "082 - Day 82 - The Valley of Achor.mp3"
+    },
+    {
+      "title": "The Gibeonite Trickery",
+      "day_number": 83,
+      "url": "https://bibleinayear.fireside.fm/day-83-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ae43583e-1f95-4d00-b211-51be3cc5ded7.mp3",
+      "filename": "083 - Day 83 - The Gibeonite Trickery.mp3"
+    },
+    {
+      "title": "The Sun Stands Still",
+      "day_number": 84,
+      "url": "https://bibleinayear.fireside.fm/day-84-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/fb2d259c-8807-4415-aaa6-7bfa33096b15.mp3",
+      "filename": "084 - Day 84 - The Sun Stands Still.mp3"
+    },
+    {
+      "title": "Fighting for Each Other",
+      "day_number": 85,
+      "url": "https://bibleinayear.fireside.fm/day-85-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1606cdc0-b34d-4a87-b38f-75fded141bd4.mp3",
+      "filename": "085 - Day 85 - Fighting for Each Other.mp3"
+    },
+    {
+      "title": "The Real Presence of God",
+      "day_number": 86,
+      "url": "https://bibleinayear.fireside.fm/day-86-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6c69ba1e-9233-4cda-8df6-2b934e617dcf.mp3",
+      "filename": "086 - Day 86 - The Real Presence of God.mp3"
+    },
+    {
+      "title": "God Keeps His Promises",
+      "day_number": 87,
+      "url": "https://bibleinayear.fireside.fm/day-87-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/55549c6b-37bd-43fb-a577-6859524fbb3e.mp3",
+      "filename": "087 - Day 87 - God Keeps His Promises.mp3"
+    },
+    {
+      "title": "Joshua's Last Words to Israel",
+      "day_number": 88,
+      "url": "https://bibleinayear.fireside.fm/day-88-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/af224511-8b27-4b85-82f4-0e736536db11.mp3",
+      "filename": "088 - Day 88 - Joshua's Last Words to Israel.mp3"
+    },
+    {
+      "title": "Israel's Cycle of Disobedience",
+      "day_number": 89,
+      "url": "https://bibleinayear.fireside.fm/day-89-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3561a515-1904-4fe6-9100-b735b7d6d8ac.mp3",
+      "filename": "089 - Day 89 - Israel's Cycle of Disobedience.mp3"
+    },
+    {
+      "title": "Ruth and Boaz",
+      "day_number": 90,
+      "url": "https://bibleinayear.fireside.fm/day-90-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/57b7d1e6-d3e9-4365-aadf-411157a7065f.mp3",
+      "filename": "090 - Day 90 - Ruth and Boaz.mp3"
+    },
+    {
+      "title": "Gideon's Story",
+      "day_number": 91,
+      "url": "https://bibleinayear.fireside.fm/day-91-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b1a1781e-4b94-469b-8758-c5263245082d.mp3",
+      "filename": "091 - Day 91 - Gideon's Story.mp3"
+    },
+    {
+      "title": "Jephthah's Vow",
+      "day_number": 92,
+      "url": "https://bibleinayear.fireside.fm/day-92-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cacbbcd9-381e-4394-aa10-f025a343a441.mp3",
+      "filename": "092 - Day 92 - Jephthah's Vow.mp3"
+    },
+    {
+      "title": "Strengths and Weaknesses",
+      "day_number": 93,
+      "url": "https://bibleinayear.fireside.fm/day-93-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c6525a82-3f00-45cd-a533-a8e4a2bc35c6.mp3",
+      "filename": "093 - Day 93 - Strengths and Weaknesses.mp3"
+    },
+    {
+      "title": "Samson and Delilah",
+      "day_number": 94,
+      "url": "https://bibleinayear.fireside.fm/day-94-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c21557db-e4de-4178-acdf-5bdc740f13ab.mp3",
+      "filename": "094 - Day 94 - Samson and Delilah.mp3"
+    },
+    {
+      "title": "The Sin of Benjamin",
+      "day_number": 95,
+      "url": "https://bibleinayear.fireside.fm/day-95-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a00cbb03-45e9-4fb8-9998-7c25351b883a.mp3",
+      "filename": "095 - Day 95 - The Sin of Benjamin.mp3"
+    },
+    {
+      "title": "Hannah's Prayer",
+      "day_number": 96,
+      "url": "https://bibleinayear.fireside.fm/day-96-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c91dec7c-aa1c-4c35-af0d-488af2f6c8e9.mp3",
+      "filename": "096 - Day 96 - Hannah's Prayer.mp3"
+    },
+    {
+      "title": "Samuel's Prophecy",
+      "day_number": 97,
+      "url": "https://bibleinayear.fireside.fm/day-97-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0b0abd64-d67f-43e3-b543-3286bf99ee97.mp3",
+      "filename": "097 - Day 97 - Samuel's Prophecy.mp3"
+    },
+    {
+      "title": "Israel Asks for a King",
+      "day_number": 98,
+      "url": "https://bibleinayear.fireside.fm/day-98-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/aa6d38bc-670f-45ff-bdc7-1d5a8897474b.mp3",
+      "filename": "098 - Day 98 - Israel Asks for a King.mp3"
+    },
+    {
+      "title": "The Word Became Flesh",
+      "day_number": 99,
+      "url": "https://bibleinayear.fireside.fm/day-99-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/64f506d9-44c7-4a72-b562-4f934e12df19.mp3",
+      "filename": "099 - Day 99 - The Word Became Flesh.mp3"
+    },
+    {
+      "title": "This Is My Body",
+      "day_number": 100,
+      "url": "https://bibleinayear.fireside.fm/day-100-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/dcfb1493-d1f4-4c07-8b4c-0516263fb491.mp3",
+      "filename": "100 - Day 100 - This Is My Body.mp3"
+    },
+    {
+      "title": "Signs and Wonders",
+      "day_number": 101,
+      "url": "https://bibleinayear.fireside.fm/day-101-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bb632149-9852-4e5c-9f69-01dbca2a0bcc.mp3",
+      "filename": "101 - Day 101 - Signs and Wonders.mp3"
+    },
+    {
+      "title": "The Death of Lazarus",
+      "day_number": 102,
+      "url": "https://bibleinayear.fireside.fm/day-102-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/31effa17-a7c9-4151-aa0f-64c45bf2881a.mp3",
+      "filename": "102 - Day 102 - The Death of Lazarus.mp3"
+    },
+    {
+      "title": "Judas' Secrecy",
+      "day_number": 103,
+      "url": "https://bibleinayear.fireside.fm/day-103-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/baed7e4d-3e6f-4133-97ed-623ef8b2b733.mp3",
+      "filename": "103 - Day 103 - Judas' Secrecy.mp3"
+    },
+    {
+      "title": "The Priestly Prayer of Jesus",
+      "day_number": 104,
+      "url": "https://bibleinayear.fireside.fm/day-104-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b62155e0-d8fe-4ca2-8db2-217c686c3c92.mp3",
+      "filename": "104 - Day 104 - The Priestly Prayer of Jesus.mp3"
+    },
+    {
+      "title": "It Is Finished",
+      "day_number": 105,
+      "url": "https://bibleinayear.fireside.fm/day-105-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9d8df669-bf57-41c0-8e70-0f2ab20a481a.mp3",
+      "filename": "105 - Day 105 - It Is Finished.mp3"
+    },
+    {
+      "title": "Saul Is Chosen",
+      "day_number": 106,
+      "url": "https://bibleinayear.fireside.fm/day-106-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/772d7bdc-2323-4e42-9a79-1d9bb0e1d13c.mp3",
+      "filename": "106 - Day 106 - Saul Is Chosen.mp3"
+    },
+    {
+      "title": "Samuel's Speech",
+      "day_number": 107,
+      "url": "https://bibleinayear.fireside.fm/day-107-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/696198ae-1b46-45ba-816a-5b731526700f.mp3",
+      "filename": "107 - Day 107 - Samuel's Speech.mp3"
+    },
+    {
+      "title": "Saul's Vanity",
+      "day_number": 108,
+      "url": "https://bibleinayear.fireside.fm/day-108-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/120f67dd-54f6-4382-97e7-3e1f6f402b29.mp3",
+      "filename": "108 - Day 108 - Saul's Vanity.mp3"
+    },
+    {
+      "title": "A Heart of Obedience",
+      "day_number": 109,
+      "url": "https://bibleinayear.fireside.fm/day-109-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cf609e9d-ba71-43da-90f5-35fdf2c2b107.mp3",
+      "filename": "109 - Day 109 - A Heart of Obedience.mp3"
+    },
+    {
+      "title": "David and Goliath",
+      "day_number": 110,
+      "url": "https://bibleinayear.fireside.fm/day-110-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5c207b78-971b-48e0-ab28-5201b55878a8.mp3",
+      "filename": "110 - Day 110 - David and Goliath.mp3"
+    },
+    {
+      "title": "Saul Tries to Kill David",
+      "day_number": 111,
+      "url": "https://bibleinayear.fireside.fm/day-111-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0e11f080-0203-4edc-94f3-574cf2080a37.mp3",
+      "filename": "111 - Day 111 - Saul Tries to Kill David.mp3"
+    },
+    {
+      "title": "True Friendship",
+      "day_number": 112,
+      "url": "https://bibleinayear.fireside.fm/day-112-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7bd96b5f-426f-4c9b-9adb-d49152270c93.mp3",
+      "filename": "112 - Day 112 - True Friendship.mp3"
+    },
+    {
+      "title": "Broken Trust",
+      "day_number": 113,
+      "url": "https://bibleinayear.fireside.fm/day-113-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8c335c8c-2ef3-4a5d-902a-a013300e59e6.mp3",
+      "filename": "113 - Day 113 - Broken Trust.mp3"
+    },
+    {
+      "title": "David Saves Keilah",
+      "day_number": 114,
+      "url": "https://bibleinayear.fireside.fm/day-114-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1459b091-b680-4b1a-be2e-f6e72a6fece1.mp3",
+      "filename": "114 - Day 114 - David Saves Keilah.mp3"
+    },
+    {
+      "title": "King Saul is Spared",
+      "day_number": 115,
+      "url": "https://bibleinayear.fireside.fm/day-115-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1e3a6b99-113a-4cbc-a7a1-2caad386c0db.mp3",
+      "filename": "115 - Day 115 - King Saul is Spared.mp3"
+    },
+    {
+      "title": "David and Abigail",
+      "day_number": 116,
+      "url": "https://bibleinayear.fireside.fm/day-116-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0d17aeb0-48e3-4439-a444-6db17fb6f45d.mp3",
+      "filename": "116 - Day 116 - David and Abigail.mp3"
+    },
+    {
+      "title": "Reverence and Faithfulness",
+      "day_number": 117,
+      "url": "https://bibleinayear.fireside.fm/day-117-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1d2f0cfc-4426-4962-bf54-d57ab14a04fe.mp3",
+      "filename": "117 - Day 117 - Reverence and Faithfulness.mp3"
+    },
+    {
+      "title": "King Saul Despairs",
+      "day_number": 118,
+      "url": "https://bibleinayear.fireside.fm/day-118-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c937f98a-9cee-43b5-ab53-e7c2dd0905a1.mp3",
+      "filename": "118 - Day 118 - King Saul Despairs.mp3"
+    },
+    {
+      "title": "David's Wisdom",
+      "day_number": 119,
+      "url": "https://bibleinayear.fireside.fm/day-119-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/88d1f02a-b2fd-4ff3-b049-9e8580430682.mp3",
+      "filename": "119 - Day 119 - David's Wisdom.mp3"
+    },
+    {
+      "title": "David Mourns Saul",
+      "day_number": 120,
+      "url": "https://bibleinayear.fireside.fm/day-120-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3c4444f7-7db0-46b2-82f0-c4595e76fec4.mp3",
+      "filename": "120 - Day 120 - David Mourns Saul.mp3"
+    },
+    {
+      "title": "Cycle of Violence",
+      "day_number": 121,
+      "url": "https://bibleinayear.fireside.fm/day-121-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b42ef89b-34f9-44a6-a463-779675571b93.mp3",
+      "filename": "121 - Day 121 - Cycle of Violence.mp3"
+    },
+    {
+      "title": "Abner Is Killed",
+      "day_number": 122,
+      "url": "https://bibleinayear.fireside.fm/day-122-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/59ca15bd-f620-4c7e-b79c-f1528ddc5814.mp3",
+      "filename": "122 - Day 122 - Abner Is Killed.mp3"
+    },
+    {
+      "title": "The Death of Ish-bosheth",
+      "day_number": 123,
+      "url": "https://bibleinayear.fireside.fm/day-123-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b32e49f6-2286-4ac1-89b4-58e152f9bacd.mp3",
+      "filename": "123 - Day 123 - The Death of Ish-bosheth.mp3"
+    },
+    {
+      "title": "King David Rules",
+      "day_number": 124,
+      "url": "https://bibleinayear.fireside.fm/day-124-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c9c0b2af-a508-4ac9-83b3-bf435b4931af.mp3",
+      "filename": "124 - Day 124 - King David Rules.mp3"
+    },
+    {
+      "title": "Covenant with David",
+      "day_number": 125,
+      "url": "https://bibleinayear.fireside.fm/day-125-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b1eba18f-63db-4891-a0fe-09b9f50ae710.mp3",
+      "filename": "125 - Day 125 - Covenant with David.mp3"
+    },
+    {
+      "title": "David's Victories",
+      "day_number": 126,
+      "url": "https://bibleinayear.fireside.fm/day-126-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e9ae9922-4c63-4de0-b6d3-cd0c210bbaab.mp3",
+      "filename": "126 - Day 126 - David's Victories.mp3"
+    },
+    {
+      "title": "Kindness for the House of Saul",
+      "day_number": 127,
+      "url": "https://bibleinayear.fireside.fm/day-127-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cdfafc99-6234-4f1a-bcd4-027b1720e4dc.mp3",
+      "filename": "127 - Day 127 - Kindness for the House of Saul.mp3"
+    },
+    {
+      "title": "Mighty Men of Valor",
+      "day_number": 128,
+      "url": "https://bibleinayear.fireside.fm/day-128-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/67e5ea1d-5c76-4215-80f8-d40279da0ff2.mp3",
+      "filename": "128 - Day 128 - Mighty Men of Valor.mp3"
+    },
+    {
+      "title": "David Commits Adultery",
+      "day_number": 129,
+      "url": "https://bibleinayear.fireside.fm/day-129-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8a7fbe50-d4e3-4532-810d-6dbecc88ad1d.mp3",
+      "filename": "129 - Day 129 - David Commits Adultery.mp3"
+    },
+    {
+      "title": "Nathan Condemns David",
+      "day_number": 130,
+      "url": "https://bibleinayear.fireside.fm/day-130-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/107cd30b-3728-4f22-90b7-e111a844f849.mp3",
+      "filename": "130 - Day 130 - Nathan Condemns David.mp3"
+    },
+    {
+      "title": "Hope for the Future",
+      "day_number": 131,
+      "url": "https://bibleinayear.fireside.fm/day-131-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/17f4720b-395b-4a28-9883-18dad8df50af.mp3",
+      "filename": "131 - Day 131 - Hope for the Future.mp3"
+    },
+    {
+      "title": "David and Absalom",
+      "day_number": 132,
+      "url": "https://bibleinayear.fireside.fm/day132-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1f585842-a96e-4348-a0de-46fa0edc012a.mp3",
+      "filename": "132 - Day 132 - David and Absalom.mp3"
+    },
+    {
+      "title": "Persevering in Trust",
+      "day_number": 133,
+      "url": "https://bibleinayear.fireside.fm/day-133-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8d70f5da-09cc-4218-aea6-1124a27bfc2c.mp3",
+      "filename": "133 - Day 133 - Persevering in Trust.mp3"
+    },
+    {
+      "title": "Devastating Effects of Sin",
+      "day_number": 134,
+      "url": "https://bibleinayear.fireside.fm/day134-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8060d3cc-f31c-45a6-941f-3cb8a15b7936.mp3",
+      "filename": "134 - Day 134 - Devastating Effects of Sin.mp3"
+    },
+    {
+      "title": "The Counsel of Hushai",
+      "day_number": 135,
+      "url": "https://bibleinayear.fireside.fm/day135-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/940d4f0a-6b69-4f02-aad1-3c452887a41c.mp3",
+      "filename": "135 - Day 135 - The Counsel of Hushai.mp3"
+    },
+    {
+      "title": "Absalom Is Defeated",
+      "day_number": 136,
+      "url": "https://bibleinayear.fireside.fm/day-136-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/396d0783-4e16-4b63-86ad-482c0713bb53.mp3",
+      "filename": "136 - Day 136 - Absalom Is Defeated.mp3"
+    },
+    {
+      "title": "David Mourns Absalom",
+      "day_number": 137,
+      "url": "https://bibleinayear.fireside.fm/day137-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/00028ca3-ee5d-4fe8-88b8-b97d74899793.mp3",
+      "filename": "137 - Day 137 - David Mourns Absalom.mp3"
+    },
+    {
+      "title": "The Effect of Sin on Others",
+      "day_number": 138,
+      "url": "https://bibleinayear.fireside.fm/day138-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/fddcfd18-d29d-42aa-9a62-2f2ee8958234.mp3",
+      "filename": "138 - Day 138 - The Effect of Sin on Others.mp3"
+    },
+    {
+      "title": "Reparation to the Gibeonites",
+      "day_number": 139,
+      "url": "https://bibleinayear.fireside.fm/day139-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0d1465b6-0475-4d11-87f9-7fcb868902d9.mp3",
+      "filename": "139 - Day 139 - Reparation to the Gibeonites.mp3"
+    },
+    {
+      "title": "David's Prayer of Thanksgiving",
+      "day_number": 140,
+      "url": "https://bibleinayear.fireside.fm/day140-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/440a9906-93d2-4697-a7af-140c0278ab83.mp3",
+      "filename": "140 - Day 140 - David's Prayer of Thanksgiving.mp3"
+    },
+    {
+      "title": "The Life of David",
+      "day_number": 141,
+      "url": "https://bibleinayear.fireside.fm/day141-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/65dcc6d1-d7c9-425a-8f79-57253023760e.mp3",
+      "filename": "141 - Day 141 - The Life of David.mp3"
+    },
+    {
+      "title": "Whole and Joyful Hearts",
+      "day_number": 142,
+      "url": "https://bibleinayear.fireside.fm/day142-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bcf57ee3-7ad0-4c17-9486-f13ba32c0134.mp3",
+      "filename": "142 - Day 142 - Whole and Joyful Hearts.mp3"
+    },
+    {
+      "title": "Solomon Asks for Wisdom",
+      "day_number": 143,
+      "url": "https://bibleinayear.fireside.fm/day143-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/efa5dc8c-5567-4e99-96c8-b3e295a71a5e.mp3",
+      "filename": "143 - Day 143 - Solomon Asks for Wisdom.mp3"
+    },
+    {
+      "title": "David's Last Words",
+      "day_number": 144,
+      "url": "https://bibleinayear.fireside.fm/day-144-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a36b820b-0789-447e-89a4-a05cf4ba6870.mp3",
+      "filename": "144 - Day 144 - David's Last Words.mp3"
+    },
+    {
+      "title": "Solomon Builds the Temple",
+      "day_number": 145,
+      "url": "https://bibleinayear.fireside.fm/day-145-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7a6156a3-c5c7-4b49-9efd-76e4d8adf73a.mp3",
+      "filename": "145 - Day 145 - Solomon Builds the Temple.mp3"
+    },
+    {
+      "title": "The Universal Church",
+      "day_number": 146,
+      "url": "https://bibleinayear.fireside.fm/day-146-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/4a826a00-8282-46f3-8e6d-ef4731a29712.mp3",
+      "filename": "146 - Day 146 - The Universal Church.mp3"
+    },
+    {
+      "title": "Temple Worship",
+      "day_number": 147,
+      "url": "https://bibleinayear.fireside.fm/day-147-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1e28d223-69b1-491a-abd3-ecd8268b1157.mp3",
+      "filename": "147 - Day 147 - Temple Worship.mp3"
+    },
+    {
+      "title": "Solomon's Wealth",
+      "day_number": 148,
+      "url": "https://bibleinayear.fireside.fm/day-148-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e0b502a0-bbbc-4190-8fc3-24ce899693ee.mp3",
+      "filename": "148 - Day 148 - Solomon's Wealth.mp3"
+    },
+    {
+      "title": "All Is Vanity",
+      "day_number": 149,
+      "url": "https://bibleinayear.fireside.fm/day-149-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f1828beb-ff3c-439b-988e-4b3d3283a4d7.mp3",
+      "filename": "149 - Day 149 - All Is Vanity.mp3"
+    },
+    {
+      "title": "The Dedication of the Temple",
+      "day_number": 150,
+      "url": "https://bibleinayear.fireside.fm/day-150-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b9165d35-bef1-4f1c-8825-e95fc6a1ee99.mp3",
+      "filename": "150 - Day 150 - The Dedication of the Temple.mp3"
+    },
+    {
+      "title": "Wisdom and Folly",
+      "day_number": 151,
+      "url": "https://bibleinayear.fireside.fm/day-151-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/83f6635d-3090-4cb2-a787-e094511aba6f.mp3",
+      "filename": "151 - Day 151 - Wisdom and Folly.mp3"
+    },
+    {
+      "title": "Being Forgotten",
+      "day_number": 152,
+      "url": "https://bibleinayear.fireside.fm/day-152-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e28065b5-637d-4c0f-8e62-783974bb04d8.mp3",
+      "filename": "152 - Day 152 - Being Forgotten.mp3"
+    },
+    {
+      "title": "The Decline of Solomon",
+      "day_number": 153,
+      "url": "https://bibleinayear.fireside.fm/day-153-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/22384967-627f-410b-b6c3-52c8fbd19ec0.mp3",
+      "filename": "153 - Day 153 - The Decline of Solomon.mp3"
+    },
+    {
+      "title": "The Baptism of Jesus",
+      "day_number": 154,
+      "url": "https://bibleinayear.fireside.fm/day-154-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cc4372c1-f92a-41fa-a892-93573e815013.mp3",
+      "filename": "154 - Day 154 - The Baptism of Jesus.mp3"
+    },
+    {
+      "title": "Jesus is Lord",
+      "day_number": 155,
+      "url": "https://bibleinayear.fireside.fm/day-155-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d07d2f3e-0d57-41bd-b4d2-ec2f270dee32.mp3",
+      "filename": "155 - Day 155 - Jesus is Lord.mp3"
+    },
+    {
+      "title": "Jesus Casts Out Demons",
+      "day_number": 156,
+      "url": "https://bibleinayear.fireside.fm/day-156-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/725253fa-fa63-437e-b7e0-506a56bb185e.mp3",
+      "filename": "156 - Day 156 - Jesus Casts Out Demons.mp3"
+    },
+    {
+      "title": "Following Jesus",
+      "day_number": 157,
+      "url": "https://bibleinayear.fireside.fm/day-157-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/44094d26-cc88-4261-b5ae-51989ad238b5.mp3",
+      "filename": "157 - Day 157 - Following Jesus.mp3"
+    },
+    {
+      "title": "The Reality of Sin",
+      "day_number": 158,
+      "url": "https://bibleinayear.fireside.fm/day-158-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/030cfbbf-dd19-4d31-b2c4-0856b969d36c.mp3",
+      "filename": "158 - Day 158 - The Reality of Sin.mp3"
+    },
+    {
+      "title": "Bearing Fruit",
+      "day_number": 159,
+      "url": "https://bibleinayear.fireside.fm/day-159-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5df8fced-19cb-48cf-81d2-19d300941c78.mp3",
+      "filename": "159 - Day 159 - Bearing Fruit.mp3"
+    },
+    {
+      "title": "Jesus Warns the People",
+      "day_number": 160,
+      "url": "https://bibleinayear.fireside.fm/day-160-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9918019e-aaf5-483b-ab14-019f212cc950.mp3",
+      "filename": "160 - Day 160 - Jesus Warns the People.mp3"
+    },
+    {
+      "title": "The Crucifixion of Christ",
+      "day_number": 161,
+      "url": "https://bibleinayear.fireside.fm/day-161-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8e5cf65f-cd22-4195-8aab-c059814384bd.mp3",
+      "filename": "161 - Day 161 - The Crucifixion of Christ.mp3"
+    },
+    {
+      "title": "Rehoboam Seeks Counsel",
+      "day_number": 162,
+      "url": "https://bibleinayear.fireside.fm/day-162-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/98165215-65fd-4604-bd66-7e17a1d0becd.mp3",
+      "filename": "162 - Day 162 - Rehoboam Seeks Counsel.mp3"
+    },
+    {
+      "title": "Faith Over Success",
+      "day_number": 163,
+      "url": "https://bibleinayear.fireside.fm/day-163-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/298b6ea3-78c4-4628-b02d-04e38f47dba7.mp3",
+      "filename": "163 - Day 163 - Faith Over Success.mp3"
+    },
+    {
+      "title": "Tearing Down Idols",
+      "day_number": 164,
+      "url": "https://bibleinayear.fireside.fm/day-164-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/54adcfc4-20dc-4917-8a98-f327c2514c57.mp3",
+      "filename": "164 - Day 164 - Tearing Down Idols.mp3"
+    },
+    {
+      "title": "The Lover and the Beloved",
+      "day_number": 165,
+      "url": "https://bibleinayear.fireside.fm/day-165-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7bff59ce-ed58-4e81-ae7b-bacb54db2a87.mp3",
+      "filename": "165 - Day 165 - The Lover and the Beloved.mp3"
+    },
+    {
+      "title": "Responding in Faith",
+      "day_number": 166,
+      "url": "https://bibleinayear.fireside.fm/day-166-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2f02d17d-420e-443f-b1b4-ae7d8f024fe6.mp3",
+      "filename": "166 - Day 166 - Responding in Faith.mp3"
+    },
+    {
+      "title": "Viaticum",
+      "day_number": 167,
+      "url": "https://bibleinayear.fireside.fm/day-167-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3db9ace0-0ad2-4a20-970f-6ba63753e65a.mp3",
+      "filename": "167 - Day 167 - Viaticum.mp3"
+    },
+    {
+      "title": "Wicked Kinds",
+      "day_number": 168,
+      "url": "https://bibleinayear.fireside.fm/day-168-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bb834bf6-6c58-47f8-84e1-361b42d8f37a.mp3",
+      "filename": "168 - Day 168 - Wicked Kinds.mp3"
+    },
+    {
+      "title": "Joash Is Crowned",
+      "day_number": 169,
+      "url": "https://bibleinayear.fireside.fm/day-169-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/94f3226e-9a83-4f6d-9612-d62ac025a753.mp3",
+      "filename": "169 - Day 169 - Joash Is Crowned.mp3"
+    },
+    {
+      "title": "Joash's Downfall",
+      "day_number": 170,
+      "url": "https://bibleinayear.fireside.fm/day-170-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d162fac0-0894-4bf9-97b4-c30a3a7c6cd2.mp3",
+      "filename": "170 - Day 170 - Joash's Downfall.mp3"
+    },
+    {
+      "title": "Elijah and Elisha",
+      "day_number": 171,
+      "url": "https://bibleinayear.fireside.fm/day-171-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/46f6f58f-10ee-41e3-b0d0-93f965cff2b4.mp3",
+      "filename": "171 - Day 171 - Elijah and Elisha.mp3"
+    },
+    {
+      "title": "Uzziah's Pride",
+      "day_number": 172,
+      "url": "https://bibleinayear.fireside.fm/day-172-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bc3a67ad-7fba-4d64-94b4-0e77cda71196.mp3",
+      "filename": "172 - Day 172 - Uzziah's Pride.mp3"
+    },
+    {
+      "title": "Confidence in God",
+      "day_number": 173,
+      "url": "https://bibleinayear.fireside.fm/day-173-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3102387c-0d95-48a7-a57a-7f2836260baf.mp3",
+      "filename": "173 - Day 173 - Confidence in God.mp3"
+    },
+    {
+      "title": "The Prophet Hosea",
+      "day_number": 174,
+      "url": "https://bibleinayear.fireside.fm/day-174-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6ec18fa4-4302-4320-8f26-43cd642172a2.mp3",
+      "filename": "174 - Day 174 - The Prophet Hosea.mp3"
+    },
+    {
+      "title": "Knowledge of God",
+      "day_number": 175,
+      "url": "https://bibleinayear.fireside.fm/day-175-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ee9e7941-02ed-4855-86b1-52b417bc042a.mp3",
+      "filename": "175 - Day 175 - Knowledge of God.mp3"
+    },
+    {
+      "title": "Choosing Eternal Life",
+      "day_number": 176,
+      "url": "https://bibleinayear.fireside.fm/day-176-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/42106050-5a29-4790-a3a6-a5268be1461c.mp3",
+      "filename": "176 - Day 176 - Choosing Eternal Life.mp3"
+    },
+    {
+      "title": "Return, O Israel",
+      "day_number": 177,
+      "url": "https://bibleinayear.fireside.fm/day-177-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cee2400b-f495-429a-8915-9ebf48477030.mp3",
+      "filename": "177 - Day 177 - Return, O Israel.mp3"
+    },
+    {
+      "title": "Called Back",
+      "day_number": 178,
+      "url": "https://bibleinayear.fireside.fm/day-178-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6d66a399-e214-4d44-b943-91c1d34e2014.mp3",
+      "filename": "178 - Day 178 - Called Back.mp3"
+    },
+    {
+      "title": "Blinded by Comfort",
+      "day_number": 179,
+      "url": "https://bibleinayear.fireside.fm/day-179-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9fff6de5-057e-4707-9cab-93403ff7a215.mp3",
+      "filename": "179 - Day 179 - Blinded by Comfort.mp3"
+    },
+    {
+      "title": "Giving Time to God",
+      "day_number": 180,
+      "url": "https://bibleinayear.fireside.fm/day-180-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/37c6cd4d-d14c-48fb-bbe0-21afd55be4bb.mp3",
+      "filename": "180 - Day 180 - Giving Time to God.mp3"
+    },
+    {
+      "title": "Jonah and the Whale",
+      "day_number": 181,
+      "url": "https://bibleinayear.fireside.fm/day-181-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/55ff8d35-2e47-49b0-9c2a-c7cb9ffd737e.mp3",
+      "filename": "181 - Day 181 - Jonah and the Whale.mp3"
+    },
+    {
+      "title": "The Inescapable God",
+      "day_number": 182,
+      "url": "https://bibleinayear.fireside.fm/day-182-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7dae4831-f3a1-4a19-b0b0-db1fdbafe21a.mp3",
+      "filename": "182 - Day 182 - The Inescapable God.mp3"
+    },
+    {
+      "title": "Israel Falls to Assyria",
+      "day_number": 183,
+      "url": "https://bibleinayear.fireside.fm/day-183-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/612c20d1-a2ba-4bfe-9fd3-0dec4c8bb2a9.mp3",
+      "filename": "183 - Day 183 - Israel Falls to Assyria.mp3"
+    },
+    {
+      "title": "Hezekiah Reigns",
+      "day_number": 184,
+      "url": "https://bibleinayear.fireside.fm/day-184-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/573083f9-84ae-4234-95f2-d3e0fe5dbeea.mp3",
+      "filename": "184 - Day 184 - Hezekiah Reigns.mp3"
+    },
+    {
+      "title": "Hezekiah's Prayer",
+      "day_number": 185,
+      "url": "https://bibleinayear.fireside.fm/day-185-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/78f2c0dd-c50f-48c0-8d1a-f3c89bcb17da.mp3",
+      "filename": "185 - Day 185 - Hezekiah's Prayer.mp3"
+    },
+    {
+      "title": "Struggles with Self-Interest",
+      "day_number": 186,
+      "url": "https://bibleinayear.fireside.fm/day-186-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d9876548-8277-49ec-b25a-0647ffc53d09.mp3",
+      "filename": "186 - Day 186 - Struggles with Self-Interest.mp3"
+    },
+    {
+      "title": "Praying for Time",
+      "day_number": 187,
+      "url": "https://bibleinayear.fireside.fm/day-187-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3b25b234-ee02-4360-aac3-f9efac7f21a4.mp3",
+      "filename": "187 - Day 187 - Praying for Time.mp3"
+    },
+    {
+      "title": "The Book of the Law",
+      "day_number": 188,
+      "url": "https://bibleinayear.fireside.fm/day-188-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c40dccc4-8f26-4ee9-b16e-ef1dc74b2a7a.mp3",
+      "filename": "188 - Day 188 - The Book of the Law.mp3"
+    },
+    {
+      "title": "Follow the Lord",
+      "day_number": 189,
+      "url": "https://bibleinayear.fireside.fm/day-189-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b95f78a5-f344-4e4e-8bc9-50f2ce65a553.mp3",
+      "filename": "189 - Day 189 - Follow the Lord.mp3"
+    },
+    {
+      "title": "Judah Is Overrun",
+      "day_number": 190,
+      "url": "https://bibleinayear.fireside.fm/day-190-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/35c3e0cd-c5c3-400b-a635-38b972f6ab83.mp3",
+      "filename": "190 - Day 190 - Judah Is Overrun.mp3"
+    },
+    {
+      "title": "The Babylonian Exile",
+      "day_number": 191,
+      "url": "https://bibleinayear.fireside.fm/day-191-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e00b5ed3-1a9d-4e78-8c2b-dcf45fe6c1d6.mp3",
+      "filename": "191 - Day 191 - The Babylonian Exile.mp3"
+    },
+    {
+      "title": "The Prophet Isaiah",
+      "day_number": 192,
+      "url": "https://bibleinayear.fireside.fm/day-192-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/4b82ef1c-e9aa-4502-9bce-9ae15c3e9e1b.mp3",
+      "filename": "192 - Day 192 - The Prophet Isaiah.mp3"
+    },
+    {
+      "title": "The Book of Tobit",
+      "day_number": 193,
+      "url": "https://bibleinayear.fireside.fm/day-193-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9c98fc89-4da8-4ec4-b8cb-f5a4f0abd045.mp3",
+      "filename": "193 - Day 193 - The Book of Tobit.mp3"
+    },
+    {
+      "title": "Holy Is the Lord",
+      "day_number": 194,
+      "url": "https://bibleinayear.fireside.fm/day-194-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/17ff6426-8f64-497e-b8c7-f6cec98ed6d9.mp3",
+      "filename": "194 - Day 194 - Holy Is the Lord.mp3"
+    },
+    {
+      "title": "Tobias and Sarah Pray",
+      "day_number": 195,
+      "url": "https://bibleinayear.fireside.fm/day-195-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9d5ba378-6883-48b9-8004-bba5df71cdb7.mp3",
+      "filename": "195 - Day 195 - Tobias and Sarah Pray.mp3"
+    },
+    {
+      "title": "The Destruction of Israel",
+      "day_number": 196,
+      "url": "https://bibleinayear.fireside.fm/day-196-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1aa6f8fb-feda-4790-8b65-0ffee417242a.mp3",
+      "filename": "196 - Day 196 - The Destruction of Israel.mp3"
+    },
+    {
+      "title": "Woe and Consolation",
+      "day_number": 197,
+      "url": "https://bibleinayear.fireside.fm/day-197-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/52a6385f-9a4a-41f7-93ed-0ccf5edc91c9.mp3",
+      "filename": "197 - Day 197 - Woe and Consolation.mp3"
+    },
+    {
+      "title": "The Day of the Lord",
+      "day_number": 198,
+      "url": "https://bibleinayear.fireside.fm/day-198-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/4c474b84-b5ba-4d9c-ab07-065c80a039f5.mp3",
+      "filename": "198 - Day 198 - The Day of the Lord.mp3"
+    },
+    {
+      "title": "Times for War",
+      "day_number": 199,
+      "url": "https://bibleinayear.fireside.fm/day-199-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/82e69376-9707-4099-8af6-74b262487931.mp3",
+      "filename": "199 - Day 199 - Times for War.mp3"
+    },
+    {
+      "title": "Egypt, Assyria, and Israel",
+      "day_number": 200,
+      "url": "https://bibleinayear.fireside.fm/day-200-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1e97a1dd-4d0e-47c9-8d7c-7d8bdf8f1bf4.mp3",
+      "filename": "200 - Day 200 - Egypt, Assyria, and Israel.mp3"
+    },
+    {
+      "title": "Keys to the Kingdom",
+      "day_number": 201,
+      "url": "https://bibleinayear.fireside.fm/day-201-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7606d484-3e62-4e85-915d-b9ffece1be20.mp3",
+      "filename": "201 - Day 201 - Keys to the Kingdom.mp3"
+    },
+    {
+      "title": "God's Judgment",
+      "day_number": 202,
+      "url": "https://bibleinayear.fireside.fm/day-202-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c28983e9-7900-4363-b447-5b748369a1bd.mp3",
+      "filename": "202 - Day 202 - God's Judgment.mp3"
+    },
+    {
+      "title": "Rejoice in the Lord",
+      "day_number": 203,
+      "url": "https://bibleinayear.fireside.fm/day-2023-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/aac98ad1-ca56-40e9-8217-c2c0f010bfdc.mp3",
+      "filename": "203 - Day 203 - Rejoice in the Lord.mp3"
+    },
+    {
+      "title": "Zephaniah's Warnings",
+      "day_number": 204,
+      "url": "https://bibleinayear.fireside.fm/day-204-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/79c8c5e8-3b15-4818-a1ac-31281394cb36.mp3",
+      "filename": "204 - Day 204 - Zephaniah's Warnings.mp3"
+    },
+    {
+      "title": "Promise to Zion",
+      "day_number": 205,
+      "url": "https://bibleinayear.fireside.fm/day-205-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/87d522cb-ceaa-4442-b4e1-fb445ae2ab0b.mp3",
+      "filename": "205 - Day 205 - Promise to Zion.mp3"
+    },
+    {
+      "title": "The Book of Baruch",
+      "day_number": 206,
+      "url": "https://bibleinayear.fireside.fm/day-206-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a8f86b14-b1bc-4e4c-be8f-56ef149a57fa.mp3",
+      "filename": "206 - Day 206 - The Book of Baruch.mp3"
+    },
+    {
+      "title": "The Lord Will Come",
+      "day_number": 207,
+      "url": "https://bibleinayear.fireside.fm/day-207-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/148336cd-54c4-4974-9996-c91b5bb1ecd8.mp3",
+      "filename": "207 - Day 207 - The Lord Will Come.mp3"
+    },
+    {
+      "title": "The Futility of Idols",
+      "day_number": 208,
+      "url": "https://bibleinayear.fireside.fm/day-208-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6bd0f913-45c2-41b1-b8f4-bfaeaaad5332.mp3",
+      "filename": "208 - Day 208 - The Futility of Idols.mp3"
+    },
+    {
+      "title": "God Comforts His People",
+      "day_number": 209,
+      "url": "https://bibleinayear.fireside.fm/day-209-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f53dbb9c-0ca1-46ba-97db-1a7d6a5f7d82.mp3",
+      "filename": "209 - Day 209 - God Comforts His People.mp3"
+    },
+    {
+      "title": "Speaking God's Word",
+      "day_number": 210,
+      "url": "https://bibleinayear.fireside.fm/day-210-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/14853b05-37f2-453d-8ad8-4357db25d3b2.mp3",
+      "filename": "210 - Day 210 - Speaking God's Word.mp3"
+    },
+    {
+      "title": "Called by Name",
+      "day_number": 211,
+      "url": "https://bibleinayear.fireside.fm/day-211-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/68e14d8e-c6dd-4029-8521-f49683ac92d3.mp3",
+      "filename": "211 - Day 211 - Called by Name.mp3"
+    },
+    {
+      "title": "God's Instrument",
+      "day_number": 212,
+      "url": "https://bibleinayear.fireside.fm/day-212-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b1a2be84-1014-4710-b982-d84c6ffdf63d.mp3",
+      "filename": "212 - Day 212 - God's Instrument.mp3"
+    },
+    {
+      "title": "The Redeemer",
+      "day_number": 213,
+      "url": "https://bibleinayear.fireside.fm/day-213-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e4cfada5-b3b7-4385-ba17-8c5a826ca01a.mp3",
+      "filename": "213 - Day 213 - The Redeemer.mp3"
+    },
+    {
+      "title": "The Hidden Glory of God",
+      "day_number": 214,
+      "url": "https://bibleinayear.fireside.fm/day-214-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7a265db7-2520-42b6-8592-3ec0066d6bc6.mp3",
+      "filename": "214 - Day 214 - The Hidden Glory of God.mp3"
+    },
+    {
+      "title": "False Prophets",
+      "day_number": 215,
+      "url": "https://bibleinayear.fireside.fm/day-215-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8b6c18b5-af0f-4e73-8886-51065544940f.mp3",
+      "filename": "215 - Day 215 - False Prophets.mp3"
+    },
+    {
+      "title": "The Suffering Servant",
+      "day_number": 216,
+      "url": "https://bibleinayear.fireside.fm/day-216-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2a666feb-d9d0-42a2-9150-5bb14ae616bd.mp3",
+      "filename": "216 - Day 216 - The Suffering Servant.mp3"
+    },
+    {
+      "title": "The Everlasting Covenant",
+      "day_number": 217,
+      "url": "https://bibleinayear.fireside.fm/day-217-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d9b363ab-7e4e-469a-ae87-bb5ba64b8134.mp3",
+      "filename": "217 - Day 217 - The Everlasting Covenant.mp3"
+    },
+    {
+      "title": "Each Will Be Judged",
+      "day_number": 218,
+      "url": "https://bibleinayear.fireside.fm/day-218-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1663d2e0-491d-4071-b887-126f7f4877cf.mp3",
+      "filename": "218 - Day 218 - Each Will Be Judged.mp3"
+    },
+    {
+      "title": "Separation from God",
+      "day_number": 219,
+      "url": "https://bibleinayear.fireside.fm/day-219-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/745c5523-71c5-4cb6-8d91-66c5669c9090.mp3",
+      "filename": "219 - Day 219 - Separation from God.mp3"
+    },
+    {
+      "title": "Prophecy Fulfilled",
+      "day_number": 220,
+      "url": "https://bibleinayear.fireside.fm/day-220-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/35d623c1-f30c-48ff-86c3-993f0ca4f8cb.mp3",
+      "filename": "220 - Day 220 - Prophecy Fulfilled.mp3"
+    },
+    {
+      "title": "Walking with Wise Men",
+      "day_number": 221,
+      "url": "https://bibleinayear.fireside.fm/2025-day-221",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6e87e390-f231-4a62-b776-85e731af9b37.mp3",
+      "filename": "221 - Day 221 - Walking with Wise Men.mp3"
+    },
+    {
+      "title": "Idolatry and Adultery",
+      "day_number": 222,
+      "url": "https://bibleinayear.fireside.fm/2025-day-222",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/693cba3e-aefd-4294-b29d-ad1fdbb0f15e.mp3",
+      "filename": "222 - Day 222 - Idolatry and Adultery.mp3"
+    },
+    {
+      "title": "Responding Well",
+      "day_number": 223,
+      "url": "https://bibleinayear.fireside.fm/2025-day-223",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c75d63b7-3bd2-4791-a04d-bb6d73b581ee.mp3",
+      "filename": "223 - Day 223 - Responding Well.mp3"
+    },
+    {
+      "title": "The Weeping Prophet",
+      "day_number": 224,
+      "url": "https://bibleinayear.fireside.fm/2025-day-224",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b807b801-9fb7-49a3-b8a9-65ec6d732a12.mp3",
+      "filename": "224 - Day 224 - The Weeping Prophet.mp3"
+    },
+    {
+      "title": "Our Will Versus God's Will",
+      "day_number": 225,
+      "url": "https://bibleinayear.fireside.fm/2025-day-225",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/eff0812a-6b48-4218-bed5-1905ebf35b13.mp3",
+      "filename": "225 - Day 225 - Our Will Versus God's Will.mp3"
+    },
+    {
+      "title": "Unfaithful Israel",
+      "day_number": 226,
+      "url": "https://bibleinayear.fireside.fm/2025-day-226",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f2c4d647-6a24-4f1b-9141-496e5ca6ab66.mp3",
+      "filename": "226 - Day 226 - Unfaithful Israel.mp3"
+    },
+    {
+      "title": "The Towering Cedar",
+      "day_number": 227,
+      "url": "https://bibleinayear.fireside.fm/2025-day-227",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3e567aec-7f44-41c5-808b-116b18f721d4.mp3",
+      "filename": "227 - Day 227 - The Towering Cedar.mp3"
+    },
+    {
+      "title": "The Watchman's Duty",
+      "day_number": 228,
+      "url": "https://bibleinayear.fireside.fm/2025-day-228",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9fec5ecd-630f-404d-acb4-e1dc33ec60e7.mp3",
+      "filename": "228 - Day 228 - The Watchman's Duty.mp3"
+    },
+    {
+      "title": "Shepherds of Israel",
+      "day_number": 229,
+      "url": "https://bibleinayear.fireside.fm/2025-day-229",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3b19a708-9624-40e9-9518-1048553a3f81.mp3",
+      "filename": "229 - Day 229 - Shepherds of Israel.mp3"
+    },
+    {
+      "title": "A New Heart",
+      "day_number": 230,
+      "url": "https://bibleinayear.fireside.fm/2025-day-230",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/99214e43-62ff-40d2-b519-716ed6709c90.mp3",
+      "filename": "230 - Day 230 - A New Heart.mp3"
+    },
+    {
+      "title": "The Valley of Dry Bones",
+      "day_number": 231,
+      "url": "https://bibleinayear.fireside.fm/2025-day-231",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/56acc60a-b4d4-44cf-acd8-adef45f0af59.mp3",
+      "filename": "231 - Day 231 - The Valley of Dry Bones.mp3"
+    },
+    {
+      "title": "Glory in Knowing God",
+      "day_number": 232,
+      "url": "https://bibleinayear.fireside.fm/2025-day-232",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6d7d8743-fc27-4903-b32d-339830f84d4b.mp3",
+      "filename": "232 - Day 232 - Glory in Knowing God.mp3"
+    },
+    {
+      "title": "Correct me, O Lord",
+      "day_number": 233,
+      "url": "https://bibleinayear.fireside.fm/2025-day-233",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/08e466ab-48f1-4880-a4d3-516188389842.mp3",
+      "filename": "233 - Day 233 - Correct me, O Lord.mp3"
+    },
+    {
+      "title": "Jeremiah Complains",
+      "day_number": 234,
+      "url": "https://bibleinayear.fireside.fm/2025-day-234",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/758fc415-ca1b-4435-ae15-3687031e7fa4.mp3",
+      "filename": "234 - Day 234 - Jeremiah Complains.mp3"
+    },
+    {
+      "title": "Lying Prophets",
+      "day_number": 235,
+      "url": "https://bibleinayear.fireside.fm/2025-day-235",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d0d5a053-d53f-426f-9219-f3e432246616.mp3",
+      "filename": "235 - Day 235 - Lying Prophets.mp3"
+    },
+    {
+      "title": "Rich in Love",
+      "day_number": 236,
+      "url": "https://bibleinayear.fireside.fm/2025-day-236",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cbfc0c5f-5657-4abb-9665-7566b8782fa5.mp3",
+      "filename": "236 - Day 236 - Rich in Love.mp3"
+    },
+    {
+      "title": "Water from the Temple",
+      "day_number": 237,
+      "url": "https://bibleinayear.fireside.fm/2025-day-237",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2bfe5fef-2239-4158-8f17-3c32d9a4df24.mp3",
+      "filename": "237 - Day 237 - Water from the Temple.mp3"
+    },
+    {
+      "title": "Fall of Jerusalem",
+      "day_number": 238,
+      "url": "https://bibleinayear.fireside.fm/2025-day-238",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ec56dffa-373d-4d86-9318-f399299032bc.mp3",
+      "filename": "238 - Day 238 - Fall of Jerusalem.mp3"
+    },
+    {
+      "title": "Hananiah, Mishael, and Azariah",
+      "day_number": 239,
+      "url": "https://bibleinayear.fireside.fm/2025-day-239",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6d7bd7c1-7e53-4969-90f9-f0b601e918ee.mp3",
+      "filename": "239 - Day 239 - Hananiah, Mishael, and Azariah.mp3"
+    },
+    {
+      "title": "Remaining Humble",
+      "day_number": 240,
+      "url": "https://bibleinayear.fireside.fm/2025-day-240",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/443efcc3-4c9a-4fb7-944c-d143636f9697.mp3",
+      "filename": "240 - Day 240 - Remaining Humble.mp3"
+    },
+    {
+      "title": "Daniel and the Den of Lions",
+      "day_number": 241,
+      "url": "https://bibleinayear.fireside.fm/2025-day-241",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1addc836-153a-430b-8dfa-1176da99dfdf.mp3",
+      "filename": "241 - Day 241 - Daniel and the Den of Lions.mp3"
+    },
+    {
+      "title": "The Role of King Nebuchadnezzar",
+      "day_number": 242,
+      "url": "https://bibleinayear.fireside.fm/2025-day-242",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/11270f24-d28a-457b-94c0-6e9b29a3973e.mp3",
+      "filename": "242 - Day 242 - The Role of King Nebuchadnezzar.mp3"
+    },
+    {
+      "title": "The Lord's Plans",
+      "day_number": 243,
+      "url": "https://bibleinayear.fireside.fm/2025-day-243",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f232030f-8f06-4e09-b8c9-78afd7face8f.mp3",
+      "filename": "243 - Day 243 - The Lord's Plans.mp3"
+    },
+    {
+      "title": "Susanna's Righteousness",
+      "day_number": 244,
+      "url": "https://bibleinayear.fireside.fm/2025-day-244",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/928b43a6-b77a-47cd-a4a5-83e30d66c409.mp3",
+      "filename": "244 - Day 244 - Susanna's Righteousness.mp3"
+    },
+    {
+      "title": "The Faithfulness of Daniel",
+      "day_number": 245,
+      "url": "https://bibleinayear.fireside.fm/2025-day-245",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/872e0ca0-f47e-4af6-b37b-2b7bdcbdf717.mp3",
+      "filename": "245 - Day 245 - The Faithfulness of Daniel.mp3"
+    },
+    {
+      "title": "Rejoice in Doing Good",
+      "day_number": 246,
+      "url": "https://bibleinayear.fireside.fm/2025-day-246",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d19f5dcf-8c8d-4aeb-a0ff-045e1338f318.mp3",
+      "filename": "246 - Day 246 - Rejoice in Doing Good.mp3"
+    },
+    {
+      "title": "True Repentance",
+      "day_number": 247,
+      "url": "https://bibleinayear.fireside.fm/2025-day-247",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2226afc6-09f4-4446-8434-71788ff80b12.mp3",
+      "filename": "247 - Day 247 - True Repentance.mp3"
+    },
+    {
+      "title": "Cut to the Heart",
+      "day_number": 248,
+      "url": "https://bibleinayear.fireside.fm/2025-day-248",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ff27ba10-47e1-4463-94e7-d0e1354a5fe5.mp3",
+      "filename": "248 - Day 248 - Cut to the Heart.mp3"
+    },
+    {
+      "title": "Prayer of Judith",
+      "day_number": 249,
+      "url": "https://bibleinayear.fireside.fm/2025-day-249",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c79a7214-d0b4-4359-905d-c608a360e1a1.mp3",
+      "filename": "249 - Day 249 - Prayer of Judith.mp3"
+    },
+    {
+      "title": "Final Wave of Exile",
+      "day_number": 250,
+      "url": "https://bibleinayear.fireside.fm/2025-day-250",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/29793079-2b83-4c0b-87be-532f471643ae.mp3",
+      "filename": "250 - Day 250 - Final Wave of Exile.mp3"
+    },
+    {
+      "title": "Judith and Holofernes",
+      "day_number": 251,
+      "url": "https://bibleinayear.fireside.fm/2025-day-251",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/221c32c6-af83-4c54-8e0f-24649a6d678c.mp3",
+      "filename": "251 - Day 251 - Judith and Holofernes.mp3"
+    },
+    {
+      "title": "Queen of Heaven",
+      "day_number": 252,
+      "url": "https://bibleinayear.fireside.fm/2025-day-252",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3da3526c-ae2f-4566-8685-b100d678a5e4.mp3",
+      "filename": "252 - Day 252 - Queen of Heaven.mp3"
+    },
+    {
+      "title": "Lamentations of Jeremiah",
+      "day_number": 253,
+      "url": "https://bibleinayear.fireside.fm/2025-day-253",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c6d46815-1210-4f3e-a299-5a3bd7cdeb19.mp3",
+      "filename": "253 - Day 253 - Lamentations of Jeremiah.mp3"
+    },
+    {
+      "title": "Judgment of Nations",
+      "day_number": 254,
+      "url": "https://bibleinayear.fireside.fm/2025-day-254",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a9d2419c-6b66-45be-b39a-753ca402ac7f.mp3",
+      "filename": "254 - Day 254 - Judgment of Nations.mp3"
+    },
+    {
+      "title": "God Is Good",
+      "day_number": 255,
+      "url": "https://bibleinayear.fireside.fm/2025-day-255",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2f8789f9-de8b-4beb-8a06-3dc441affb74.mp3",
+      "filename": "255 - Day 255 - God Is Good.mp3"
+    },
+    {
+      "title": "Hard Seasons",
+      "day_number": 256,
+      "url": "https://bibleinayear.fireside.fm/2025-day-256",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a5ef3c14-ddd9-4cb4-a216-a6df02b3c652.mp3",
+      "filename": "256 - Day 256 - Hard Seasons.mp3"
+    },
+    {
+      "title": "Choose to Love",
+      "day_number": 257,
+      "url": "https://bibleinayear.fireside.fm/2025-day-257",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9c7d749f-6003-44bb-9179-6fab1f7e14c4.mp3",
+      "filename": "257 - Day 257 - Choose to Love.mp3"
+    },
+    {
+      "title": "The Kingdom Is Here",
+      "day_number": 258,
+      "url": "https://bibleinayear.fireside.fm/2025-day-258",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e5121236-069b-4813-82c0-655c0769214c.mp3",
+      "filename": "258 - Day 258 - The Kingdom Is Here.mp3"
+    },
+    {
+      "title": "The Sermon on the Mount",
+      "day_number": 259,
+      "url": "https://bibleinayear.fireside.fm/2025-day-259",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e773056b-aeef-40f0-9155-497380b157b9.mp3",
+      "filename": "259 - Day 259 - The Sermon on the Mount.mp3"
+    },
+    {
+      "title": "Carrying the Cross",
+      "day_number": 260,
+      "url": "https://bibleinayear.fireside.fm/2025-day-260",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/37fe083f-f13d-4358-8e7b-1508df1c3c22.mp3",
+      "filename": "260 - Day 260 - Carrying the Cross.mp3"
+    },
+    {
+      "title": "Ornate Souls",
+      "day_number": 261,
+      "url": "https://bibleinayear.fireside.fm/2025-day-261",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/aa26a7dc-3c2b-46cf-bf66-c4c942a5037e.mp3",
+      "filename": "261 - Day 261 - Ornate Souls.mp3"
+    },
+    {
+      "title": "Miracle Worker",
+      "day_number": 262,
+      "url": "https://bibleinayear.fireside.fm/2025-day-262",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a3b60a20-2e5e-4074-8b91-912b6730af5f.mp3",
+      "filename": "262 - Day 262 - Miracle Worker.mp3"
+    },
+    {
+      "title": "The Father's Generosity",
+      "day_number": 263,
+      "url": "https://bibleinayear.fireside.fm/2025-day-263",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ecfbf11c-f4db-483e-acc8-05d7c8185261.mp3",
+      "filename": "263 - Day 263 - The Father's Generosity.mp3"
+    },
+    {
+      "title": "Preaching Without Practice",
+      "day_number": 264,
+      "url": "https://bibleinayear.fireside.fm/2025-day-264",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8cd82540-2f47-4c66-b2a1-cf44174c646c.mp3",
+      "filename": "264 - Day 264 - Preaching Without Practice.mp3"
+    },
+    {
+      "title": "Sins of Omission",
+      "day_number": 265,
+      "url": "https://bibleinayear.fireside.fm/2025-day-265",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bde48a03-ec94-452d-aad8-62e62dd6bce2.mp3",
+      "filename": "265 - Day 265 - Sins of Omission.mp3"
+    },
+    {
+      "title": "Son of the Father",
+      "day_number": 266,
+      "url": "https://bibleinayear.fireside.fm/2025-day-266",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/e73f0c7e-17af-42c8-be62-1a39a95c5a77.mp3",
+      "filename": "266 - Day 266 - Son of the Father.mp3"
+    },
+    {
+      "title": "Indifference and Apathy",
+      "day_number": 267,
+      "url": "https://bibleinayear.fireside.fm/2025-day-267",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/55ce66b9-a68c-4cf8-b631-02378b33c29f.mp3",
+      "filename": "267 - Day 267 - Indifference and Apathy.mp3"
+    },
+    {
+      "title": "Rebuilding the Temple",
+      "day_number": 268,
+      "url": "https://bibleinayear.fireside.fm/2025-day-268",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/81eda35c-f9bd-4012-8953-84c51bd0a782.mp3",
+      "filename": "268 - Day 268 - Rebuilding the Temple.mp3"
+    },
+    {
+      "title": "The Day of Small Things",
+      "day_number": 269,
+      "url": "https://bibleinayear.fireside.fm/2025-day-269",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8c807711-ca39-4ec3-b94d-e977452ee21d.mp3",
+      "filename": "269 - Day 269 - The Day of Small Things.mp3"
+    },
+    {
+      "title": "God's Favor with Ezra",
+      "day_number": 270,
+      "url": "https://bibleinayear.fireside.fm/2025-day-270",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b6d7b3fc-0fd7-45ac-b7fd-506f9cc537b5.mp3",
+      "filename": "270 - Day 270 - God's Favor with Ezra.mp3"
+    },
+    {
+      "title": "Israel's Foreign Wives",
+      "day_number": 271,
+      "url": "https://bibleinayear.fireside.fm/2025-day-271",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5cde65b2-b03b-46be-ae8d-7438d3d48920.mp3",
+      "filename": "271 - Day 271 - Israel's Foreign Wives.mp3"
+    },
+    {
+      "title": "The Call of Nehemiah",
+      "day_number": 272,
+      "url": "https://bibleinayear.fireside.fm/2025-day-272",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a9487271-df61-4b34-b8b7-49f53514505b.mp3",
+      "filename": "272 - Day 272 - The Call of Nehemiah.mp3"
+    },
+    {
+      "title": "The Lord's Work",
+      "day_number": 273,
+      "url": "https://bibleinayear.fireside.fm/2025-day-273",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f62cd85a-30b4-4dc3-98c2-57c429e305be.mp3",
+      "filename": "273 - Day 273 - The Lord's Work.mp3"
+    },
+    {
+      "title": "Perseverance in Opposition",
+      "day_number": 274,
+      "url": "https://bibleinayear.fireside.fm/day-274-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9069c0bc-6591-4c39-91a8-b6c3100d7f0a.mp3",
+      "filename": "274 - Day 274 - Perseverance in Opposition.mp3"
+    },
+    {
+      "title": "Esther Becomes Queen",
+      "day_number": 275,
+      "url": "https://bibleinayear.fireside.fm/day-275-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9b611a66-40da-4519-b488-c32347bb7deb.mp3",
+      "filename": "275 - Day 275 - Esther Becomes Queen.mp3"
+    },
+    {
+      "title": "Haman's Plan",
+      "day_number": 276,
+      "url": "https://bibleinayear.fireside.fm/day-276-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/4eb91784-1591-4479-aaf6-5ceb15bdab33.mp3",
+      "filename": "276 - Day 276 - Haman's Plan.mp3"
+    },
+    {
+      "title": "Such a Time as This",
+      "day_number": 277,
+      "url": "https://bibleinayear.fireside.fm/day-277-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2f9f02f4-64ce-4b42-b313-837f09c3c673.mp3",
+      "filename": "277 - Day 277 - Such a Time as This.mp3"
+    },
+    {
+      "title": "Power in Weakness",
+      "day_number": 278,
+      "url": "https://bibleinayear.fireside.fm/day-278-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/64fb10ad-ad91-42ed-be73-f951c9e754e5.mp3",
+      "filename": "278 - Day 278 - Power in Weakness.mp3"
+    },
+    {
+      "title": "Blessings and Burdens",
+      "day_number": 279,
+      "url": "https://bibleinayear.fireside.fm/day-279-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/11ecd59f-7108-4b3f-960e-357aadca10d9.mp3",
+      "filename": "279 - Day 279 - Blessings and Burdens.mp3"
+    },
+    {
+      "title": "The People of the Covenant",
+      "day_number": 280,
+      "url": "https://bibleinayear.fireside.fm/day-280-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5d9c5a29-0456-42dd-87b0-589a36f2b4d9.mp3",
+      "filename": "280 - Day 280 - The People of the Covenant.mp3"
+    },
+    {
+      "title": "Good and Evil",
+      "day_number": 281,
+      "url": "https://bibleinayear.fireside.fm/day-281-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6724b51d-d2a5-446d-bafe-5c7f17145b23.mp3",
+      "filename": "281 - Day 281 - Good and Evil.mp3"
+    },
+    {
+      "title": "Antiochus Desecrates the Temple",
+      "day_number": 282,
+      "url": "https://bibleinayear.fireside.fm/day-282-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/66432ebd-aea5-4a5b-90b1-28dcdab79198.mp3",
+      "filename": "282 - Day 282 - Antiochus Desecrates the Temple.mp3"
+    },
+    {
+      "title": "Mattathias Attacks",
+      "day_number": 283,
+      "url": "https://bibleinayear.fireside.fm/day-283-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d44dc44c-52f9-48ec-853b-2fa4b241ec35.mp3",
+      "filename": "283 - Day 283 - Mattathias Attacks.mp3"
+    },
+    {
+      "title": "Near Occasion of Sin",
+      "day_number": 284,
+      "url": "https://bibleinayear.fireside.fm/day-284-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5771410e-785d-45d1-9966-240fa874db87.mp3",
+      "filename": "284 - Day 284 - Near Occasion of Sin.mp3"
+    },
+    {
+      "title": "Story of Hanukkah",
+      "day_number": 285,
+      "url": "https://bibleinayear.fireside.fm/day-285-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/565f4966-66b4-4f4b-92ec-6ccd832156a0.mp3",
+      "filename": "285 - Day 285 - Story of Hanukkah.mp3"
+    },
+    {
+      "title": "The Battle to Choose God",
+      "day_number": 286,
+      "url": "https://bibleinayear.fireside.fm/day-286-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/753bf800-c94c-40c3-9b3e-b90559f0a314.mp3",
+      "filename": "286 - Day 286 - The Battle to Choose God.mp3"
+    },
+    {
+      "title": "Eleazar's Sacrifice",
+      "day_number": 287,
+      "url": "https://bibleinayear.fireside.fm/day-287-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b29251cf-9040-46ea-89f3-a9cb04977855.mp3",
+      "filename": "287 - Day 287 - Eleazar's Sacrifice.mp3"
+    },
+    {
+      "title": "Battling Against Gossip",
+      "day_number": 288,
+      "url": "https://bibleinayear.fireside.fm/day-288-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/67308906-8b29-4496-887e-8f6d6aac0033.mp3",
+      "filename": "288 - Day 288 - Battling Against Gossip.mp3"
+    },
+    {
+      "title": "Wise Influences",
+      "day_number": 289,
+      "url": "https://bibleinayear.fireside.fm/day-289-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8306309d-3419-4b6f-b81f-b614e3883ddd.mp3",
+      "filename": "289 - Day 289 - Wise Influences.mp3"
+    },
+    {
+      "title": "Judas Maccabeus Dies",
+      "day_number": 290,
+      "url": "https://bibleinayear.fireside.fm/day-290-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2e64b3f5-3913-41ec-94c3-f6eb9a767958.mp3",
+      "filename": "290 - Day 290 - Judas Maccabeus Dies.mp3"
+    },
+    {
+      "title": "The Rise of King Alexander",
+      "day_number": 291,
+      "url": "https://bibleinayear.fireside.fm/day-291-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/11dfbd8d-c118-4242-9a92-361f66d82971.mp3",
+      "filename": "291 - Day 291 - The Rise of King Alexander.mp3"
+    },
+    {
+      "title": "The Power of Words",
+      "day_number": 292,
+      "url": "https://bibleinayear.fireside.fm/day-292-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/4f47797d-14a6-46d2-8aa0-f872c06496e9.mp3",
+      "filename": "292 - Day 292 - The Power of Words.mp3"
+    },
+    {
+      "title": "Discipline Grounded in Love",
+      "day_number": 293,
+      "url": "https://bibleinayear.fireside.fm/day-293-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/7850b918-abee-4f91-9918-6764e7de8f0c.mp3",
+      "filename": "293 - Day 293 - Discipline Grounded in Love.mp3"
+    },
+    {
+      "title": "Judea Gains Independence",
+      "day_number": 294,
+      "url": "https://bibleinayear.fireside.fm/day-294-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/cb431e8b-4c9f-4e37-933a-a7a43245975b.mp3",
+      "filename": "294 - Day 294 - Judea Gains Independence.mp3"
+    },
+    {
+      "title": "Israel's Expectations",
+      "day_number": 295,
+      "url": "https://bibleinayear.fireside.fm/day-295-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/984ec2d5-e996-454b-a3ca-1edaf0dcac88.mp3",
+      "filename": "295 - Day 295 - Israel's Expectations.mp3"
+    },
+    {
+      "title": "Know Your Heart",
+      "day_number": 296,
+      "url": "https://bibleinayear.fireside.fm/day-296-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a39a8d66-6bb5-4e73-860b-8e25ade3dae0.mp3",
+      "filename": "296 - Day 296 - Know Your Heart.mp3"
+    },
+    {
+      "title": "Using Good Things for Evil",
+      "day_number": 297,
+      "url": "https://bibleinayear.fireside.fm/day-297-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/44f2ca47-6ef7-4001-ac5a-b190bccce1d6.mp3",
+      "filename": "297 - Day 297 - Using Good Things for Evil.mp3"
+    },
+    {
+      "title": "The Gift of Life",
+      "day_number": 298,
+      "url": "https://bibleinayear.fireside.fm/day-298-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/29e7894e-fb38-4624-83b9-099e3157e4ac.mp3",
+      "filename": "298 - Day 298 - The Gift of Life.mp3"
+    },
+    {
+      "title": "Jeremiah Hides the Ark",
+      "day_number": 299,
+      "url": "https://bibleinayear.fireside.fm/day-299-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/50f19f38-aa18-44af-803a-9ab294bcb546.mp3",
+      "filename": "299 - Day 299 - Jeremiah Hides the Ark.mp3"
+    },
+    {
+      "title": "Conversion of Heart",
+      "day_number": 300,
+      "url": "https://bibleinayear.fireside.fm/day-300-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/eaff9502-f29f-4166-b13e-00f813c43fee.mp3",
+      "filename": "300 - Day 300 - Conversion of Heart.mp3"
+    },
+    {
+      "title": "Rising Again",
+      "day_number": 301,
+      "url": "https://bibleinayear.fireside.fm/day-301-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/442be711-58ae-4556-b593-bf28cd272f2f.mp3",
+      "filename": "301 - Day 301 - Rising Again.mp3"
+    },
+    {
+      "title": "The Pursuit of Wisdom",
+      "day_number": 302,
+      "url": "https://bibleinayear.fireside.fm/day-302-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/38781950-07a1-405c-aaf4-c73dc81fb30d.mp3",
+      "filename": "302 - Day 302 - The Pursuit of Wisdom.mp3"
+    },
+    {
+      "title": "Eleazar's Martyrdom",
+      "day_number": 303,
+      "url": "https://bibleinayear.fireside.fm/day-303-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ac9a9212-d476-40c3-8920-00d5b709ce1c.mp3",
+      "filename": "303 - Day 303 - Eleazar's Martyrdom.mp3"
+    },
+    {
+      "title": "Life Beyond Death",
+      "day_number": 304,
+      "url": "https://bibleinayear.fireside.fm/day-304-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/de83717c-00ed-4c42-a680-6345f389c61b.mp3",
+      "filename": "304 - Day 304 - Life Beyond Death.mp3"
+    },
+    {
+      "title": "The Defender",
+      "day_number": 305,
+      "url": "https://bibleinayear.fireside.fm/day-305-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/1ba768f0-9cf2-4101-a6d6-7181c55180d3.mp3",
+      "filename": "305 - Day 305 - The Defender.mp3"
+    },
+    {
+      "title": "Wisdom Is Beautiful",
+      "day_number": 306,
+      "url": "https://bibleinayear.fireside.fm/day-306-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d01942fb-1cf5-4927-a041-3ec5c4b40496.mp3",
+      "filename": "306 - Day 306 - Wisdom Is Beautiful.mp3"
+    },
+    {
+      "title": "Courage in Battle",
+      "day_number": 307,
+      "url": "https://bibleinayear.fireside.fm/day-307-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/262347ee-470f-4278-8232-459247d62bbb.mp3",
+      "filename": "307 - Day 307 - Courage in Battle.mp3"
+    },
+    {
+      "title": "Little by Little",
+      "day_number": 308,
+      "url": "https://bibleinayear.fireside.fm/day-308-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b64cb10f-66d8-4b4b-8e21-a1cb2db34788.mp3",
+      "filename": "308 - Day 308 - Little by Little.mp3"
+    },
+    {
+      "title": "Praying for the Dead",
+      "day_number": 309,
+      "url": "https://bibleinayear.fireside.fm/day-309-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bb6867da-dfcb-4e6e-9769-a72208370f49.mp3",
+      "filename": "309 - Day 309 - Praying for the Dead.mp3"
+    },
+    {
+      "title": "Rivals for the Heart",
+      "day_number": 310,
+      "url": "https://bibleinayear.fireside.fm/day-310-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/152d26d9-83df-443d-8879-44589a267dc1.mp3",
+      "filename": "310 - Day 310 - Rivals for the Heart.mp3"
+    },
+    {
+      "title": "God Fights for You",
+      "day_number": 311,
+      "url": "https://bibleinayear.fireside.fm/day-311-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9ca08180-99cf-4d92-ae18-8e58adfbe6d6.mp3",
+      "filename": "311 - Day 311 - God Fights for You.mp3"
+    },
+    {
+      "title": "Conclusion to the Old Testament",
+      "day_number": 312,
+      "url": "https://bibleinayear.fireside.fm/day-312-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/77195fe5-6a5a-4141-8392-dc73685f6c06.mp3",
+      "filename": "312 - Day 312 - Conclusion to the Old Testament.mp3"
+    },
+    {
+      "title": "The Ark of the New Covenant",
+      "day_number": 313,
+      "url": "https://bibleinayear.fireside.fm/day-313-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8ce23949-69a8-4bb9-ba00-5d99a4838517.mp3",
+      "filename": "313 - Day 313 - The Ark of the New Covenant.mp3"
+    },
+    {
+      "title": "My Beloved Son",
+      "day_number": 314,
+      "url": "https://bibleinayear.fireside.fm/day-314-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/536dfaea-6e51-4c63-aa3d-b80a8c8f5215.mp3",
+      "filename": "314 - Day 314 - My Beloved Son.mp3"
+    },
+    {
+      "title": "The Virtue of Mercy",
+      "day_number": 315,
+      "url": "https://bibleinayear.fireside.fm/day-315-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/38403621-017b-4d08-bdb3-2ba0d1d5353a.mp3",
+      "filename": "315 - Day 315 - The Virtue of Mercy.mp3"
+    },
+    {
+      "title": "Absolute Surrender",
+      "day_number": 316,
+      "url": "https://bibleinayear.fireside.fm/day-316-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/5547bea5-e405-4dc4-ac30-d817435300f6.mp3",
+      "filename": "316 - Day 316 - Absolute Surrender.mp3"
+    },
+    {
+      "title": "Persistence in Prayer",
+      "day_number": 317,
+      "url": "https://bibleinayear.fireside.fm/day-317-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/b6070ec7-d238-442a-9093-c723cb5fb945.mp3",
+      "filename": "317 - Day 317 - Persistence in Prayer.mp3"
+    },
+    {
+      "title": "The Narrow Gate, the Lost Sheep, and the Prodigal Son",
+      "day_number": 318,
+      "url": "https://bibleinayear.fireside.fm/day-318-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/448df606-f3c2-4c2f-86fb-2b7a5c86ca27.mp3",
+      "filename": "318 - Day 318 - The Narrow Gate, the Lost Sheep, and the Prodigal Son.mp3"
+    },
+    {
+      "title": "Come, Follow Me",
+      "day_number": 319,
+      "url": "https://bibleinayear.fireside.fm/day-319-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d737ca63-6549-46f1-a4c1-c5f44ae1f024.mp3",
+      "filename": "319 - Day 319 - Come, Follow Me.mp3"
+    },
+    {
+      "title": "Peter's Denial Foretold",
+      "day_number": 320,
+      "url": "https://bibleinayear.fireside.fm/day-320-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3e4320a5-4fee-4802-9e85-a7337195190c.mp3",
+      "filename": "320 - Day 320 - Peter's Denial Foretold.mp3"
+    },
+    {
+      "title": "Jesus' Prayer in the Garden",
+      "day_number": 321,
+      "url": "https://bibleinayear.fireside.fm/day-321-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/2a67a40f-ba96-4362-8730-2366465b4db7.mp3",
+      "filename": "321 - Day 321 - Jesus' Prayer in the Garden.mp3"
+    },
+    {
+      "title": "The Ascension",
+      "day_number": 322,
+      "url": "https://bibleinayear.fireside.fm/day-322-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/62970ec4-107f-41a0-a54f-190d6f32227d.mp3",
+      "filename": "322 - Day 322 - The Ascension.mp3"
+    },
+    {
+      "title": "Pentecost",
+      "day_number": 323,
+      "url": "https://bibleinayear.fireside.fm/day-323-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0b0ee4d0-fff1-4825-af45-5e1a514b2b49.mp3",
+      "filename": "323 - Day 323 - Pentecost.mp3"
+    },
+    {
+      "title": "The Name of Jesus",
+      "day_number": 324,
+      "url": "https://bibleinayear.fireside.fm/day-324-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/03532f12-8f39-4fa1-be13-c8c7a6a95940.mp3",
+      "filename": "324 - Day 324 - The Name of Jesus.mp3"
+    },
+    {
+      "title": "Boldness in Faith",
+      "day_number": 325,
+      "url": "https://bibleinayear.fireside.fm/day-325-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d0bef7f0-b683-4252-b3ef-d0e5a8c0fb49.mp3",
+      "filename": "325 - Day 325 - Boldness in Faith.mp3"
+    },
+    {
+      "title": "Life in the Spirit",
+      "day_number": 326,
+      "url": "https://bibleinayear.fireside.fm/day-326-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/49d5a826-fe03-46ea-9e4f-505763983ecd.mp3",
+      "filename": "326 - Day 326 - Life in the Spirit.mp3"
+    },
+    {
+      "title": "Origin of the Diaconate",
+      "day_number": 327,
+      "url": "https://bibleinayear.fireside.fm/day-327-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3b09fd6f-86bb-4f1d-a9ea-0c8d779cb00d.mp3",
+      "filename": "327 - Day 327 - Origin of the Diaconate.mp3"
+    },
+    {
+      "title": "Stephen Is Martyred",
+      "day_number": 328,
+      "url": "https://bibleinayear.fireside.fm/day-328-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f964771f-f601-47eb-9980-cc0ca29fde56.mp3",
+      "filename": "328 - Day 328 - Stephen Is Martyred.mp3"
+    },
+    {
+      "title": "The Ethiopian Eunuch",
+      "day_number": 329,
+      "url": "https://bibleinayear.fireside.fm/day-329-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/490676d8-eb15-4e65-aebc-01dbf3d63b37.mp3",
+      "filename": "329 - Day 329 - The Ethiopian Eunuch.mp3"
+    },
+    {
+      "title": "Saul's Conversion",
+      "day_number": 330,
+      "url": "https://bibleinayear.fireside.fm/day-330-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0991cbd9-0a73-4cc2-b86b-ec93568064c1.mp3",
+      "filename": "330 - Day 330 - Saul's Conversion.mp3"
+    },
+    {
+      "title": "Peter Preaches to the Gentiles",
+      "day_number": 331,
+      "url": "https://bibleinayear.fireside.fm/day-331-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/fb2822bd-7049-4207-be6b-3a19d03721b5.mp3",
+      "filename": "331 - Day 331 - Peter Preaches to the Gentiles.mp3"
+    },
+    {
+      "title": "Barnabas and Paul On Mission",
+      "day_number": 332,
+      "url": "https://bibleinayear.fireside.fm/day-332-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/8ad0e130-512e-4679-bc45-b2314e2cfe55.mp3",
+      "filename": "332 - Day 332 - Barnabas and Paul On Mission.mp3"
+    },
+    {
+      "title": "Peter Is Rescued from Prison",
+      "day_number": 333,
+      "url": "https://bibleinayear.fireside.fm/day-333-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/847429cf-d733-4825-acaf-18e76bc39b10.mp3",
+      "filename": "333 - Day 333 - Peter Is Rescued from Prison.mp3"
+    },
+    {
+      "title": "The Meaning of Fasting",
+      "day_number": 334,
+      "url": "https://bibleinayear.fireside.fm/day-334-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f4337c11-768e-4ff3-93ce-97d08cdfe7c6.mp3",
+      "filename": "334 - Day 334 - The Meaning of Fasting.mp3"
+    },
+    {
+      "title": "Run the Race",
+      "day_number": 335,
+      "url": "https://bibleinayear.fireside.fm/day-335-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c232d7d0-5676-4f44-ba08-ac292a86f1fe.mp3",
+      "filename": "335 - Day 335 - Run the Race.mp3"
+    },
+    {
+      "title": "The Council at Jerusalem",
+      "day_number": 336,
+      "url": "https://bibleinayear.fireside.fm/day-336-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ebc6798b-a730-4268-b07e-3b8695bf76a2.mp3",
+      "filename": "336 - Day 336 - The Council at Jerusalem.mp3"
+    },
+    {
+      "title": "The Importance of Love",
+      "day_number": 337,
+      "url": "https://bibleinayear.fireside.fm/day-337-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6b3f2a7c-b0c3-49d8-9bdf-018ae09d8326.mp3",
+      "filename": "337 - Day 337 - The Importance of Love.mp3"
+    },
+    {
+      "title": "Death Defeated",
+      "day_number": 338,
+      "url": "https://bibleinayear.fireside.fm/day-338-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d285ea3a-c472-4a04-aa7f-9d58eb864f1d.mp3",
+      "filename": "338 - Day 338 - Death Defeated.mp3"
+    },
+    {
+      "title": "Priscilla and Aquila",
+      "day_number": 339,
+      "url": "https://bibleinayear.fireside.fm/day-339-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ccad31b6-d220-433d-b82f-3f9a389ce05d.mp3",
+      "filename": "339 - Day 339 - Priscilla and Aquila.mp3"
+    },
+    {
+      "title": "The Power of the Holy Spirit",
+      "day_number": 340,
+      "url": "https://bibleinayear.fireside.fm/day-340-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/c1244117-f3a5-45ed-9a38-2ed9e5d0dda3.mp3",
+      "filename": "340 - Day 340 - The Power of the Holy Spirit.mp3"
+    },
+    {
+      "title": "Eternal Weight of Glory",
+      "day_number": 341,
+      "url": "https://bibleinayear.fireside.fm/day-341-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/fd1b58bf-02f2-4572-8523-ab86189b8df4.mp3",
+      "filename": "341 - Day 341 - Eternal Weight of Glory.mp3"
+    },
+    {
+      "title": "Generous Hearts",
+      "day_number": 342,
+      "url": "https://bibleinayear.fireside.fm/day-342-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/bad92bcb-7463-42a8-8d28-b0695a4efbb0.mp3",
+      "filename": "342 - Day 342 - Generous Hearts.mp3"
+    },
+    {
+      "title": "God Uses Paul's Past",
+      "day_number": 343,
+      "url": "https://bibleinayear.fireside.fm/day-343-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/010caf3e-50e1-44c5-bc7b-529853e963ff.mp3",
+      "filename": "343 - Day 343 - God Uses Paul's Past.mp3"
+    },
+    {
+      "title": "The Thorn in Paul's Side",
+      "day_number": 344,
+      "url": "https://bibleinayear.fireside.fm/day-344-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/0eab4795-ee45-41a0-9daa-d4dfa74d69a4.mp3",
+      "filename": "344 - Day 344 - The Thorn in Paul's Side.mp3"
+    },
+    {
+      "title": "One in Christ",
+      "day_number": 345,
+      "url": "https://bibleinayear.fireside.fm/day-345-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/24e7f36f-bb80-44ff-81c7-117065985d95.mp3",
+      "filename": "345 - Day 345 - One in Christ.mp3"
+    },
+    {
+      "title": "Fruits of the Spirit",
+      "day_number": 346,
+      "url": "https://bibleinayear.fireside.fm/day-346-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/a86e14af-8839-423a-a1f9-5ceb42a5b53e.mp3",
+      "filename": "346 - Day 346 - Fruits of the Spirit.mp3"
+    },
+    {
+      "title": "Witness to Unbelievers",
+      "day_number": 347,
+      "url": "https://bibleinayear.fireside.fm/day-347-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d1c09f8d-de0c-4a78-a910-aa735bae2695.mp3",
+      "filename": "347 - Day 347 - Witness to Unbelievers.mp3"
+    },
+    {
+      "title": "Rules for the New Life",
+      "day_number": 348,
+      "url": "https://bibleinayear.fireside.fm/day-348-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/aca57e40-7bdb-41d8-8697-de9bee5891f9.mp3",
+      "filename": "348 - Day 348 - Rules for the New Life.mp3"
+    },
+    {
+      "title": "Holy Indifference",
+      "day_number": 349,
+      "url": "https://bibleinayear.fireside.fm/day-349-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/68391e80-79a1-4304-b292-ccb4d2accbba.mp3",
+      "filename": "349 - Day 349 - Holy Indifference.mp3"
+    },
+    {
+      "title": "Faith and Works",
+      "day_number": 350,
+      "url": "https://bibleinayear.fireside.fm/day-350-2027",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/42a7153e-07c9-4b2b-998a-3312563945cf.mp3",
+      "filename": "350 - Day 350 - Faith and Works.mp3"
+    },
+    {
+      "title": "Draw Near to God",
+      "day_number": 351,
+      "url": "https://bibleinayear.fireside.fm/day-351-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/d711c39e-8870-4151-b759-6d6d0a9d1198.mp3",
+      "filename": "351 - Day 351 - Draw Near to God.mp3"
+    },
+    {
+      "title": "Purified by Fire",
+      "day_number": 352,
+      "url": "https://bibleinayear.fireside.fm/day-352-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f931e87f-1341-4f58-86ff-09610c9bb6e8.mp3",
+      "filename": "352 - Day 352 - Purified by Fire.mp3"
+    },
+    {
+      "title": "Sharing the Gospel",
+      "day_number": 353,
+      "url": "https://bibleinayear.fireside.fm/day-353-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/6fed9de5-bfa9-4708-9712-897af77058af.mp3",
+      "filename": "353 - Day 353 - Sharing the Gospel.mp3"
+    },
+    {
+      "title": "Partakers of the Divine Nature",
+      "day_number": 354,
+      "url": "https://bibleinayear.fireside.fm/day-354-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/352f26b0-4529-4401-abed-72fe84de7c1b.mp3",
+      "filename": "354 - Day 354 - Partakers of the Divine Nature.mp3"
+    },
+    {
+      "title": "The Things of This World",
+      "day_number": 355,
+      "url": "https://bibleinayear.fireside.fm/day-355-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/3483d7fc-e3c4-4953-bd9b-b263875798ad.mp3",
+      "filename": "355 - Day 355 - The Things of This World.mp3"
+    },
+    {
+      "title": "God Is Love",
+      "day_number": 356,
+      "url": "https://bibleinayear.fireside.fm/day-356-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f17d8465-d320-486e-8be3-b9a5fb2a5fad.mp3",
+      "filename": "356 - Day 356 - God Is Love.mp3"
+    },
+    {
+      "title": "Truth and Love",
+      "day_number": 357,
+      "url": "https://bibleinayear.fireside.fm/day-357-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/dab577f7-0102-4553-a1d5-4fe3e518d69c.mp3",
+      "filename": "357 - Day 357 - Truth and Love.mp3"
+    },
+    {
+      "title": "From Rebellion to Faithfulness",
+      "day_number": 358,
+      "url": "https://bibleinayear.fireside.fm/day-358-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/20529e99-9b55-43e1-a882-34fac5296c4a.mp3",
+      "filename": "358 - Day 358 - From Rebellion to Faithfulness.mp3"
+    },
+    {
+      "title": "John's Apocalypse",
+      "day_number": 359,
+      "url": "https://bibleinayear.fireside.fm/day-359-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/f6762b28-86d4-43e3-ac6e-18fa94879900.mp3",
+      "filename": "359 - Day 359 - John's Apocalypse.mp3"
+    },
+    {
+      "title": "Heavenly Worship",
+      "day_number": 360,
+      "url": "https://bibleinayear.fireside.fm/day-360-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9bd94188-142f-467b-9567-b3765542b520.mp3",
+      "filename": "360 - Day 360 - Heavenly Worship.mp3"
+    },
+    {
+      "title": "Judgment and Repentance",
+      "day_number": 361,
+      "url": "https://bibleinayear.fireside.fm/day-361-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/eabebd71-ac62-4624-b1a2-4575ade9d56f.mp3",
+      "filename": "361 - Day 361 - Judgment and Repentance.mp3"
+    },
+    {
+      "title": "The Woman Clothed with the Sun",
+      "day_number": 362,
+      "url": "https://bibleinayear.fireside.fm/day-362-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/ce4daa83-3bd1-4bb5-9087-9f1cbf9799cb.mp3",
+      "filename": "362 - Day 362 - The Woman Clothed with the Sun.mp3"
+    },
+    {
+      "title": "The New Covenant Priesthood",
+      "day_number": 363,
+      "url": "https://bibleinayear.fireside.fm/day-363-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/301a6e25-3316-4ef8-a3d9-751caf670023.mp3",
+      "filename": "363 - Day 363 - The New Covenant Priesthood.mp3"
+    },
+    {
+      "title": "Christ's Sacrifice Once for All",
+      "day_number": 364,
+      "url": "https://bibleinayear.fireside.fm/day-364-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/9d95b35e-3215-4f06-81ac-f78054fd037b.mp3",
+      "filename": "364 - Day 364 - Christ's Sacrifice Once for All.mp3"
+    },
+    {
+      "title": "The Beginning and the End",
+      "day_number": 365,
+      "url": "https://bibleinayear.fireside.fm/day-365-2025",
+      "audio_url": "https://dts.podtrac.com/redirect.mp3/aphid.fireside.fm/d/1437767933/c6354d0d-bd10-4eed-b811-1bb569d46efd/be1ce0e2-eb65-44ef-8b22-22ff46e54b15.mp3",
+      "filename": "365 - Day 365 - The Beginning and the End.mp3"
+    }
+  ]
+}

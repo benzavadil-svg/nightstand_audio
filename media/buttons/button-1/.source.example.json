@@ -1,0 +1,8 @@
+{
+  "display_name": "Button 1",
+  "source_type": "podcast",
+  "ordering": "filename_asc",
+  "resume_policy": "resume_playlist",
+  "completion_threshold_percent": 95,
+  "end_behavior": "stop"
+}
