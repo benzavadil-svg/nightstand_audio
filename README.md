@@ -353,6 +353,7 @@ Environment overrides:
 ```text
 AUDIO_BACKEND=alsa
 AUDIO_DEVICE=auto
+PLAYBACK_BACKEND=mpv
 # AUDIO_DEVICE=plughw:1,0
 # AUDIO_DEVICE=hw:1,0
 ```
@@ -375,6 +376,12 @@ dtoverlay=allo-boss-dac-pcm512x-audio
 ```
 
 The script uses `aplay` when `AUDIO_BACKEND=alsa`, prints `aplay -l` and `aplay -L`, auto-detects the InnoMaker/PCM512x card when it appears as `BossDAC` or `snd_rpi_hifiberry_dacplus`, and plays a short stereo generated WAV through the selected ALSA device. `AUDIO_DEVICE=auto` prefers `plughw:1,0` for compatibility when the working `BossDAC` card is detected. The hifiberry overlay may enumerate this board but has produced I2S SYNC errors, so the Boss DAC overlay is the current known-good path. This does not affect the main simulator or MPD adapter, and explicit `AUDIO_DEVICE=...` overrides still win.
+
+Appliance playback uses `MPVPlayer`, not the simulator player. The production launch path logs `[PLAYBACK] backend=mpv`, `[PLAYBACK] device=<alsa device>`, `[PLAYBACK] file=<resolved path>`, and `[PLAYBACK] command=<full command>`. Test a single file through the same MPV adapter:
+
+```bash
+python -m scripts.play_file_test "media/buttons/button-1/example.mp3"
+```
 
 ## Simulator Controls
 
@@ -545,7 +552,7 @@ For compatibility while developing, the scanner also reads the old folders as fa
 
 The app is structured so hardware behavior stays behind adapters:
 
-- `PlaybackAdapter`: Mock player now, MPD later.
+- `PlaybackAdapter`: mock player for Mac/dev simulator, MPV player for current Raspberry Pi appliance audio, MPD adapter stubbed for later.
 - `DisplayAdapter`: PNG simulator now, optional live Waveshare e-paper output on Raspberry Pi.
 - `InputAdapter`: keyboard now, GPIO rotary/buttons later.
 
@@ -554,18 +561,18 @@ Expected Pi path:
 1. Install Raspberry Pi OS Bookworm.
 2. Configure the InnoMaker DAC Mini HAT for wired headphones and the USB sound card for speaker/alarm output.
 3. Confirm PipeWire can see and switch between InnoMaker DAC, USB sound card, and Bluetooth sinks.
-4. Install and configure MPD for local files.
-5. Replace `MockPlayer` with `MPDPlayer`.
-6. Enable live Waveshare output with `USE_REAL_EPD=true` while keeping PNG output for debugging.
-7. Replace `KeyboardInput` with a GPIO adapter for the rotary encoder and buttons.
-8. Package as a systemd service.
+4. Use `MPVPlayer` with `--audio-device=alsa/plughw:1,0` for the confirmed BossDAC path.
+5. Enable live Waveshare output with `USE_REAL_EPD=true` while keeping PNG output for debugging.
+6. Replace `KeyboardInput` with a GPIO adapter for the rotary encoder and buttons.
+7. Package as a systemd service.
 
 Adapter TODO contracts:
 
 - GPIO rotary encoder: turn emits `InputEvent("turn", +/-1)`, short press emits `press`, long press emits `long_press`.
 - GPIO buttons: preset buttons emit `InputEvent("source", source_id)`, and long-press Button 3 emits `sleep_timer`.
 - Waveshare e-paper: `SimulatorDisplay` renders the selected model's 1-bit image to PNG and forwards it to `WaveshareDisplay` when `USE_REAL_EPD=true`.
-- MPD playback: match the `PlaybackAdapter` API used by `MockPlayer`.
+- MPV playback: current appliance backend; launch local files with `mpv --no-video --no-audio-display --audio-device=alsa/<AUDIO_DEVICE>`.
+- MPD playback: later backend; match the `PlaybackAdapter` API used by `MockPlayer` and `MPVPlayer`.
 - InnoMaker DAC audio: document and validate the exact Bookworm overlay/config separately from app logic.
 - USB speaker output: route alarm/fallback audio to the USB sound card -> MonkMakes speaker sink by default.
 - Bluetooth output: add as a later output target behind playback/output selection.

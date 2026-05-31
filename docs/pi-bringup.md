@@ -274,6 +274,7 @@ EPD_DISABLE_CLOCK_AUTO_REFRESH=false
 WAVESHARE_EPD_PYTHON_PATH=/home/pi/e-Paper/RaspberryPi_JetsonNano/python
 AUDIO_BACKEND=alsa
 AUDIO_DEVICE=auto
+PLAYBACK_BACKEND=mpv
 ```
 
 E-paper retains the last image after sleep. Live mode sleeps the display on exit without clearing by default and logs `Display sleeping; last image remains visible by design.` To clear on exit, set `CLEAR_EPD_ON_EXIT=true`.
@@ -455,6 +456,23 @@ AUDIO_BACKEND=alsa AUDIO_DEVICE=hw:1,0 python -m scripts.test_audio_output
 ```
 
 The script prints the selected backend/device, lists ALSA outputs, auto-detects `BossDAC` first and `snd_rpi_hifiberry_dacplus` as a secondary compatible name, and plays a short stereo generated WAV through `aplay -D <device>`. With `AUDIO_DEVICE=auto`, it prefers `plughw:<card>,0` for the detected InnoMaker/PCM512x card. It is independent of the main app and does not change MPD or PipeWire configuration. Explicit `AUDIO_DEVICE=plughw:1,0` or `AUDIO_DEVICE=hw:1,0` still overrides auto-detection.
+
+The current appliance playback backend is MPV. `scripts.run_live_epd` defaults `PLAYBACK_BACKEND=mpv`, and appliance mode never selects the simulator player. Production playback logs the selected backend, ALSA device, resolved file path, and full MPV command:
+
+```text
+[AUDIO] Playback backend: mpv
+[AUDIO] ALSA device: plughw:1,0
+[PLAYBACK] backend=mpv
+[PLAYBACK] device=plughw:1,0
+[PLAYBACK] file=/home/bzavadil/nightstand-audio/media/buttons/button-1/example.mp3
+[PLAYBACK] command=mpv --no-video --no-audio-display --audio-device=alsa/plughw:1,0 ...
+```
+
+Test a single file through the same adapter:
+
+```bash
+python -m scripts.play_file_test "/home/bzavadil/nightstand-audio/media/buttons/button-1/example.mp3"
+```
 
 ## USB Sound Card / Speaker Setup
 

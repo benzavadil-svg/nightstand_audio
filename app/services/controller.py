@@ -539,11 +539,14 @@ class NightstandController:
         }
 
     def _handle_source_selection(self, source_id: str) -> None:
+        self.log_playback.info("Playback flow step=button_press source=%s", source_id)
         status = self.player.status()
         active_source = status.source_id or self.current_source_id
         if active_source == source_id and status.state in {PlaybackState.PLAYING, PlaybackState.PAUSED}:
+            self.log_playback.info("Playback flow step=toggle_existing_source source=%s", source_id)
             self.toggle_play_pause_or_resume()
             return
+        self.log_playback.info("Playback flow step=start_source source=%s", source_id)
         self.start_source(source_id)
 
     def start_source(self, source_id: str) -> None:
@@ -558,6 +561,12 @@ class NightstandController:
         self.current_source_id = source_id
         self.store.set_current_source_id(source_id)
         self._last_completed_item_id = None
+        self.log_playback.info(
+            "Playback flow step=player_launch source=%s file=%s position=%.1fs",
+            source_id,
+            item.file_path,
+            position,
+        )
         self.player.play(item, position)
         if item.id:
             self.store.mark_started(item.id)

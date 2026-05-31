@@ -53,6 +53,7 @@ class Settings:
     ambient_show_playback_glyph: bool
     audio_backend: str
     audio_device: str
+    playback_backend: str
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -126,6 +127,11 @@ class Settings:
             ambient_show_playback_glyph=_env_bool("AMBIENT_SHOW_PLAYBACK_GLYPH", True),
             audio_backend=os.getenv("AUDIO_BACKEND", "alsa"),
             audio_device=os.getenv("AUDIO_DEVICE", "auto"),
+            playback_backend=_normalize_choice(
+                os.getenv("PLAYBACK_BACKEND", "auto"),
+                {"auto", "mock", "mpv"},
+                "auto",
+            ),
         )
 
     def ensure_dirs(self) -> None:

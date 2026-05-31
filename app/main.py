@@ -8,7 +8,7 @@ from app.display.simulator_display import SimulatorDisplay
 from app.display.waveshare_display import WaveshareDisplay, display_model_spec
 from app.input.keyboard_input import KeyboardInput
 from app.media_library import MediaLibrary
-from app.playback.mock_player import MockPlayer
+from app.playback.factory import build_playback_adapter
 from app.services.audio import AudioOutputSelector
 from app.services.controller import NightstandController
 from app.services.logger import get_logger, log_startup_banner
@@ -93,7 +93,7 @@ def build_simulator_controller() -> NightstandController:
     )
     display.startup_profiler = profiler
     with profiler.span("playback_service_init"):
-        player = MockPlayer()
+        player = build_playback_adapter(settings, audio_selection)
         keyboard = KeyboardInput()
         controller = NightstandController(
             store=store,
