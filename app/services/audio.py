@@ -9,6 +9,7 @@ from app.services.logger import get_logger
 
 
 PREFERRED_DAC_PATTERNS = (
+    "bossdac",
     "snd_rpi_hifiberry_dacplus",
     "hifiberry",
     "pcm512",
@@ -101,13 +102,17 @@ def read_aplay_cards() -> str:
 
 
 def detect_preferred_dac(aplay_output: str) -> _DetectedDac:
-    for line in aplay_output.splitlines():
-        lowered = line.lower()
-        if not any(pattern in lowered for pattern in PREFERRED_DAC_PATTERNS):
-            continue
-        match = re.search(r"card\s+(\d+):\s*([^\s\[]+)", line, re.IGNORECASE)
-        if match:
-            return _DetectedDac(name=match.group(2), card_index=int(match.group(1)))
-        card_match = re.search(r"card\s+(\d+):", line, re.IGNORECASE)
-        return _DetectedDac(name=line.strip(), card_index=int(card_match.group(1)) if card_match else None)
+    lines = list(aplay_output.splitlines())
+    for pattern in PREFERRED_DAC_PATTERNS:
+        for line in lines:
+            if pattern not in line.lower():
+                continue
+            match = re.search(r"card\s+(\d+):\s*([^\s\[]+)", line, re.IGNORECASE)
+            if match:
+                return _DetectedDac(name=match.group(2), card_index=int(match.group(1)))
+            card_match = re.search(r"card\s+(\d+):", line, re.IGNORECASE)
+            return _DetectedDac(
+                name=line.strip(),
+                card_index=int(card_match.group(1)) if card_match else None,
+            )
     return _DetectedDac()

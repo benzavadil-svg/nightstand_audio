@@ -366,7 +366,15 @@ python -m scripts.test_audio_output --device plughw:1,0
 python -m scripts.test_audio_output --device hw:1,0
 ```
 
-The script uses `aplay` when `AUDIO_BACKEND=alsa`, prints `aplay -l` and `aplay -L`, auto-detects the InnoMaker/PCM512x card when it appears as `snd_rpi_hifiberry_dacplus`, and plays a short stereo generated WAV through the selected ALSA device. `AUDIO_DEVICE=auto` prefers `plughw:1,0` for compatibility when that DAC is detected. This does not affect the main simulator or MPD adapter.
+For the tested InnoMaker HiFi DAC HAT, use this `/boot/firmware/config.txt` audio setup:
+
+```text
+dtparam=i2s=on
+dtoverlay=allo-boss-dac-pcm512x-audio
+#dtparam=audio=on
+```
+
+The script uses `aplay` when `AUDIO_BACKEND=alsa`, prints `aplay -l` and `aplay -L`, auto-detects the InnoMaker/PCM512x card when it appears as `BossDAC` or `snd_rpi_hifiberry_dacplus`, and plays a short stereo generated WAV through the selected ALSA device. `AUDIO_DEVICE=auto` prefers `plughw:1,0` for compatibility when the working `BossDAC` card is detected. The hifiberry overlay may enumerate this board but has produced I2S SYNC errors, so the Boss DAC overlay is the current known-good path. This does not affect the main simulator or MPD adapter, and explicit `AUDIO_DEVICE=...` overrides still win.
 
 ## Simulator Controls
 

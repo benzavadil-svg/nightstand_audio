@@ -396,21 +396,23 @@ aplay -L
 wpctl status
 ```
 
-Raspberry Pi audio HAT overlays vary by board revision. Validate the exact InnoMaker DAC Mini HAT PCM5122 overlay/configuration against the board documentation before finalizing `/boot/firmware/config.txt` on Bookworm. Do not assume the old official DAC+ / IQaudio overlay is correct without testing it on this board.
+Raspberry Pi audio HAT overlays vary by board revision. The InnoMaker HiFi DAC HAT tested for this project works with the Allo Boss PCM512x overlay and enumerates as `BossDAC`.
 
-Possible `/boot/firmware/config.txt` work will likely involve enabling I2S and a PCM5122-compatible overlay, but keep this explicit and verified against the exact InnoMaker board revision:
+Use this `/boot/firmware/config.txt` audio setup for the tested InnoMaker board:
 
 ```text
-# Example only. Validate before keeping.
 dtparam=i2s=on
-# dtoverlay=<exact-innomaker-or-compatible-overlay>
+dtoverlay=allo-boss-dac-pcm512x-audio
+#dtparam=audio=on
 ```
+
+The `hifiberry-dacplus`/`snd_rpi_hifiberry_dacplus` path may enumerate this board, but it caused I2S SYNC errors during bring-up. Keep `allo-boss-dac-pcm512x-audio` as the current known-good overlay unless future board testing proves otherwise.
 
 Useful checks:
 
 ```bash
-grep -n "dtoverlay" /boot/firmware/config.txt
-dmesg | grep -i -E "audio|snd|pcm5122|innomaker|hifiberry|dac"
+grep -n "dtparam\\|dtoverlay" /boot/firmware/config.txt
+dmesg | grep -i -E "audio|snd|pcm5122|innomaker|boss|hifiberry|dac|sync"
 aplay -l
 speaker-test -t wav -c 2
 ```
@@ -450,7 +452,7 @@ AUDIO_BACKEND=alsa AUDIO_DEVICE=hw:0,0 python -m scripts.test_audio_output
 AUDIO_BACKEND=alsa AUDIO_DEVICE=hw:1,0 python -m scripts.test_audio_output
 ```
 
-The script prints the selected backend/device, lists ALSA outputs, auto-detects `snd_rpi_hifiberry_dacplus`, and plays a short stereo generated WAV through `aplay -D <device>`. With `AUDIO_DEVICE=auto`, it prefers `plughw:<card>,0` for the detected InnoMaker/PCM512x card. It is independent of the main app and does not change MPD or PipeWire configuration.
+The script prints the selected backend/device, lists ALSA outputs, auto-detects `BossDAC` first and `snd_rpi_hifiberry_dacplus` as a secondary compatible name, and plays a short stereo generated WAV through `aplay -D <device>`. With `AUDIO_DEVICE=auto`, it prefers `plughw:<card>,0` for the detected InnoMaker/PCM512x card. It is independent of the main app and does not change MPD or PipeWire configuration. Explicit `AUDIO_DEVICE=plughw:1,0` or `AUDIO_DEVICE=hw:1,0` still overrides auto-detection.
 
 ## USB Sound Card / Speaker Setup
 
