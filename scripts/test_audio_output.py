@@ -11,6 +11,7 @@ import wave
 from pathlib import Path
 
 from app.config import get_settings
+from app.services.audio import AudioOutputSelector
 
 
 def main() -> None:
@@ -27,10 +28,17 @@ def main() -> None:
 
     settings = get_settings()
     backend = (args.backend or os.getenv("AUDIO_BACKEND") or settings.audio_backend).lower()
-    device = args.device or os.getenv("AUDIO_DEVICE") or settings.audio_device
+    requested_device = args.device or os.getenv("AUDIO_DEVICE") or settings.audio_device
+    selection = AudioOutputSelector(backend, requested_device).select()
+    device = selection.selected_device
 
     print("Nightstand Audio Output Test")
     print(f"Backend: {backend}")
+    if selection.hardware_dac_detected:
+        print(f"Hardware DAC detected: {selection.hardware_dac_detected}")
+    elif selection.fallback_used:
+        print("Hardware DAC detected: no")
+    print(f"Requested device: {requested_device}")
     print(f"Selected device: {device}")
     print()
     _list_alsa_devices()
@@ -74,12 +82,13 @@ def _write_test_tone(duration_seconds: float, frequency: float) -> Path:
     path = Path(handle.name)
     handle.close()
     with wave.open(str(path), "wb") as wav:
-        wav.setnchannels(1)
+        wav.setnchannels(2)
         wav.setsampwidth(2)
         wav.setframerate(sample_rate)
         for frame in range(frame_count):
             sample = amplitude * math.sin(2 * math.pi * frequency * frame / sample_rate)
-            wav.writeframes(struct.pack("<h", int(sample * 32767)))
+            packed = struct.pack("<hh", int(sample * 32767), int(sample * 32767))
+            wav.writeframes(packed)
     return path
 
 

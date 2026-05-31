@@ -188,6 +188,9 @@ USE_REAL_EPD=true GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_simulator
 Required/optional environment variables:
 
 ```text
+RUNTIME_MODE=appliance
+DISPLAY_BACKEND=waveshare
+HARDWARE_FALLBACK_TO_SIMULATOR=false
 USE_REAL_EPD=true
 DISPLAY_MODEL=waveshare_5in83_v2
 FORCE_EPD_UPDATE=false
@@ -223,13 +226,14 @@ AMBIENT_CLOCK_REFRESH_SECONDS=60
 AMBIENT_SHOW_PLAYBACK_GLYPH=true
 WAVESHARE_EPD_PYTHON_PATH=/home/pi/e-Paper/RaspberryPi_JetsonNano/python
 AUDIO_BACKEND=alsa
-AUDIO_DEVICE=default
+AUDIO_DEVICE=auto
 ```
 
 Notes:
 
 - `DISPLAY_MODEL=waveshare_5in83_v2` uses the Waveshare `epd5in83_V2` driver and defaults to `600x448`.
 - `DISPLAY_MODEL=waveshare_4in2_v2` uses the Waveshare `epd4in2_V2` driver and defaults to `400x300`.
+- `scripts.run_live_epd` defaults to appliance mode: `RUNTIME_MODE=appliance`, `DISPLAY_BACKEND=waveshare`, `AUDIO_BACKEND=alsa`, `AUDIO_DEVICE=auto`, and `HARDWARE_FALLBACK_TO_SIMULATOR=false`.
 - Appliance live mode initializes the selected Waveshare driver once, keeps the panel awake during the simulator session, and sleeps the display on shutdown.
 - Physical e-paper writes are skipped when the rendered image is unchanged.
 - Rapid sequential renders are coalesced with `EPD_RENDER_DEBOUNCE_MS`, default `750`.
@@ -258,7 +262,8 @@ Notes:
 - Set `EPD_ONE_SHOT_MAJOR_TRANSITIONS=false` only when returning to the persistent live-display lifecycle for major transitions.
 - Set `EPD_DISABLE_PARTIAL=true` to avoid `init_Part()` and `display_Partial()` entirely if partial refresh artifacts appear during real use.
 - Set `EPD_PARTIAL_UPDATE_ENABLED=false` to keep app policy from requesting partial updates.
-- If `USE_REAL_EPD` is false, the simulator remains PNG-only.
+- In appliance mode, hardware display init failures are not silently treated as success when `HARDWARE_FALLBACK_TO_SIMULATOR=false`.
+- If `USE_REAL_EPD` is false or `DISPLAY_BACKEND=png`, the Mac/dev simulator remains PNG-only.
 
 To manually clear the physical panel:
 
@@ -346,8 +351,8 @@ Environment overrides:
 
 ```text
 AUDIO_BACKEND=alsa
-AUDIO_DEVICE=default
-# AUDIO_DEVICE=hw:0,0
+AUDIO_DEVICE=auto
+# AUDIO_DEVICE=plughw:1,0
 # AUDIO_DEVICE=hw:1,0
 ```
 
@@ -356,10 +361,11 @@ List devices and play a short tone:
 ```bash
 python -m scripts.test_audio_output --list-only
 python -m scripts.test_audio_output
+python -m scripts.test_audio_output --device plughw:1,0
 python -m scripts.test_audio_output --device hw:1,0
 ```
 
-The script uses `aplay` when `AUDIO_BACKEND=alsa`, prints `aplay -l` and `aplay -L`, then plays a short generated WAV through the selected ALSA device. This does not affect the main simulator or MPD adapter.
+The script uses `aplay` when `AUDIO_BACKEND=alsa`, prints `aplay -l` and `aplay -L`, auto-detects the InnoMaker/PCM512x card when it appears as `snd_rpi_hifiberry_dacplus`, and plays a short stereo generated WAV through the selected ALSA device. `AUDIO_DEVICE=auto` prefers `plughw:1,0` for compatibility when that DAC is detected. This does not affect the main simulator or MPD adapter.
 
 ## Simulator Controls
 

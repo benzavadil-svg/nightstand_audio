@@ -5,7 +5,12 @@ import os
 
 os.environ.setdefault("USE_REAL_EPD", "true")
 os.environ.setdefault("GPIOZERO_PIN_FACTORY", "lgpio")
+os.environ.setdefault("RUNTIME_MODE", "appliance")
+os.environ.setdefault("DISPLAY_BACKEND", "waveshare")
 os.environ.setdefault("DISPLAY_MODEL", "waveshare_5in83_v2")
+os.environ.setdefault("AUDIO_BACKEND", "alsa")
+os.environ.setdefault("AUDIO_DEVICE", "auto")
+os.environ.setdefault("HARDWARE_FALLBACK_TO_SIMULATOR", "false")
 os.environ.setdefault("FORCE_EPD_UPDATE", "false")
 os.environ.setdefault("EPD_REINIT_EVERY_UPDATE", "false")
 os.environ.setdefault("CLEAR_BEFORE_EPD_UPDATE", "false")

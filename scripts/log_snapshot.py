@@ -21,6 +21,8 @@ def main() -> None:
         "app_state": {
             "db_path": str(settings.db_path),
             "media_dir": str(settings.media_dir),
+            "runtime_mode": settings.runtime_mode,
+            "hardware_fallback_to_simulator": settings.hardware_fallback_to_simulator,
             "current_source_id": source_id,
             "preferred_output": store.get_app_state_value("preferred_output") or "dac",
             "alarm_enabled": store.get_alarm_config().enabled,
@@ -30,6 +32,7 @@ def main() -> None:
             "screen_path": str(settings.screen_path),
             "screen_exists": settings.screen_path.exists(),
             "screen_size_bytes": _file_size(settings.screen_path),
+            "display_backend": settings.display_backend,
             "display_model": settings.display_model,
             "resolution": f"{settings.display_width}x{settings.display_height}",
             "use_real_epd": settings.use_real_epd,

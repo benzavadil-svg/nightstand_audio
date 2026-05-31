@@ -64,6 +64,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
         disable_partial: bool | None = None,
         one_shot_major_transitions: bool = True,
         region_partial_enabled: bool = True,
+        allow_hardware_fallback: bool = True,
     ) -> None:
         self.model_spec = display_model_spec(display_model)
         self.display_model = self.model_spec.model
@@ -78,6 +79,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
         self.partial_update_enabled = partial_update_enabled
         self.one_shot_major_transitions = one_shot_major_transitions
         self.region_partial_enabled = region_partial_enabled
+        self.allow_hardware_fallback = allow_hardware_fallback
         self.disable_partial = (
             _env_bool("EPD_DISABLE_PARTIAL", False)
             if disable_partial is None
@@ -226,6 +228,8 @@ class WaveshareDisplay(ImageDisplayAdapter):
                     epd.sleep()
             except Exception:
                 pass
+            if not self.allow_hardware_fallback:
+                raise
             return False
 
     def full_update(
@@ -467,6 +471,10 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 exc_info=is_debug_enabled("EPD"),
             )
             self.log.warning("Continuing with PNG-only simulator output.")
+            if not self.allow_hardware_fallback:
+                raise RuntimeError(
+                    f"Waveshare {self.driver_name} initialization failed and hardware fallback is disabled"
+                ) from exc
             return False
 
     def _ensure_ready_for_render(self) -> bool:
@@ -514,6 +522,10 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 exc_info=is_debug_enabled("EPD"),
             )
             self.log.warning("Continuing with PNG-only simulator output.")
+            if not self.allow_hardware_fallback:
+                raise RuntimeError(
+                    f"Waveshare {self.driver_name} forced reinit failed and hardware fallback is disabled"
+                ) from exc
             return False
 
     def _partial_api_supported(self) -> bool:
@@ -522,7 +534,8 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 hasattr(self._epd, name) for name in ("display_Partial", "init_Part")
             )
             self.log.info(
-                "Partial refresh support driver=%s supported=%s",
+                "Partial refresh support display_model=%s driver=%s partial_supported=%s",
+                self.display_model,
                 self.driver_name,
                 self._partial_supported,
             )

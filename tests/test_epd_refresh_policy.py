@@ -113,6 +113,30 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             ("partial", False),
         )
 
+    def test_4in2_display_model_uses_same_refresh_policy_classification(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("SLEEP_TIMER", "Sleep Timer", "sleep_timer")
+
+        self.assertEqual(
+            display._classify_update("sleep_timer", ("SLEEP_TIMER", "Sleep Timer", "sleep_timer"))[:2],
+            ("partial", False),
+        )
+        self.assertEqual(
+            display._classify_update("major_layout_transition", ("HOME", "Clock", "idle_home"))[:2],
+            ("full", True),
+        )
+
+    def test_playback_start_is_full_update(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        self.assertEqual(
+            display._classify_update("playback_start", ("HOME", "Sleep Baseball", "playback_home"))[:2],
+            ("full", True),
+        )
+
     def test_screen_mode_or_title_change_forces_clean_full_update(self) -> None:
         display = self.make_display()
         display._last_pushed_hash = "already-rendered"

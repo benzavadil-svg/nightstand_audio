@@ -15,6 +15,9 @@ class Settings:
     data_dir: Path
     db_path: Path
     screen_path: Path
+    runtime_mode: str
+    display_backend: str
+    hardware_fallback_to_simulator: bool
     display_model: str
     display_width: int
     display_height: int
@@ -65,6 +68,17 @@ class Settings:
             data_dir=data_dir,
             db_path=Path(os.getenv("NIGHTSTAND_DB_PATH", data_dir / "nightstand.sqlite")),
             screen_path=Path(os.getenv("NIGHTSTAND_SCREEN_PATH", data_dir / "latest_screen.png")),
+            runtime_mode=_normalize_choice(
+                os.getenv("RUNTIME_MODE", "simulator"),
+                {"simulator", "appliance"},
+                "simulator",
+            ),
+            display_backend=_normalize_choice(
+                os.getenv("DISPLAY_BACKEND", "png"),
+                {"png", "waveshare"},
+                "png",
+            ),
+            hardware_fallback_to_simulator=_env_bool("HARDWARE_FALLBACK_TO_SIMULATOR", True),
             display_model=display_model,
             display_width=int(os.getenv("NIGHTSTAND_DISPLAY_WIDTH", str(default_width))),
             display_height=int(os.getenv("NIGHTSTAND_DISPLAY_HEIGHT", str(default_height))),
@@ -111,7 +125,7 @@ class Settings:
             ambient_clock_refresh_seconds=int(os.getenv("AMBIENT_CLOCK_REFRESH_SECONDS", "60")),
             ambient_show_playback_glyph=_env_bool("AMBIENT_SHOW_PLAYBACK_GLYPH", True),
             audio_backend=os.getenv("AUDIO_BACKEND", "alsa"),
-            audio_device=os.getenv("AUDIO_DEVICE", "default"),
+            audio_device=os.getenv("AUDIO_DEVICE", "auto"),
         )
 
     def ensure_dirs(self) -> None:
@@ -147,13 +161,19 @@ def _load_env_file(path: Path) -> None:
 
 
 def _normalize_display_model(value: str) -> str:
-    normalized = value.strip().lower()
-    if normalized in {"waveshare_5in83_v2", "waveshare_4in2_v2"}:
-        return normalized
-    return "waveshare_5in83_v2"
+    return _normalize_choice(
+        value,
+        {"waveshare_5in83_v2", "waveshare_4in2_v2"},
+        "waveshare_5in83_v2",
+    )
 
 
 def _display_dimensions(display_model: str) -> tuple[int, int]:
     if display_model == "waveshare_4in2_v2":
         return 400, 300
     return 600, 448
+
+
+def _normalize_choice(value: str, allowed: set[str], default: str) -> str:
+    normalized = value.strip().lower()
+    return normalized if normalized in allowed else default

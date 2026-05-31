@@ -81,19 +81,31 @@ def is_debug_enabled(subsystem: str | None = None) -> bool:
 
 def log_startup_banner(
     *,
+    runtime_mode: str,
+    display_backend: str,
+    display_model: str,
     display: str,
     resolution: str,
     gpio_backend: str,
     audio: str,
+    audio_device: str,
     live_epd: bool,
 ) -> None:
+    get_logger("APP").info("Runtime mode: %s", runtime_mode)
+    get_logger("DISPLAY").info("Backend: %s", display_backend)
+    get_logger("DISPLAY").info("Model: %s", display_model)
+    get_logger("AUDIO").info("Backend: %s", audio)
+    get_logger("AUDIO").info("Selected device: %s", audio_device)
     get_logger("SIM").info(
-        "Nightstand Audio | Display: %s | Resolution: %s | GPIO backend: %s | "
-        "Audio: %s | Live EPD: %s",
+        "Nightstand Audio | Runtime: %s | Display: %s | Model: %s | Resolution: %s | "
+        "GPIO backend: %s | Audio: %s | Audio device: %s | Live EPD: %s",
+        runtime_mode,
         display,
+        display_model,
         resolution,
         gpio_backend,
         audio,
+        audio_device,
         "enabled" if live_epd else "disabled",
     )
 

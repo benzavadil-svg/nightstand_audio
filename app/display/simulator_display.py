@@ -175,7 +175,12 @@ class SimulatorDisplay(DisplayAdapter):
             return
         if image_hash == self._last_pushed_hash:
             self._skipped_count += 1
-            self.epd_log.info("Skipped update reason=image_unchanged source_reason=%s", reason)
+            self.epd_log.info(
+                "Skipped update reason=image_unchanged source_reason=%s selected_update_mode=skipped previous=%s next=%s",
+                reason,
+                _format_screen(self._last_pushed_screen_signature),
+                _format_screen(next_screen),
+            )
             return
 
         update_mode, clean_refresh, policy_reason = self._classify_update(reason, next_screen)
@@ -211,10 +216,11 @@ class SimulatorDisplay(DisplayAdapter):
         self._pending_clean_refresh = clean_refresh
         self._pending_requested_at = time.monotonic()
         self.log.info(
-            "EPD refresh classified previous=%s next=%s selected=%s clean=%s reason=%s normalized_reason=%s policy=%s dirty_region=%s bounds=%s partial_streak=%s",
+            "EPD refresh classified previous=%s next=%s selected=%s selected_update_mode=%s clean=%s reason=%s normalized_reason=%s policy=%s dirty_region=%s bounds=%s partial_streak=%s",
             _format_screen(self._last_pushed_screen_signature),
             _format_screen(next_screen),
             update_mode.upper(),
+            update_mode,
             clean_refresh,
             reason,
             _normalize_partial_reason(reason),

@@ -244,6 +244,9 @@ USE_REAL_EPD=true GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_simulator
 Useful environment:
 
 ```text
+RUNTIME_MODE=appliance
+DISPLAY_BACKEND=waveshare
+HARDWARE_FALLBACK_TO_SIMULATOR=false
 USE_REAL_EPD=true
 DISPLAY_MODEL=waveshare_5in83_v2
 FORCE_EPD_UPDATE=false
@@ -270,7 +273,7 @@ EPD_CLOCK_REFRESH_SECONDS=60
 EPD_DISABLE_CLOCK_AUTO_REFRESH=false
 WAVESHARE_EPD_PYTHON_PATH=/home/pi/e-Paper/RaspberryPi_JetsonNano/python
 AUDIO_BACKEND=alsa
-AUDIO_DEVICE=default
+AUDIO_DEVICE=auto
 ```
 
 E-paper retains the last image after sleep. Live mode sleeps the display on exit without clearing by default and logs `Display sleeping; last image remains visible by design.` To clear on exit, set `CLEAR_EPD_ON_EXIT=true`.
@@ -289,6 +292,8 @@ GPIOZERO_PIN_FACTORY=lgpio python -m scripts.push_latest_epd --full
 ```
 
 The live adapter uses the selected driver from `DISPLAY_MODEL`, initializes the display once at startup, keeps it awake during the simulator session, and calls `sleep()` on shutdown. Each physical update opens `data/latest_screen.png`, converts to 1-bit, and resizes to `epd.width`/`epd.height`.
+
+`scripts.run_live_epd` sets appliance defaults before the app starts: `RUNTIME_MODE=appliance`, `DISPLAY_BACKEND=waveshare`, `AUDIO_BACKEND=alsa`, `AUDIO_DEVICE=auto`, and `HARDWARE_FALLBACK_TO_SIMULATOR=false`. If Waveshare initialization fails in this mode, the app logs the failure clearly instead of silently pretending the hardware path is working.
 
 Full updates run in true full mode with `epd.init()` and `epd.display(epd.getbuffer(img))`. Partial updates run in partial mode with `init_Part()` and `display_Partial()` when those methods are present in the installed Waveshare driver. Major clean transitions switch from partial mode back to full mode before `Clear()` and `display()`, which avoids the muddy mixed-screen artifacts caused by using the partial LUT for full-looking updates.
 
@@ -426,17 +431,18 @@ pactl list short sinks
 Test the default output first:
 
 ```bash
-AUDIO_BACKEND=alsa AUDIO_DEVICE=default python -m scripts.test_audio_output
+AUDIO_BACKEND=alsa AUDIO_DEVICE=auto python -m scripts.test_audio_output
 ```
 
 Then test explicit ALSA devices reported by `aplay -l`:
 
 ```bash
+AUDIO_BACKEND=alsa AUDIO_DEVICE=plughw:1,0 python -m scripts.test_audio_output
 AUDIO_BACKEND=alsa AUDIO_DEVICE=hw:0,0 python -m scripts.test_audio_output
 AUDIO_BACKEND=alsa AUDIO_DEVICE=hw:1,0 python -m scripts.test_audio_output
 ```
 
-The script prints the selected backend/device, lists ALSA outputs, and plays a short generated WAV through `aplay -D <device>`. It is independent of the main app and does not change MPD or PipeWire configuration.
+The script prints the selected backend/device, lists ALSA outputs, auto-detects `snd_rpi_hifiberry_dacplus`, and plays a short stereo generated WAV through `aplay -D <device>`. With `AUDIO_DEVICE=auto`, it prefers `plughw:<card>,0` for the detected InnoMaker/PCM512x card. It is independent of the main app and does not change MPD or PipeWire configuration.
 
 ## USB Sound Card / Speaker Setup
 

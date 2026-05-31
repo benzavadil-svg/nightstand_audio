@@ -24,6 +24,7 @@ def main() -> None:
         partial_update_enabled=settings.epd_partial_update_enabled,
         disable_partial=settings.epd_disable_partial,
         region_partial_enabled=settings.epd_region_partial_enabled,
+        allow_hardware_fallback=settings.hardware_fallback_to_simulator,
     )
     display.clear(sleep_after=True)
 

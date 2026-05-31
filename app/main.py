@@ -9,6 +9,7 @@ from app.display.waveshare_display import WaveshareDisplay, display_model_spec
 from app.input.keyboard_input import KeyboardInput
 from app.media_library import MediaLibrary
 from app.playback.mock_player import MockPlayer
+from app.services.audio import AudioOutputSelector
 from app.services.controller import NightstandController
 from app.services.logger import get_logger, log_startup_banner
 from app.state_store import StateStore
@@ -17,11 +18,21 @@ from app.state_store import StateStore
 def build_simulator_controller() -> NightstandController:
     settings = get_settings()
     display_spec = display_model_spec(settings.display_model)
+    audio_selection = AudioOutputSelector(
+        settings.audio_backend,
+        settings.audio_device,
+    ).select()
     log_startup_banner(
+        runtime_mode=settings.runtime_mode,
+        display_backend=settings.display_backend,
+        display_model=settings.display_model,
         display=display_spec.label,
         resolution=f"{settings.display_width}x{settings.display_height}",
         gpio_backend=os.getenv("GPIOZERO_PIN_FACTORY", "default"),
-        audio="simulator",
+        audio=audio_selection.backend
+        if settings.runtime_mode == "appliance"
+        else "simulator",
+        audio_device=audio_selection.selected_device,
         live_epd=settings.use_real_epd,
     )
     store = StateStore(settings.db_path)
@@ -30,7 +41,7 @@ def build_simulator_controller() -> NightstandController:
     library.ensure_demo_library()
     renderer = EInkRenderer(settings.display_width, settings.display_height)
     physical_display = None
-    if settings.use_real_epd:
+    if settings.use_real_epd or settings.display_backend == "waveshare":
         get_logger("EPD").info("Live e-paper output enabled.")
         physical_display = WaveshareDisplay(
             width=settings.display_width,
@@ -46,9 +57,16 @@ def build_simulator_controller() -> NightstandController:
             disable_partial=settings.epd_disable_partial,
             one_shot_major_transitions=settings.epd_one_shot_major_transitions,
             region_partial_enabled=settings.epd_region_partial_enabled,
+            allow_hardware_fallback=settings.hardware_fallback_to_simulator,
         )
     else:
         get_logger("DISPLAY").info("Live e-paper output disabled; PNG-only mode.")
+    get_logger("DISPLAY").info("Backend: %s", settings.display_backend)
+    get_logger("DISPLAY").info("Model: %s", settings.display_model)
+    get_logger("DISPLAY").info(
+        "Partial policy: %s",
+        "enabled" if settings.epd_partial_update_enabled and not settings.epd_disable_partial else "disabled",
+    )
     display = SimulatorDisplay(
         renderer,
         settings.screen_path,
