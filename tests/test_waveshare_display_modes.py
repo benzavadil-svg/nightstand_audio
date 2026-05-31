@@ -59,6 +59,41 @@ class Fake4In2Epd(FakeEpd):
     height = 300
 
 
+class Fake4In2LowercasePartialEpd:
+    width = 400
+    height = 300
+
+    def __init__(self, calls: list[str] | None = None) -> None:
+        self.calls: list[str] = calls if calls is not None else []
+
+    def init(self) -> None:
+        self.calls.append("init")
+
+    def init_Part(self) -> None:
+        self.calls.append("init_Part")
+
+    def Clear(self) -> None:
+        self.calls.append("Clear")
+
+    def getbuffer(self, image: Image.Image) -> str:
+        self.calls.append(f"getbuffer:{image.size[0]}x{image.size[1]}")
+        return "buffer"
+
+    def display(self, buffer: str) -> None:
+        self.calls.append(f"display:{buffer}")
+
+    def display_part(self, buffer: str) -> None:
+        self.calls.append(f"display_part:{buffer}")
+
+    def sleep(self) -> None:
+        self.calls.append("sleep")
+
+
+class FakeTwoBufferPartialEpd(Fake4In2LowercasePartialEpd):
+    def display_part(self, old_buffer: str, new_buffer: str) -> None:
+        self.calls.append(f"display_part:{old_buffer}->{new_buffer}")
+
+
 class Fake4In2Driver:
     EPD_WIDTH = 400
     EPD_HEIGHT = 300
@@ -69,6 +104,30 @@ class Fake4In2Driver:
     def EPD(self) -> Fake4In2Epd:
         self.calls.append("EPD")
         return Fake4In2Epd(self.calls)
+
+
+class FakeLowercasePartialDriver:
+    EPD_WIDTH = 400
+    EPD_HEIGHT = 300
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    def EPD(self) -> Fake4In2LowercasePartialEpd:
+        self.calls.append("EPD")
+        return Fake4In2LowercasePartialEpd(self.calls)
+
+
+class FakeTwoBufferPartialDriver:
+    EPD_WIDTH = 400
+    EPD_HEIGHT = 300
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    def EPD(self) -> FakeTwoBufferPartialEpd:
+        self.calls.append("EPD")
+        return FakeTwoBufferPartialEpd(self.calls)
 
 
 class WaveshareDisplayModeTest(unittest.TestCase):
@@ -181,6 +240,34 @@ class WaveshareDisplayModeTest(unittest.TestCase):
         )
         self.assertEqual(display.width, 400)
         self.assertEqual(display.height, 300)
+
+    def test_4in2_lowercase_partial_api_is_detected_and_used(self) -> None:
+        driver = FakeLowercasePartialDriver()
+        display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)
+        display._epd_module = driver
+
+        self.assertTrue(display._ensure_initialized())
+        display.partial_update(Image.new("1", (400, 300), 1), reason="play_pause")
+
+        self.assertEqual(display._display_mode, MODE_PARTIAL)
+        self.assertIn("init_Part", driver.calls)
+        self.assertIn("display_part:buffer", driver.calls)
+        self.assertEqual(display._partial_update_count, 1)
+        self.assertEqual(display._full_update_count, 0)
+        self.assertEqual(display._partial_api.display_method_name, "display_part")
+
+    def test_two_buffer_partial_api_receives_previous_full_buffer(self) -> None:
+        driver = FakeTwoBufferPartialDriver()
+        display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)
+        display._epd_module = driver
+
+        self.assertTrue(display._ensure_initialized())
+        display.full_update(Image.new("1", (400, 300), 1), reason="startup")
+        display.partial_update(Image.new("1", (400, 300), 1), reason="volume_change")
+
+        self.assertIn("display:buffer", driver.calls)
+        self.assertIn("display_part:buffer->buffer", driver.calls)
+        self.assertEqual(display._partial_update_count, 1)
 
     def _write_preview_image(self, size=(600, 448)):
         import tempfile

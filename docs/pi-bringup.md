@@ -295,7 +295,15 @@ The live adapter uses the selected driver from `DISPLAY_MODEL`, initializes the 
 
 `scripts.run_live_epd` sets appliance defaults before the app starts: `RUNTIME_MODE=appliance`, `DISPLAY_BACKEND=waveshare`, `AUDIO_BACKEND=alsa`, `AUDIO_DEVICE=auto`, and `HARDWARE_FALLBACK_TO_SIMULATOR=false`. If Waveshare initialization fails in this mode, the app logs the failure clearly instead of silently pretending the hardware path is working.
 
-Full updates run in true full mode with `epd.init()` and `epd.display(epd.getbuffer(img))`. Partial updates run in partial mode with `init_Part()` and `display_Partial()` when those methods are present in the installed Waveshare driver. Major clean transitions switch from partial mode back to full mode before `Clear()` and `display()`, which avoids the muddy mixed-screen artifacts caused by using the partial LUT for full-looking updates.
+Full updates run in true full mode with `epd.init()` and `epd.display(epd.getbuffer(img))`. Partial updates run in partial mode after discovering the installed Waveshare driver's partial API (`display_Partial`, `display_part`, `DisplayPart`, or similar) and calling the matching partial init method when available. Major clean transitions switch from partial mode back to full mode before `Clear()` and `display()`, which avoids the muddy mixed-screen artifacts caused by using the partial LUT for full-looking updates.
+
+Inspect the exact driver available on the Pi:
+
+```bash
+python -m scripts.inspect_epd_driver --model waveshare_4in2_v2
+```
+
+Live logs include `partial_supported`, `partial_api`, `init_part_called`, `selected_policy`, and `physical_mode`. If the app requests a partial update but the physical driver cannot do one, it logs `selected_policy=partial physical_mode=full_fallback` instead of pretending the display was updated partially.
 
 `EPD_ONE_SHOT_MAJOR_TRANSITIONS=true` is the current default for major transitions. It matches the working manual push lifecycle: create a fresh selected-driver `EPD()`, call `init()`, open `data/latest_screen.png`, convert to 1-bit, resize to `epd.width`/`epd.height`, call `display(epd.getbuffer(img))`, then call `sleep()`. The display scheduler cancels pending debounced physical updates before this one-shot push so a stale queued frame cannot immediately overwrite the transition.
 

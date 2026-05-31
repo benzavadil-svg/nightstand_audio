@@ -245,7 +245,8 @@ Notes:
 - Volume on HOME, sleep timer changes while already on the Sleep Timer screen, alarm toggle while already on the Alarm screen, play/pause, clock minute updates on HOME, and playlist switches while already on the playback home layout are partial candidates.
 - Full refresh is used for startup, source changes, playback start/stop, major layout transitions, screen mode/title changes, playlist completion, and periodic ghosting cleanup.
 - `EPD_PARTIAL_STREAK_LIMIT=8` forces a clean full refresh after eight consecutive partial updates.
-- The adapter tracks physical display mode explicitly: true full updates use `epd.init()` plus `display()`, while partial updates switch to `epd.init_Part()` plus `display_Partial()`.
+- The adapter tracks physical display mode explicitly: true full updates use `epd.init()` plus `display()`, while partial updates discover the installed driver's partial method (`display_Partial`, `display_part`, `DisplayPart`, or similar) and call the matching partial init method when available.
+- Inspect the installed Waveshare driver methods with `python -m scripts.inspect_epd_driver --model waveshare_4in2_v2`; logs include `partial_supported`, `partial_api`, `init_part_called`, `selected_policy`, and the actual `physical_mode`.
 - Any clean/full major transition switches out of partial mode before `Clear()` and `display()` so the panel does not keep using the fast partial LUT.
 - `EPD_ONE_SHOT_MAJOR_TRANSITIONS=true` uses the known-good manual push lifecycle for major transitions: fresh `EPD()`, `init()`, open `latest_screen.png`, convert to 1-bit, resize to panel size, `display()`, then `sleep()`.
 - One-shot major transitions cancel any pending debounced physical update before pushing the final rendered frame.
