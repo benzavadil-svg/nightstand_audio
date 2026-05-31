@@ -296,9 +296,17 @@ The live adapter uses the selected driver from `DISPLAY_MODEL`, initializes the 
 
 `scripts.run_live_epd` sets appliance defaults before the app starts: `RUNTIME_MODE=appliance`, `DISPLAY_BACKEND=waveshare`, `AUDIO_BACKEND=alsa`, `AUDIO_DEVICE=auto`, and `HARDWARE_FALLBACK_TO_SIMULATOR=false`. If Waveshare initialization fails in this mode, the app logs the failure clearly instead of silently pretending the hardware path is working.
 
-Startup performance instrumentation logs `[STARTUP] step=<name> duration_ms=<value>` for config load, audio detection, media scan, playback/controller init, display driver import, display init, initial PNG render, and first physical EPD update. The final summary is `[STARTUP] total_ms=...`, which is the quickest way to see whether startup is dominated by ALSA, media scanning, driver import, panel init, or the first refresh.
+Startup performance instrumentation logs `[STARTUP] step=<name> duration_ms=<value>` for config load, audio detection, media cache load, background media scan start, playback/controller init, display driver import, display init, initial PNG render, and first physical EPD update. The final summary is `[STARTUP] total_ms=...`, which is the quickest way to see whether startup is dominated by ALSA, cache load, driver import, panel init, or the first refresh.
+
+Appliance startup no longer blocks on a full media scan. It loads `data/media_index.json` if valid, renders the passive screen, and refreshes the full index in a background thread. The cache stores paths relative to `media/`, so a cache built on Mac does not hardcode `/Users/...` paths on the Pi. Rebuild it manually with:
+
+```bash
+python -m scripts.rebuild_media_index
+```
 
 Full updates run in true full mode with `epd.init()` and `epd.display(epd.getbuffer(img))`. Partial updates run in partial mode after discovering the installed Waveshare driver's partial API (`display_Partial`, `display_part`, `DisplayPart`, or similar) and calling the matching partial init method when available. Major clean transitions switch from partial mode back to full mode before `Clear()` and `display()`, which avoids the muddy mixed-screen artifacts caused by using the partial LUT for full-looking updates.
+
+For the 4.2 inch V2 panel, a partial refresh immediately after a one-shot major transition is blocked and sent through full fallback instead. This avoids calling `display_Partial()` on a slept/closed driver handle and logs `partial_blocked_reason=driver_sleep_or_invalid_handle`.
 
 Inspect the exact driver available on the Pi:
 

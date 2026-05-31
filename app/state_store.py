@@ -99,10 +99,15 @@ class StateStore:
         if column_name not in columns:
             conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {declaration}")
 
-    def upsert_media_items(self, items: Iterable[MediaItem]) -> int:
+    def upsert_media_items(
+        self,
+        items: Iterable[MediaItem],
+        prune_source_ids: Iterable[str] | None = None,
+    ) -> int:
+        item_list = list(items)
         count = 0
         with self.connect() as conn:
-            for item in items:
+            for item in item_list:
                 conn.execute(
                     """
                     INSERT INTO media_items (
@@ -126,7 +131,38 @@ class StateStore:
                     ),
                 )
                 count += 1
+            if prune_source_ids is not None:
+                for source_id in prune_source_ids:
+                    current_paths = {
+                        item.file_path for item in item_list if item.source_id == source_id
+                    }
+                    if current_paths:
+                        placeholders = ",".join("?" for _ in current_paths)
+                        conn.execute(
+                            f"""
+                            DELETE FROM media_items
+                            WHERE source_id = ?
+                              AND file_path NOT IN ({placeholders})
+                            """,
+                            (source_id, *sorted(current_paths)),
+                        )
+                    else:
+                        conn.execute(
+                            "DELETE FROM media_items WHERE source_id = ?",
+                            (source_id,),
+                        )
         return count
+
+    def delete_media_items_by_paths(self, paths: Iterable[str]) -> int:
+        path_list = list(paths)
+        if not path_list:
+            return 0
+        deleted = 0
+        with self.connect() as conn:
+            for file_path in path_list:
+                cursor = conn.execute("DELETE FROM media_items WHERE file_path = ?", (file_path,))
+                deleted += cursor.rowcount
+        return deleted
 
     def media_count(self) -> int:
         with self.connect() as conn:

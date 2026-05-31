@@ -101,6 +101,10 @@ class MediaLibraryBehaviorTest(unittest.TestCase):
             self.assertEqual(metadata.display_name, "Morning Lectures")
             self.assertTrue(metadata.loop_enabled)
             self.assertEqual([item.title for item in queue], ["002 Second", "001 First"])
+            self.assertEqual(
+                queue[0].file_path,
+                "buttons/button-1/002-second.mp3",
+            )
 
     def test_scan_decodes_url_encoded_file_names_for_display(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -146,6 +150,56 @@ class MediaLibraryBehaviorTest(unittest.TestCase):
             self.assertEqual(library.get_source_label("button-2"), "Sleep Baseball")
             self.assertEqual(queue[0].title, "Lake City Loons vs South Haven Ravens")
             self.assertEqual(queue[0].artist, "Ep 040")
+
+    def test_cached_index_uses_relative_paths_and_resolves_current_media_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            media_dir = root / "media"
+            button_dir = media_dir / "buttons" / "button-1"
+            button_dir.mkdir(parents=True)
+            media_file = button_dir / "001-first.mp3"
+            media_file.write_text("", encoding="utf-8")
+            store = StateStore(root / "test.sqlite")
+            library = MediaLibrary(media_dir, store)
+
+            library.scan()
+            cached = json.loads(library.index_path.read_text(encoding="utf-8"))
+            self.assertEqual(cached["items"][0]["file_path"], "buttons/button-1/001-first.mp3")
+
+            store2 = StateStore(root / "second.sqlite")
+            library2 = MediaLibrary(media_dir, store2)
+            self.assertEqual(library2.load_cached_index(), 1)
+            item = library2.get_queue("button-1")[0]
+            self.assertEqual(
+                str(library2.resolve_media_path(item.file_path)),
+                str(media_file),
+            )
+
+    def test_cached_index_rejects_host_absolute_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            media_dir = root / "media"
+            media_dir.mkdir()
+            store = StateStore(root / "test.sqlite")
+            library = MediaLibrary(media_dir, store)
+            library.index_path.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "items": [
+                            {
+                                "source_id": "button-1",
+                                "file_path": "/Users/benzabs/dev_work/nightstand-audio/media/buttons/button-1/old.mp3",
+                                "title": "Old",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            self.assertEqual(library.load_cached_index(), 0)
+            self.assertEqual(library.get_queue("button-1"), [])
 
 
 if __name__ == "__main__":

@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 data/nightstand.sqlite
 data/latest_screen.png
+data/media_index.json

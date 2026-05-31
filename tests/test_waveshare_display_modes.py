@@ -256,6 +256,24 @@ class WaveshareDisplayModeTest(unittest.TestCase):
         self.assertEqual(display._full_update_count, 0)
         self.assertEqual(display._partial_api.display_method_name, "display_part")
 
+    def test_4in2_partial_after_one_shot_uses_full_fallback(self) -> None:
+        epd = Fake4In2Epd()
+        display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)
+        display._epd = epd
+        display._initialized = True
+        display._display_mode = MODE_FULL
+        display._previous_update_was_one_shot = True
+        display.width = epd.width
+        display.height = epd.height
+
+        display.partial_update(Image.new("1", (400, 300), 1), reason="volume_change")
+
+        self.assertEqual(display._display_mode, MODE_FULL)
+        self.assertIn("display:buffer", epd.calls)
+        self.assertNotIn("display_Partial:buffer", epd.calls)
+        self.assertEqual(display._partial_update_count, 0)
+        self.assertEqual(display._full_update_count, 1)
+
     def test_two_buffer_partial_api_receives_previous_full_buffer(self) -> None:
         driver = FakeTwoBufferPartialDriver()
         display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)

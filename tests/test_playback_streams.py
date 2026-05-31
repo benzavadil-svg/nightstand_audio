@@ -86,6 +86,40 @@ class PlaybackStreamsTest(unittest.TestCase):
             self.assertEqual(status.item_id, first.item_id)
             self.assertGreaterEqual(status.position_seconds, 0.3)
 
+    def test_source_button_lazy_scans_when_queue_contains_stale_host_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="/Users/benzabs/dev_work/nightstand-audio/media/buttons/button-1/old.mp3",
+                        title="Old Host Path",
+                        sort_key="old",
+                    )
+                ]
+            )
+            media_file = Path(tmp) / "media" / "buttons" / "button-1" / "001-first.mp3"
+            media_file.parent.mkdir(parents=True, exist_ok=True)
+            media_file.write_text("", encoding="utf-8")
+            library = MediaLibrary(Path(tmp) / "media", store)
+            controller = NightstandController(
+                store=store,
+                library=library,
+                player=MockPlayer(),
+                display=MemoryDisplay(),
+                menu_timeout_seconds=15,
+            )
+
+            controller.handle_event(InputEvent("source", "button-1"))
+            status = controller.player.status()
+
+            self.assertEqual(status.title, "001 First")
+            self.assertEqual(
+                store.get_source_queue("button-1")[0].file_path,
+                "buttons/button-1/001-first.mp3",
+            )
+
     def test_completion_advances_to_next_track_in_queue(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             controller = self.make_controller(tmp)

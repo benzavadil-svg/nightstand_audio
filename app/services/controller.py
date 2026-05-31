@@ -100,6 +100,8 @@ class NightstandController:
         self._last_logged_playback_state: PlaybackState | None = None
         self.startup_profiler = None
         self._startup_summary_logged = False
+        self.start_background_media_scan_after_first_render = False
+        self._background_media_scan_started = False
         self._restore_active_session()
         self._refresh_main_menu_labels()
         self._evaluate_night_mode(datetime.now(), initial=True)
@@ -283,6 +285,7 @@ class NightstandController:
         if reason == "startup" and self.startup_profiler and not self._startup_summary_logged:
             self.startup_profiler.total()
             self._startup_summary_logged = True
+            self._start_background_media_scan_if_needed()
         self._dirty = False
         self._dirty_reason = None
         self._last_clock_refresh_at = time.monotonic()
@@ -550,6 +553,7 @@ class NightstandController:
         self.start_source(source_id)
 
     def start_source(self, source_id: str) -> None:
+        self.library.ensure_source_ready(source_id)
         if self.library.is_source_complete(source_id):
             self._show_completed_source(source_id)
             return
@@ -567,7 +571,8 @@ class NightstandController:
             item.file_path,
             position,
         )
-        self.player.play(item, position)
+        if not self._play_item_through_adapter(item, position):
+            return
         if item.id:
             self.store.mark_started(item.id)
         self._save_session(source_id, item.id, index, position, is_playing=True)
@@ -679,7 +684,8 @@ class NightstandController:
         if status.position_seconds > 5:
             item = self.library.get_item_at_index(source_id, index)
             if item:
-                self.player.play(item, 0)
+                if not self._play_item_through_adapter(item, 0):
+                    return
                 if item.id:
                     self.store.update_playback_position(item.id, 0, completed=False)
                 self._save_session(source_id, item.id, index, 0, is_playing=True)
@@ -768,7 +774,8 @@ class NightstandController:
         self.current_source_id = source_id
         self.store.set_current_source_id(source_id)
         self._last_completed_item_id = None
-        self.player.play(item, position)
+        if not self._play_item_through_adapter(item, position):
+            return
         if item.id:
             self.store.mark_started(item.id)
         self._save_session(source_id, item.id, index, position, is_playing=True)
@@ -809,7 +816,8 @@ class NightstandController:
                 self._show_completed_source(source_id)
             return
         self.log_playback.info("Track complete; advancing source=%s next_index=%s", source_id, index + 1)
-        self.player.play(next_item, 0)
+        if not self._play_item_through_adapter(next_item, 0):
+            return
         if next_item.id:
             self.store.mark_started(next_item.id)
             self.store.update_playback_position(next_item.id, 0, completed=False)
@@ -920,10 +928,40 @@ class NightstandController:
         if not item:
             return
         self.current_source_id = source_id
-        self.player.play(item, session.last_position_seconds)
+        if not self._play_item_through_adapter(item, session.last_position_seconds):
+            return
         if not session.is_playing:
             self.player.pause()
         self._mark_dirty("startup")
+
+    def _play_item_through_adapter(self, item, position: float) -> bool:
+        if not self.library.is_playable_item(item):
+            self.log_playback.error(
+                "Playback rejected invalid media path source=%s item_id=%s file=%s exists=false",
+                item.source_id,
+                item.id,
+                item.file_path,
+            )
+            return False
+        resolved_item = self.library.resolve_item(item)
+        self.player.play(resolved_item, position)
+        return True
+
+    def _start_background_media_scan_if_needed(self) -> None:
+        if not self.start_background_media_scan_after_first_render:
+            return
+        if self._background_media_scan_started:
+            return
+        self._background_media_scan_started = True
+        if self.startup_profiler:
+            started = time.perf_counter()
+            self.library.start_background_scan()
+            self.startup_profiler.record(
+                "background_media_scan_start",
+                (time.perf_counter() - started) * 1000,
+            )
+            return
+        self.library.start_background_scan()
 
     def _status_with_queue_context(self) -> PlaybackStatus:
         status = self.player.status()

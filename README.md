@@ -333,7 +333,7 @@ DEBUG_EPD=true SHOW_RENDER_TIMINGS=true GPIOZERO_PIN_FACTORY=lgpio python -m scr
 DEBUG_INPUT=true python -m scripts.run_simulator
 ```
 
-Startup logs include a banner with display type, resolution, GPIO backend, audio mode, and whether live EPD output is enabled. They also include `[STARTUP]` timing spans for `config_load`, `audio_device_detection`, `media_library_scan`, `playback_service_init`, `display_driver_import`, `display_init`, `initial_render_png`, `first_physical_epd_update`, and final `total_ms`.
+Startup logs include a banner with display type, resolution, GPIO backend, audio mode, and whether live EPD output is enabled. They also include `[STARTUP]` timing spans for `config_load`, `audio_device_detection`, `media_cache_load`, `background_media_scan_start`, `playback_service_init`, `display_driver_import`, `display_init`, `initial_render_png`, `first_physical_epd_update`, and final `total_ms`.
 
 Troubleshooting:
 
@@ -381,6 +381,12 @@ Appliance playback uses `MPVPlayer`, not the simulator player. The production la
 
 ```bash
 python -m scripts.play_file_test "media/buttons/button-1/example.mp3"
+```
+
+Rebuild the portable media cache after changing files:
+
+```bash
+python -m scripts.rebuild_media_index
 ```
 
 ## Simulator Controls
@@ -532,6 +538,8 @@ Supported extensions:
 ```
 
 Button folders and sounds are stored as persistent queues. The app remembers the current source, current track, track index, position, play/pause state, and queue order in SQLite. Files default to filename/path order, so podcast dates or album folders can be arranged naturally on disk.
+
+The media index cache lives at `data/media_index.json` and stores file paths relative to `media/`, not absolute Mac or Pi paths. On appliance startup the app loads this cache quickly, renders Ambient/Night mode, then refreshes the full media scan in the background. Pressing a source button can also lazily scan just that button folder if its queue is empty or contains stale paths. Cache entries with absolute paths, `/Users/...` paths, or missing resolved files are invalidated.
 
 Playback persistence includes:
 

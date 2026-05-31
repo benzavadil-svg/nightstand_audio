@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 import re
+import time
+import threading
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -15,13 +18,25 @@ class MediaLibrary:
     def __init__(self, media_dir: Path, store: StateStore) -> None:
         self.media_dir = media_dir
         self.store = store
+        self.index_path = store.db_path.parent / "media_index.json"
         self._metadata_cache: dict[str, SourceMetadata] = {}
-        self.log = get_logger("STATE")
+        self.log = get_logger("MEDIA")
+        self._scan_lock = threading.Lock()
+        self._background_scan_started = False
 
-    def scan(self) -> int:
+    def scan(self, source_id: str | None = None, write_cache: bool = True) -> int:
+        with self._scan_lock:
+            return self._scan_locked(source_id=source_id, write_cache=write_cache)
+
+    def _scan_locked(self, source_id: str | None = None, write_cache: bool = True) -> int:
         items: list[MediaItem] = []
         self._metadata_cache = {}
-        for source in SOURCE_DEFINITIONS.values():
+        sources = (
+            [SOURCE_DEFINITIONS[source_id]]
+            if source_id and source_id in SOURCE_DEFINITIONS
+            else list(SOURCE_DEFINITIONS.values())
+        )
+        for source in sources:
             source_dir = self.media_dir / source.relative_dir
             source_dir.mkdir(parents=True, exist_ok=True)
             metadata = self.get_source_metadata(source.id)
@@ -37,13 +52,94 @@ class MediaLibrary:
                     items.append(
                         MediaItem(
                             source_id=source.id,
-                            file_path=str(path),
+                            file_path=self._relative_media_path(path),
                             title=display.title,
                             artist=display.metadata_label,
                             sort_key=self._sort_key(scan_dir, path, index),
                         )
                     )
-        return self.store.upsert_media_items(items)
+        count = self.store.upsert_media_items(items, prune_source_ids=[source.id for source in sources])
+        if write_cache and source_id is None:
+            self._write_index_cache(items)
+        return count
+
+    def prepare_startup_index(self) -> int:
+        self._purge_invalid_media_items()
+        started = time.perf_counter()
+        loaded = self.load_cached_index()
+        self.log.info(
+            "Loaded cached index duration_ms=%.1f items=%s",
+            (time.perf_counter() - started) * 1000,
+            loaded,
+        )
+        return loaded
+
+    def start_background_scan(self) -> None:
+        if self._background_scan_started:
+            return
+        self._background_scan_started = True
+        self.log.info("Background scan started")
+        thread = threading.Thread(target=self._background_scan, name="media-scan", daemon=True)
+        thread.start()
+
+    def _background_scan(self) -> None:
+        started = time.perf_counter()
+        try:
+            count = self.scan(write_cache=True)
+        except Exception as exc:
+            self.log.error("Background scan failed error=%s", exc)
+            return
+        self.log.info(
+            "Background scan complete duration_ms=%.1f items=%s",
+            (time.perf_counter() - started) * 1000,
+            count,
+        )
+
+    def scan_source(self, source_id: str) -> int:
+        started = time.perf_counter()
+        count = self.scan(source_id=source_id, write_cache=False)
+        self._refresh_cache_from_store()
+        self.log.info(
+            "Lazy scan source=%s duration_ms=%.1f items=%s",
+            source_id,
+            (time.perf_counter() - started) * 1000,
+            count,
+        )
+        return count
+
+    def ensure_source_ready(self, source_id: str) -> None:
+        queue = self.get_queue(source_id)
+        if not queue or any(not self.is_playable_item(item) for item in queue):
+            self.scan_source(source_id)
+
+    def load_cached_index(self) -> int:
+        if not self.index_path.exists():
+            return 0
+        try:
+            payload = json.loads(self.index_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            self.log.info("cache_invalidated reason=read_error error=%s", exc)
+            return 0
+        if payload.get("version") != 1:
+            self.log.info("cache_invalidated reason=version_mismatch")
+            return 0
+        items = []
+        for raw in payload.get("items", []):
+            try:
+                item = MediaItem(**raw)
+            except TypeError:
+                self.log.info("cache_invalidated reason=invalid_item")
+                return 0
+            reason = self._cache_path_invalid_reason(item.file_path)
+            if reason:
+                self.log.info("cache_invalidated reason=%s path=%s", reason, item.file_path)
+                return 0
+            items.append(item)
+        return self.store.upsert_media_items(items, prune_source_ids=SOURCE_DEFINITIONS.keys())
+
+    def rebuild_index(self) -> int:
+        self._purge_invalid_media_items()
+        return self.scan(write_cache=True)
 
     def ensure_demo_library(self) -> int:
         demo_specs = {
@@ -136,6 +232,26 @@ class MediaLibrary:
     def reset_source_progress(self, source_id: str) -> None:
         self.store.reset_source_progress(source_id)
 
+    def resolve_item(self, item: MediaItem) -> MediaItem:
+        return replace(item, file_path=str(self.resolve_media_path(item.file_path)))
+
+    def resolve_media_path(self, file_path: str) -> Path:
+        if file_path.startswith("demo://"):
+            return Path(file_path)
+        path = Path(file_path).expanduser()
+        if path.is_absolute():
+            resolved = path
+        else:
+            resolved = self.media_dir / path
+        exists = resolved.exists()
+        self.log.info("resolved_path=%s exists=%s", resolved, str(exists).lower())
+        return resolved
+
+    def is_playable_item(self, item: MediaItem) -> bool:
+        if item.file_path.startswith("demo://"):
+            return True
+        return self.resolve_media_path(item.file_path).exists()
+
     def completion_threshold(self, source_id: str | None) -> float:
         if not source_id:
             return 0.95
@@ -152,6 +268,67 @@ class MediaLibrary:
             return {}
         return data if isinstance(data, dict) else {}
 
+    def _write_index_cache(self, items: list[MediaItem]) -> None:
+        payload = {
+            "version": 1,
+            "items": [
+                self._item_to_cache_payload(item)
+                for item in items
+                if not item.file_path.startswith("demo://")
+                and not self._cache_path_invalid_reason(item.file_path)
+            ],
+        }
+        self.index_path.parent.mkdir(parents=True, exist_ok=True)
+        self.index_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def _item_to_cache_payload(self, item: MediaItem) -> dict[str, Any]:
+        return {
+            "source_id": item.source_id,
+            "file_path": item.file_path,
+            "title": item.title,
+            "artist": item.artist,
+            "duration_seconds": item.duration_seconds,
+            "sort_key": item.sort_key,
+            "last_position_seconds": item.last_position_seconds,
+            "completed": item.completed,
+            "play_count": item.play_count,
+        }
+
+    def _refresh_cache_from_store(self) -> None:
+        items = [
+            item
+            for item in self.store.list_media()
+            if not item.file_path.startswith("demo://")
+            and not self._cache_path_invalid_reason(item.file_path)
+        ]
+        self._write_index_cache(items)
+
+    def _cache_path_invalid_reason(self, file_path: str) -> str | None:
+        if file_path.startswith("demo://"):
+            return None
+        path = Path(file_path).expanduser()
+        if path.is_absolute():
+            if str(path).startswith("/Users/"):
+                return "host_path_mismatch"
+            return "absolute_path"
+        if not (self.media_dir / path).exists():
+            return "missing_file"
+        return None
+
+    def _purge_invalid_media_items(self) -> int:
+        invalid_paths = [
+            item.file_path
+            for item in self.store.list_media()
+            if self._cache_path_invalid_reason(item.file_path)
+        ]
+        deleted = self.store.delete_media_items_by_paths(invalid_paths)
+        if deleted:
+            self.log.info(
+                "cache_invalidated reason=host_path_mismatch deleted_items=%s",
+                deleted,
+            )
+        return deleted
+
     def _ordered_audio_files(self, directory: Path, ordering: str) -> list[Path]:
         files = [
             path
@@ -160,6 +337,12 @@ class MediaLibrary:
         ]
         reverse = ordering == "filename_desc"
         return sorted(files, key=lambda path: str(path.relative_to(directory)).lower(), reverse=reverse)
+
+    def _relative_media_path(self, path: Path) -> str:
+        try:
+            return str(path.relative_to(self.media_dir))
+        except ValueError:
+            return str(path)
 
     def _has_audio_files(self, directory: Path) -> bool:
         return bool(self._ordered_audio_files(directory, "filename_asc"))

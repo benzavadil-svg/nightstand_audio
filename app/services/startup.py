@@ -30,5 +30,6 @@ class StartupProfiler:
 
     def total(self) -> float:
         duration_ms = (time.perf_counter() - self.started_at) * 1000
+        self.log.info("step=total_startup duration_ms=%.1f", duration_ms)
         self.log.info("total_ms=%.1f", duration_ms)
         return duration_ms

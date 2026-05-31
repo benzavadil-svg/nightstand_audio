@@ -125,6 +125,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
         self._partial_api: PartialApi | None = None
         self._last_full_buffer: Any = None
         self._last_display_buffer: Any = None
+        self._previous_update_was_one_shot = False
         self._full_durations_ms: list[float] = []
         self._partial_durations_ms: list[float] = []
         self.log = get_logger("EPD")
@@ -234,10 +235,13 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 )
                 epd.display(epd.getbuffer(prepared))
             epd.sleep()
-            self._epd = epd
-            self._initialized = True
+            self._epd = None
+            self._initialized = False
             self._sleeping = True
             self._display_mode = MODE_FULL
+            self._partial_api = None
+            self._partial_supported = None
+            self._previous_update_was_one_shot = True
             self._render_count += 1
             self._full_update_count += 1
             duration_ms = (time.perf_counter() - started) * 1000
@@ -285,6 +289,17 @@ class WaveshareDisplay(ImageDisplayAdapter):
             self.log.info(
                 "Partial update disabled; using true full display mode selected_policy=partial physical_mode=full_fallback reason=%s",
                 reason,
+            )
+            self.full_update(image, reason=reason, clean_refresh=False)
+            return
+        blocked_reason = self._partial_blocked_reason()
+        if blocked_reason:
+            self.log.info(
+                "Partial update blocked selected_policy=partial physical_mode=full_fallback reason=%s epd_awake=%s previous_update_was_one_shot=%s partial_blocked_reason=%s",
+                reason,
+                str(not self._sleeping).lower(),
+                str(self._previous_update_was_one_shot).lower(),
+                blocked_reason,
             )
             self.full_update(image, reason=reason, clean_refresh=False)
             return
@@ -350,7 +365,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
             if update_mode == "full":
                 self.log.info("True full display write start reason=%s", reason)
             self.log.info(
-                "%s display write start reason=%s update=%s epd_width=%s epd_height=%s clean_refresh=%s selected_policy=%s physical_mode=%s",
+                "%s display write start reason=%s update=%s epd_width=%s epd_height=%s clean_refresh=%s selected_policy=%s physical_mode=%s epd_awake=%s previous_update_was_one_shot=%s",
                 _update_label(update_mode),
                 reason,
                 self._render_count,
@@ -359,6 +374,8 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 clear_before_display,
                 update_mode,
                 update_mode,
+                str(not self._sleeping).lower(),
+                str(self._previous_update_was_one_shot).lower(),
             )
             buffer = self._epd.getbuffer(prepared)
             if update_mode == "partial":
@@ -386,6 +403,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 self._last_full_buffer = buffer
             duration_ms = (time.perf_counter() - started) * 1000
             self._last_display_buffer = buffer
+            self._previous_update_was_one_shot = False
             if update_mode == "full":
                 self.log.info(
                     "True full display write complete reason=%s duration_ms=%.1f",
@@ -606,6 +624,13 @@ class WaveshareDisplay(ImageDisplayAdapter):
             self._partial_api = self._discover_partial_api()
             self._partial_supported = self._partial_api.supported
         return self._partial_supported
+
+    def _partial_blocked_reason(self) -> str | None:
+        if self.display_model == "waveshare_4in2_v2" and self._previous_update_was_one_shot:
+            return "driver_sleep_or_invalid_handle"
+        if self._sleeping or not self._initialized or self._epd is None:
+            return "driver_sleep_or_invalid_handle"
+        return None
 
     def _discover_partial_api(self) -> PartialApi:
         method_names = available_epd_methods(self._epd)

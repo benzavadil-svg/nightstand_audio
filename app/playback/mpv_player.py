@@ -26,6 +26,7 @@ class MPVPlayer(PlaybackAdapter):
         self._ipc_socket_path: Path | None = None
         self._started_monotonic: float | None = None
         self._base_position = 0.0
+        self._stderr_logged = False
         self.log = get_logger("PLAYBACK")
         self.log.info("backend=mpv")
         self.log.info("device=%s", self.audio_device)
@@ -33,13 +34,19 @@ class MPVPlayer(PlaybackAdapter):
     def play(self, item: MediaItem, start_position_seconds: float = 0) -> None:
         self.stop()
         resolved_path = str(Path(item.file_path).expanduser().resolve(strict=False))
+        exists = Path(resolved_path).exists()
+        self.log.info("file=%s", resolved_path)
+        self.log.info("exists=%s", str(exists).lower())
+        if not exists:
+            self._status = PlaybackStatus(volume=self._status.volume)
+            self.log.error("Playback rejected missing file=%s exists=false", resolved_path)
+            return
         self._base_position = max(0, float(start_position_seconds))
         self._started_monotonic = time.monotonic()
         self._ipc_socket_path = _ipc_socket_path()
         command = self._build_command(resolved_path, self._base_position, self._ipc_socket_path)
         self.log.info("backend=mpv")
         self.log.info("device=%s", self.audio_device)
-        self.log.info("file=%s", resolved_path)
         self.log.info("command=%s", shlex.join(command))
         self._status = PlaybackStatus(
             state=PlaybackState.PLAYING,
@@ -55,8 +62,10 @@ class MPVPlayer(PlaybackAdapter):
             self._process = subprocess.Popen(
                 command,
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                text=True,
             )
+            self._stderr_logged = False
         except FileNotFoundError:
             self._process = None
             self._started_monotonic = None
@@ -69,6 +78,7 @@ class MPVPlayer(PlaybackAdapter):
             self._status.state = PlaybackState.STOPPED
             self.log.error("mpv launch failed file=%s error=%s", resolved_path, exc)
             return
+        self.log.info("pid=%s", self._process.pid)
         self.log.info(
             "Track start source=%s item_id=%s title=%s position=%.1fs",
             item.source_id,
@@ -131,6 +141,7 @@ class MPVPlayer(PlaybackAdapter):
         self._base_position = 0
         self._started_monotonic = None
         self._process = None
+        self._stderr_logged = False
 
     def toggle_play_pause(self) -> None:
         if self._status.state == PlaybackState.PLAYING:
@@ -152,6 +163,7 @@ class MPVPlayer(PlaybackAdapter):
 
     def tick(self) -> None:
         if self._process and self._process.poll() is not None:
+            self._log_unexpected_exit()
             self._status.state = PlaybackState.STOPPED
             self._started_monotonic = None
             self._cleanup_ipc_socket()
@@ -166,6 +178,24 @@ class MPVPlayer(PlaybackAdapter):
             self._started_monotonic = None
         else:
             self._status.position_seconds = position
+
+    def _log_unexpected_exit(self) -> None:
+        if not self._process or self._stderr_logged:
+            return
+        return_code = self._process.returncode
+        stderr_text = ""
+        if self._process.stderr:
+            try:
+                stderr_text = self._process.stderr.read() or ""
+            except OSError:
+                stderr_text = ""
+        self._stderr_logged = True
+        if return_code not in (0, None):
+            self.log.error(
+                "mpv exited unexpectedly returncode=%s stderr=%s",
+                return_code,
+                stderr_text.strip(),
+            )
 
     def _build_command(
         self,

@@ -40,10 +40,14 @@ def build_simulator_controller() -> NightstandController:
         live_epd=settings.use_real_epd,
     )
     store = StateStore(settings.db_path)
-    with profiler.span("media_library_scan"):
-        library = MediaLibrary(settings.media_dir, store)
-        library.scan()
-        library.ensure_demo_library()
+    library = MediaLibrary(settings.media_dir, store)
+    if settings.runtime_mode == "appliance":
+        with profiler.span("media_cache_load"):
+            library.prepare_startup_index()
+    else:
+        with profiler.span("media_library_scan"):
+            library.scan()
+            library.ensure_demo_library()
     renderer = EInkRenderer(settings.display_width, settings.display_height)
     physical_display = None
     if settings.use_real_epd or settings.display_backend == "waveshare":
@@ -115,6 +119,8 @@ def build_simulator_controller() -> NightstandController:
             ambient_show_playback_glyph=settings.ambient_show_playback_glyph,
         )
     controller.startup_profiler = profiler
+    if settings.runtime_mode == "appliance":
+        controller.start_background_media_scan_after_first_render = True
     return controller
 
 
