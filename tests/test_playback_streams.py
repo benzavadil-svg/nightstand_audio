@@ -44,6 +44,21 @@ class SpyPlayer(MockPlayer):
         return super().status()
 
 
+class CountingMediaLibrary(MediaLibrary):
+    def __init__(self, media_dir: Path, store: StateStore) -> None:
+        super().__init__(media_dir, store)
+        self.resolved_paths: list[str] = []
+        self.scan_source_calls = 0
+
+    def resolve_media_path(self, file_path: str) -> Path:
+        self.resolved_paths.append(file_path)
+        return super().resolve_media_path(file_path)
+
+    def scan_source(self, source_id: str) -> int:
+        self.scan_source_calls += 1
+        return super().scan_source(source_id)
+
+
 class PlaybackStreamsTest(unittest.TestCase):
     def make_controller(self, tmp: str) -> NightstandController:
         store = StateStore(Path(tmp) / "test.sqlite")
@@ -220,6 +235,7 @@ class PlaybackStreamsTest(unittest.TestCase):
                 player=MockPlayer(),
                 display=MemoryDisplay(),
                 menu_timeout_seconds=15,
+                validate_playlist_on_play=True,
             )
 
             controller.handle_event(InputEvent("source", "button-1"))
@@ -230,6 +246,43 @@ class PlaybackStreamsTest(unittest.TestCase):
                 store.get_source_queue("button-1")[0].file_path,
                 "buttons/button-1/001-first.mp3",
             )
+
+    def test_source_button_resolves_only_current_track_before_launch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            media_dir = root / "media"
+            button_dir = media_dir / "buttons" / "button-1"
+            button_dir.mkdir(parents=True)
+            current_file = button_dir / "001-first.mp3"
+            current_file.write_text("", encoding="utf-8")
+            store = StateStore(root / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path=f"buttons/button-1/{index:03d}-track.mp3"
+                        if index > 1
+                        else "buttons/button-1/001-first.mp3",
+                        title=f"Track {index:03d}",
+                        sort_key=f"{index:03d}",
+                    )
+                    for index in range(1, 366)
+                ]
+            )
+            library = CountingMediaLibrary(media_dir, store)
+            controller = NightstandController(
+                store=store,
+                library=library,
+                player=MockPlayer(),
+                display=MemoryDisplay(),
+                validate_playlist_on_play=False,
+            )
+
+            controller.handle_event(InputEvent("source", "button-1"))
+
+            self.assertEqual(library.scan_source_calls, 0)
+            self.assertEqual(library.resolved_paths, ["buttons/button-1/001-first.mp3"])
+            self.assertEqual(controller.player.status().title, "Track 001")
 
     def test_completion_advances_to_next_track_in_queue(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

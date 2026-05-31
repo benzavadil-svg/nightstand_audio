@@ -112,6 +112,10 @@ class MediaLibrary:
         if not queue or any(self._stored_path_invalid_without_stat(item.file_path) for item in queue):
             self.scan_source(source_id)
 
+    def ensure_source_index_available(self, source_id: str) -> None:
+        if not self.get_queue(source_id):
+            self.scan_source(source_id)
+
     def load_cached_index(self) -> int:
         if not self.index_path.exists():
             return 0
@@ -130,7 +134,7 @@ class MediaLibrary:
             except TypeError:
                 self.log.info("cache_invalidated reason=invalid_item")
                 return 0
-            reason = self._cache_path_invalid_reason(item.file_path)
+            reason = self._cache_path_invalid_reason(item.file_path, check_exists=False)
             if reason:
                 self.log.info("cache_invalidated reason=%s path=%s", reason, item.file_path)
                 return 0
@@ -283,7 +287,7 @@ class MediaLibrary:
                 self._item_to_cache_payload(item)
                 for item in items
                 if not item.file_path.startswith("demo://")
-                and not self._cache_path_invalid_reason(item.file_path)
+                and not self._cache_path_invalid_reason(item.file_path, check_exists=False)
             ],
         }
         self.index_path.parent.mkdir(parents=True, exist_ok=True)
@@ -307,11 +311,11 @@ class MediaLibrary:
             item
             for item in self.store.list_media()
             if not item.file_path.startswith("demo://")
-            and not self._cache_path_invalid_reason(item.file_path)
+            and not self._cache_path_invalid_reason(item.file_path, check_exists=False)
         ]
         self._write_index_cache(items)
 
-    def _cache_path_invalid_reason(self, file_path: str) -> str | None:
+    def _cache_path_invalid_reason(self, file_path: str, check_exists: bool = True) -> str | None:
         if file_path.startswith("demo://"):
             return None
         path = Path(file_path).expanduser()
@@ -319,7 +323,7 @@ class MediaLibrary:
             if str(path).startswith("/Users/"):
                 return "host_path_mismatch"
             return "absolute_path"
-        if not (self.media_dir / path).exists():
+        if check_exists and not (self.media_dir / path).exists():
             return "missing_file"
         return None
 
@@ -327,7 +331,7 @@ class MediaLibrary:
         invalid_paths = [
             item.file_path
             for item in self.store.list_media()
-            if self._cache_path_invalid_reason(item.file_path)
+            if self._cache_path_invalid_reason(item.file_path, check_exists=False)
         ]
         deleted = self.store.delete_media_items_by_paths(invalid_paths)
         if deleted:

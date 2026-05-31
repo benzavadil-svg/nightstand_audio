@@ -120,6 +120,7 @@ def build_simulator_controller() -> NightstandController:
             restore_playback_on_startup=settings.restore_playback_on_startup,
             resume_on_startup=settings.resume_on_startup,
             playback_restore_launch=settings.playback_restore_launch,
+            validate_playlist_on_play=settings.validate_playlist_on_play,
         )
     controller.startup_profiler = profiler
     if settings.runtime_mode == "appliance":

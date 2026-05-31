@@ -51,6 +51,7 @@ class NightstandController:
         restore_playback_on_startup: bool = True,
         resume_on_startup: bool = False,
         playback_restore_launch: bool = False,
+        validate_playlist_on_play: bool = False,
     ) -> None:
         self.store = store
         self.library = library
@@ -83,6 +84,7 @@ class NightstandController:
         self.restore_playback_on_startup = restore_playback_on_startup
         self.resume_on_startup = resume_on_startup
         self.playback_restore_launch = playback_restore_launch
+        self.validate_playlist_on_play = validate_playlist_on_play
         self._startup_initializing = True
         self.is_night_mode_active = False
         self.is_sleep_screen_locked = False
@@ -563,7 +565,10 @@ class NightstandController:
         self.start_source(source_id)
 
     def start_source(self, source_id: str) -> None:
-        self.library.ensure_source_ready(source_id)
+        if self.validate_playlist_on_play:
+            self.library.ensure_source_ready(source_id)
+        else:
+            self.library.ensure_source_index_available(source_id)
         if self.library.is_source_complete(source_id):
             self._show_completed_source(source_id)
             return
