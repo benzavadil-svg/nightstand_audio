@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from contextlib import nullcontext
 from datetime import datetime, time as clock_time
+from pathlib import Path
 
 from app.display.base import DisplayAdapter
 from app.input.base import InputAdapter
@@ -98,6 +99,7 @@ class NightstandController:
         self._source_button_click_window_seconds = 1.0
         self._last_logged_mode = self.nav.current_mode
         self._last_logged_playback_state: PlaybackState | None = None
+        self._restored_status: PlaybackStatus | None = None
         self.startup_profiler = None
         self._startup_summary_logged = False
         self.start_background_media_scan_after_first_render = False
@@ -928,22 +930,45 @@ class NightstandController:
         if not item:
             return
         self.current_source_id = source_id
-        if not self._play_item_through_adapter(item, session.last_position_seconds):
-            return
-        if not session.is_playing:
-            self.player.pause()
+        self._restored_status = PlaybackStatus(
+            state=PlaybackState.PAUSED if session.is_playing else PlaybackState.STOPPED,
+            source_id=source_id,
+            item_id=item.id,
+            title=item.title,
+            subtitle=item.artist or "",
+            position_seconds=session.last_position_seconds,
+            duration_seconds=item.duration_seconds,
+            volume=self.player.status().volume,
+            track_index=index or session.current_track_index,
+            queue_length=len(self.library.get_queue(source_id)),
+        )
+        self.log_playback.info(
+            "restored_state source=%s title=%s position=%.1fs launch=false",
+            source_id,
+            item.title,
+            session.last_position_seconds,
+        )
         self._mark_dirty("startup")
 
     def _play_item_through_adapter(self, item, position: float) -> bool:
-        if not self.library.is_playable_item(item):
+        resolved_item = self.library.resolve_item(item)
+        exists = resolved_item.file_path.startswith("demo://") or Path(resolved_item.file_path).exists()
+        self.log_playback.info(
+            "launching_current_track source=%s index=%s file=%s exists=%s",
+            item.source_id,
+            self.library.index_for_item(item.source_id, item.id),
+            resolved_item.file_path,
+            str(exists).lower(),
+        )
+        if not exists:
             self.log_playback.error(
                 "Playback rejected invalid media path source=%s item_id=%s file=%s exists=false",
                 item.source_id,
                 item.id,
-                item.file_path,
+                resolved_item.file_path,
             )
             return False
-        resolved_item = self.library.resolve_item(item)
+        self._restored_status = None
         self.player.play(resolved_item, position)
         return True
 
@@ -965,6 +990,8 @@ class NightstandController:
 
     def _status_with_queue_context(self) -> PlaybackStatus:
         status = self.player.status()
+        if not status.source_id and self._restored_status is not None:
+            status = self._restored_status
         if not status.source_id:
             return status
         status.track_index = self._current_index(status.source_id, status.item_id)

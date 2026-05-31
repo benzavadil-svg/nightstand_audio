@@ -109,7 +109,7 @@ class MediaLibrary:
 
     def ensure_source_ready(self, source_id: str) -> None:
         queue = self.get_queue(source_id)
-        if not queue or any(not self.is_playable_item(item) for item in queue):
+        if not queue or any(self._stored_path_invalid_without_stat(item.file_path) for item in queue):
             self.scan_source(source_id)
 
     def load_cached_index(self) -> int:
@@ -233,6 +233,8 @@ class MediaLibrary:
         self.store.reset_source_progress(source_id)
 
     def resolve_item(self, item: MediaItem) -> MediaItem:
+        if item.file_path.startswith("demo://"):
+            return item
         return replace(item, file_path=str(self.resolve_media_path(item.file_path)))
 
     def resolve_media_path(self, file_path: str) -> Path:
@@ -251,6 +253,12 @@ class MediaLibrary:
         if item.file_path.startswith("demo://"):
             return True
         return self.resolve_media_path(item.file_path).exists()
+
+    def _stored_path_invalid_without_stat(self, file_path: str) -> bool:
+        if file_path.startswith("demo://"):
+            return False
+        path = Path(file_path).expanduser()
+        return path.is_absolute()
 
     def completion_threshold(self, source_id: str | None) -> float:
         if not source_id:
