@@ -483,6 +483,7 @@ RESTORE_PLAYBACK_ON_STARTUP=true
 RESUME_ON_STARTUP=false
 PLAYBACK_RESTORE_LAUNCH=false
 VALIDATE_PLAYLIST_ON_PLAY=false
+BACKGROUND_MEDIA_SCAN=true
 ```
 
 After startup and before pressing a source/play control, this should not show a Nightstand MPV process:
@@ -492,6 +493,8 @@ ps aux | grep mpv
 ```
 
 Keep `VALIDATE_PLAYLIST_ON_PLAY=false` on the Pi. Source button handling should use the cached queue and resolve only the current track before MPV launch; full playlist checks belong in `python -m scripts.rebuild_media_index` or the background scan, not in the tactile button-press path.
+
+For clean BossDAC playback isolation, set `BACKGROUND_MEDIA_SCAN=false` while testing. When background scanning is enabled, Nightstand skips starting it during active playback and cancels a running scan before launching MPV.
 
 Test a single file through the same adapter:
 

@@ -14,6 +14,10 @@ from app.services.logger import get_logger
 from app.state_store import StateStore
 
 
+class _ScanCancelled(Exception):
+    pass
+
+
 class MediaLibrary:
     def __init__(self, media_dir: Path, store: StateStore) -> None:
         self.media_dir = media_dir
@@ -23,12 +27,19 @@ class MediaLibrary:
         self.log = get_logger("MEDIA")
         self._scan_lock = threading.Lock()
         self._background_scan_started = False
+        self._background_scan_cancel = threading.Event()
+        self._background_scan_thread: threading.Thread | None = None
 
     def scan(self, source_id: str | None = None, write_cache: bool = True) -> int:
         with self._scan_lock:
             return self._scan_locked(source_id=source_id, write_cache=write_cache)
 
-    def _scan_locked(self, source_id: str | None = None, write_cache: bool = True) -> int:
+    def _scan_locked(
+        self,
+        source_id: str | None = None,
+        write_cache: bool = True,
+        cancel_event: threading.Event | None = None,
+    ) -> int:
         items: list[MediaItem] = []
         self._metadata_cache = {}
         sources = (
@@ -37,6 +48,7 @@ class MediaLibrary:
             else list(SOURCE_DEFINITIONS.values())
         )
         for source in sources:
+            self._raise_if_cancelled(cancel_event)
             source_dir = self.media_dir / source.relative_dir
             source_dir.mkdir(parents=True, exist_ok=True)
             metadata = self.get_source_metadata(source.id)
@@ -48,6 +60,7 @@ class MediaLibrary:
 
             for scan_dir in scan_dirs:
                 for index, path in enumerate(self._ordered_audio_files(scan_dir, metadata.ordering)):
+                    self._raise_if_cancelled(cancel_event)
                     display = self._display_metadata_for_file(path, metadata.display_name)
                     items.append(
                         MediaItem(
@@ -77,23 +90,51 @@ class MediaLibrary:
     def start_background_scan(self) -> None:
         if self._background_scan_started:
             return
+        self._background_scan_cancel.clear()
         self._background_scan_started = True
         self.log.info("Background scan started")
-        thread = threading.Thread(target=self._background_scan, name="media-scan", daemon=True)
-        thread.start()
+        self._background_scan_thread = threading.Thread(
+            target=self._background_scan,
+            name="media-scan",
+            daemon=True,
+        )
+        self._background_scan_thread.start()
+
+    def cancel_background_scan(self, reason: str) -> None:
+        thread = self._background_scan_thread
+        if not thread or not thread.is_alive():
+            return
+        self._background_scan_cancel.set()
+        self.log.info("Background scan skipped reason=%s", reason)
 
     def _background_scan(self) -> None:
         started = time.perf_counter()
         try:
-            count = self.scan(write_cache=True)
+            with self._scan_lock:
+                count = self._scan_locked(
+                    write_cache=True,
+                    cancel_event=self._background_scan_cancel,
+                )
+        except _ScanCancelled:
+            self.log.info(
+                "Background scan cancelled duration_ms=%.1f",
+                (time.perf_counter() - started) * 1000,
+            )
+            self._background_scan_started = False
+            return
         except Exception as exc:
             self.log.error("Background scan failed error=%s", exc)
+            self._background_scan_started = False
             return
         self.log.info(
             "Background scan complete duration_ms=%.1f items=%s",
             (time.perf_counter() - started) * 1000,
             count,
         )
+
+    def _raise_if_cancelled(self, cancel_event: threading.Event | None) -> None:
+        if cancel_event and cancel_event.is_set():
+            raise _ScanCancelled()
 
     def scan_source(self, source_id: str) -> int:
         started = time.perf_counter()

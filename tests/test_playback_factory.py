@@ -85,6 +85,7 @@ def _settings(runtime_mode: str, playback_backend: str) -> Settings:
         resume_on_startup=False,
         playback_restore_launch=False,
         validate_playlist_on_play=False,
+        background_media_scan=True,
     )
 
 

@@ -49,6 +49,8 @@ class CountingMediaLibrary(MediaLibrary):
         super().__init__(media_dir, store)
         self.resolved_paths: list[str] = []
         self.scan_source_calls = 0
+        self.start_background_scan_calls = 0
+        self.cancel_background_scan_reasons: list[str] = []
 
     def resolve_media_path(self, file_path: str) -> Path:
         self.resolved_paths.append(file_path)
@@ -57,6 +59,12 @@ class CountingMediaLibrary(MediaLibrary):
     def scan_source(self, source_id: str) -> int:
         self.scan_source_calls += 1
         return super().scan_source(source_id)
+
+    def start_background_scan(self) -> None:
+        self.start_background_scan_calls += 1
+
+    def cancel_background_scan(self, reason: str) -> None:
+        self.cancel_background_scan_reasons.append(reason)
 
 
 class PlaybackStreamsTest(unittest.TestCase):
@@ -282,7 +290,32 @@ class PlaybackStreamsTest(unittest.TestCase):
 
             self.assertEqual(library.scan_source_calls, 0)
             self.assertEqual(library.resolved_paths, ["buttons/button-1/001-first.mp3"])
+            self.assertEqual(library.cancel_background_scan_reasons, ["playback_active"])
             self.assertEqual(controller.player.status().title, "Track 001")
+
+    def test_background_scan_is_skipped_while_playback_active(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            library = CountingMediaLibrary(Path(tmp) / "media", store)
+            player = MockPlayer()
+            player.play(
+                MediaItem(
+                    source_id="button-1",
+                    file_path="demo://bible/001",
+                    title="Day 001",
+                )
+            )
+            controller = NightstandController(
+                store=store,
+                library=library,
+                player=player,
+                display=MemoryDisplay(),
+            )
+            controller.start_background_media_scan_after_first_render = True
+
+            controller._start_background_media_scan_if_needed()
+
+            self.assertEqual(library.start_background_scan_calls, 0)
 
     def test_completion_advances_to_next_track_in_queue(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

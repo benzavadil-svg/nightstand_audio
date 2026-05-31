@@ -982,6 +982,7 @@ class NightstandController:
                 item.id,
             )
             return False
+        self.library.cancel_background_scan("playback_active")
         resolved_item = self.library.resolve_item(item)
         exists = resolved_item.file_path.startswith("demo://") or Path(resolved_item.file_path).exists()
         self.log_playback.info(
@@ -1007,6 +1008,9 @@ class NightstandController:
         if not self.start_background_media_scan_after_first_render:
             return
         if self._background_media_scan_started:
+            return
+        if self.player.status().is_audio_active:
+            self.library.log.info("Background scan skipped reason=playback_active")
             return
         self._background_media_scan_started = True
         if self.startup_profiler:

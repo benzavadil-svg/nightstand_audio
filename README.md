@@ -390,11 +390,14 @@ RESTORE_PLAYBACK_ON_STARTUP=true
 RESUME_ON_STARTUP=false
 PLAYBACK_RESTORE_LAUNCH=false
 VALIDATE_PLAYLIST_ON_PLAY=false
+BACKGROUND_MEDIA_SCAN=true
 ```
 
 The expected startup log is `[PLAYBACK] restored_state ... launch=false`. After startup, `ps aux | grep mpv` should show no Nightstand-launched player process.
 
 Source button presses use the cached playlist index and resolve only the selected/current track before launching MPV. Leave `VALIDATE_PLAYLIST_ON_PLAY=false` for appliance use so Button 1/2/3 do not synchronously stat or resolve every file in a long playlist. Full playlist validation belongs in `python -m scripts.rebuild_media_index` or the background media scan after playback is already stable.
+
+For isolated audio debugging on the Pi, set `BACKGROUND_MEDIA_SCAN=false`. That keeps the startup background scanner from running before playback tests. Even when enabled, the app skips starting a background scan while audio is active and asks any running background scan to cancel before MPV launch.
 
 Rebuild the portable media cache after changing files:
 

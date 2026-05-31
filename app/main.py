@@ -123,8 +123,10 @@ def build_simulator_controller() -> NightstandController:
             validate_playlist_on_play=settings.validate_playlist_on_play,
         )
     controller.startup_profiler = profiler
-    if settings.runtime_mode == "appliance":
+    if settings.runtime_mode == "appliance" and settings.background_media_scan:
         controller.start_background_media_scan_after_first_render = True
+    elif settings.runtime_mode == "appliance":
+        get_logger("MEDIA").info("Background scan disabled")
     return controller
 
 

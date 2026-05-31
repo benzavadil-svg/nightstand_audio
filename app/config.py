@@ -58,6 +58,7 @@ class Settings:
     resume_on_startup: bool
     playback_restore_launch: bool
     validate_playlist_on_play: bool
+    background_media_scan: bool
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -140,6 +141,7 @@ class Settings:
             resume_on_startup=_env_bool("RESUME_ON_STARTUP", False),
             playback_restore_launch=_env_bool("PLAYBACK_RESTORE_LAUNCH", False),
             validate_playlist_on_play=_env_bool("VALIDATE_PLAYLIST_ON_PLAY", False),
+            background_media_scan=_env_bool("BACKGROUND_MEDIA_SCAN", True),
         )
 
     def ensure_dirs(self) -> None:
