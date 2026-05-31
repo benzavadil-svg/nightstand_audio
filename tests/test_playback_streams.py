@@ -7,7 +7,15 @@ from pathlib import Path
 
 from app.display.base import DisplayAdapter
 from app.media_library import MediaLibrary
-from app.models import InputEvent, MediaItem, PlaybackState, PlaybackStatus, RenderState, UIMode
+from app.models import (
+    InputEvent,
+    MediaItem,
+    PlaybackSession,
+    PlaybackState,
+    PlaybackStatus,
+    RenderState,
+    UIMode,
+)
 from app.playback.mock_player import MockPlayer
 from app.services.controller import NightstandController
 from app.state_store import StateStore
@@ -19,6 +27,21 @@ class MemoryDisplay(DisplayAdapter):
 
     def render(self, state: RenderState, reason: str | None = None) -> None:
         self.last_state = state
+
+
+class SpyPlayer(MockPlayer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.play_calls = 0
+        self.status_calls = 0
+
+    def play(self, item: MediaItem, start_position_seconds: float = 0) -> None:
+        self.play_calls += 1
+        super().play(item, start_position_seconds)
+
+    def status(self) -> PlaybackStatus:
+        self.status_calls += 1
+        return super().status()
 
 
 class PlaybackStreamsTest(unittest.TestCase):
@@ -85,6 +108,94 @@ class PlaybackStreamsTest(unittest.TestCase):
 
             self.assertEqual(status.item_id, first.item_id)
             self.assertGreaterEqual(status.position_seconds, 0.3)
+
+    def test_startup_restore_never_touches_or_launches_player(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                        duration_seconds=60,
+                    )
+                ]
+            )
+            item = store.list_media("button-1")[0]
+            store.set_current_source_id("button-1")
+            store.save_playback_session(
+                PlaybackSession(
+                    source_id="button-1",
+                    current_track_id=item.id,
+                    current_track_index=0,
+                    last_position_seconds=12.5,
+                    is_playing=True,
+                    queue_order=[item.id],
+                )
+            )
+            library = MediaLibrary(Path(tmp) / "media", store)
+            player = SpyPlayer()
+
+            controller = NightstandController(
+                store=store,
+                library=library,
+                player=player,
+                display=MemoryDisplay(),
+                resume_on_startup=True,
+                playback_restore_launch=True,
+            )
+
+            self.assertEqual(player.play_calls, 0)
+            self.assertEqual(player.status_calls, 0)
+            status = controller.build_render_state().playback
+            self.assertEqual(player.status_calls, 1)
+            self.assertEqual(status.source_id, "button-1")
+            self.assertEqual(status.title, "Day 001")
+            self.assertEqual(status.position_seconds, 12.5)
+            self.assertEqual(status.state, PlaybackState.PAUSED)
+
+    def test_startup_restore_can_be_disabled_without_player_touch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                    )
+                ]
+            )
+            item = store.list_media("button-1")[0]
+            store.set_current_source_id("button-1")
+            store.save_playback_session(
+                PlaybackSession(
+                    source_id="button-1",
+                    current_track_id=item.id,
+                    current_track_index=0,
+                    last_position_seconds=9,
+                    is_playing=True,
+                    queue_order=[item.id],
+                )
+            )
+            player = SpyPlayer()
+
+            controller = NightstandController(
+                store=store,
+                library=MediaLibrary(Path(tmp) / "media", store),
+                player=player,
+                display=MemoryDisplay(),
+                restore_playback_on_startup=False,
+            )
+
+            self.assertEqual(player.play_calls, 0)
+            self.assertEqual(player.status_calls, 0)
+            status = controller.build_render_state().playback
+            self.assertEqual(player.status_calls, 1)
+            self.assertIsNone(status.source_id)
 
     def test_source_button_lazy_scans_when_queue_contains_stale_host_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

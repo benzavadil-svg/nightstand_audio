@@ -48,6 +48,9 @@ class NightstandController:
         active_mode_timeout_seconds: int = 30,
         ambient_clock_refresh_seconds: int = 60,
         ambient_show_playback_glyph: bool = True,
+        restore_playback_on_startup: bool = True,
+        resume_on_startup: bool = False,
+        playback_restore_launch: bool = False,
     ) -> None:
         self.store = store
         self.library = library
@@ -77,6 +80,10 @@ class NightstandController:
         self.active_mode_timeout_seconds = max(1, active_mode_timeout_seconds)
         self.ambient_clock_refresh_seconds = max(0, ambient_clock_refresh_seconds)
         self.ambient_show_playback_glyph = ambient_show_playback_glyph
+        self.restore_playback_on_startup = restore_playback_on_startup
+        self.resume_on_startup = resume_on_startup
+        self.playback_restore_launch = playback_restore_launch
+        self._startup_initializing = True
         self.is_night_mode_active = False
         self.is_sleep_screen_locked = False
         self.last_display_wake_at: datetime | None = None
@@ -105,6 +112,7 @@ class NightstandController:
         self.start_background_media_scan_after_first_render = False
         self._background_media_scan_started = False
         self._restore_active_session()
+        self._startup_initializing = False
         self._refresh_main_menu_labels()
         self._evaluate_night_mode(datetime.now(), initial=True)
         if not self.is_night_mode_active:
@@ -919,6 +927,11 @@ class NightstandController:
         )
 
     def _restore_active_session(self) -> None:
+        if not self.restore_playback_on_startup:
+            self.log_playback.info(
+                "restored_state source=None title=None position=0.0s launch=false disabled=true"
+            )
+            return
         source_id = self.store.get_current_source_id()
         if not source_id:
             return
@@ -926,7 +939,8 @@ class NightstandController:
         if not session.current_track_id:
             return
         index = self.library.index_for_item(source_id, session.current_track_id)
-        item = self.library.get_item_at_index(source_id, index or session.current_track_index)
+        restored_index = index if index is not None else session.current_track_index
+        item = self.library.get_item_at_index(source_id, restored_index)
         if not item:
             return
         self.current_source_id = source_id
@@ -938,19 +952,31 @@ class NightstandController:
             subtitle=item.artist or "",
             position_seconds=session.last_position_seconds,
             duration_seconds=item.duration_seconds,
-            volume=self.player.status().volume,
-            track_index=index or session.current_track_index,
+            volume=PlaybackStatus().volume,
+            track_index=restored_index,
             queue_length=len(self.library.get_queue(source_id)),
         )
         self.log_playback.info(
-            "restored_state source=%s title=%s position=%.1fs launch=false",
+            "restored_state source=%s title=%s position=%.1fs track_id=%s index=%s "
+            "launch=false resume_on_startup=%s playback_restore_launch=%s",
             source_id,
             item.title,
             session.last_position_seconds,
+            item.id,
+            restored_index,
+            str(self.resume_on_startup).lower(),
+            str(self.playback_restore_launch).lower(),
         )
         self._mark_dirty("startup")
 
     def _play_item_through_adapter(self, item, position: float) -> bool:
+        if self._startup_initializing:
+            self.log_playback.warning(
+                "startup playback launch blocked source=%s item_id=%s launch=false",
+                item.source_id,
+                item.id,
+            )
+            return False
         resolved_item = self.library.resolve_item(item)
         exists = resolved_item.file_path.startswith("demo://") or Path(resolved_item.file_path).exists()
         self.log_playback.info(

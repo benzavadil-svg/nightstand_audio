@@ -81,6 +81,9 @@ def _settings(runtime_mode: str, playback_backend: str) -> Settings:
         audio_backend="alsa",
         audio_device="auto",
         playback_backend=playback_backend,
+        restore_playback_on_startup=True,
+        resume_on_startup=False,
+        playback_restore_launch=False,
     )
 
 

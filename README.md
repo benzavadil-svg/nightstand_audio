@@ -383,6 +383,16 @@ Appliance playback uses `MPVPlayer`, not the simulator player. The production la
 python -m scripts.play_file_test "media/buttons/button-1/example.mp3"
 ```
 
+Startup restore is metadata-only. The appliance may restore the last source, title, track index, and position for the UI, but it must not launch `mpv`, open ALSA, or create an MPV IPC socket until a real user action happens. Keep these defaults unless intentionally debugging restore behavior:
+
+```text
+RESTORE_PLAYBACK_ON_STARTUP=true
+RESUME_ON_STARTUP=false
+PLAYBACK_RESTORE_LAUNCH=false
+```
+
+The expected startup log is `[PLAYBACK] restored_state ... launch=false`. After startup, `ps aux | grep mpv` should show no Nightstand-launched player process.
+
 Rebuild the portable media cache after changing files:
 
 ```bash

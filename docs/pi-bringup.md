@@ -476,6 +476,20 @@ The current appliance playback backend is MPV. `scripts.run_live_epd` defaults `
 [PLAYBACK] command=mpv --no-video --no-audio-display --audio-device=alsa/plughw:1,0 ...
 ```
 
+Startup restore is deliberately passive. During `playback_service_init`, Nightstand Audio restores only the last source/title/track index/position for display state and logs `launch=false`; it must not start MPV, open the ALSA device, or create an MPV IPC socket. Use these defaults:
+
+```text
+RESTORE_PLAYBACK_ON_STARTUP=true
+RESUME_ON_STARTUP=false
+PLAYBACK_RESTORE_LAUNCH=false
+```
+
+After startup and before pressing a source/play control, this should not show a Nightstand MPV process:
+
+```bash
+ps aux | grep mpv
+```
+
 Test a single file through the same adapter:
 
 ```bash

@@ -117,6 +117,9 @@ def build_simulator_controller() -> NightstandController:
             active_mode_timeout_seconds=settings.active_mode_timeout_seconds,
             ambient_clock_refresh_seconds=settings.ambient_clock_refresh_seconds,
             ambient_show_playback_glyph=settings.ambient_show_playback_glyph,
+            restore_playback_on_startup=settings.restore_playback_on_startup,
+            resume_on_startup=settings.resume_on_startup,
+            playback_restore_launch=settings.playback_restore_launch,
         )
     controller.startup_profiler = profiler
     if settings.runtime_mode == "appliance":

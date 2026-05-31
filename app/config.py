@@ -54,6 +54,9 @@ class Settings:
     audio_backend: str
     audio_device: str
     playback_backend: str
+    restore_playback_on_startup: bool
+    resume_on_startup: bool
+    playback_restore_launch: bool
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -132,6 +135,9 @@ class Settings:
                 {"auto", "mock", "mpv"},
                 "auto",
             ),
+            restore_playback_on_startup=_env_bool("RESTORE_PLAYBACK_ON_STARTUP", True),
+            resume_on_startup=_env_bool("RESUME_ON_STARTUP", False),
+            playback_restore_launch=_env_bool("PLAYBACK_RESTORE_LAUNCH", False),
         )
 
     def ensure_dirs(self) -> None:
