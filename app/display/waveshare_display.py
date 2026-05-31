@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 import sys
 import time
+from dataclasses import dataclass
+from importlib import import_module
 from pathlib import Path
 from types import ModuleType
 
@@ -12,9 +14,36 @@ from app.display.base import ImageDisplayAdapter
 from app.services.logger import get_logger, is_debug_enabled
 
 
-EPD_DRIVER_NAME = "epd5in83_V2"
+DEFAULT_DISPLAY_MODEL = "waveshare_5in83_v2"
 MODE_FULL = "FULL"
 MODE_PARTIAL = "PARTIAL"
+
+
+@dataclass(frozen=True)
+class DisplayModelSpec:
+    model: str
+    driver_name: str
+    width: int
+    height: int
+    label: str
+
+
+DISPLAY_MODELS: dict[str, DisplayModelSpec] = {
+    "waveshare_5in83_v2": DisplayModelSpec(
+        model="waveshare_5in83_v2",
+        driver_name="epd5in83_V2",
+        width=600,
+        height=448,
+        label='Waveshare 5.83" V2',
+    ),
+    "waveshare_4in2_v2": DisplayModelSpec(
+        model="waveshare_4in2_v2",
+        driver_name="epd4in2_V2",
+        width=400,
+        height=300,
+        label='Waveshare 4.2" V2',
+    ),
+}
 
 
 class WaveshareDisplay(ImageDisplayAdapter):
@@ -24,6 +53,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
         self,
         width: int = 600,
         height: int = 448,
+        display_model: str = DEFAULT_DISPLAY_MODEL,
         rotate_degrees: int = 0,
         clear_on_exit: bool = False,
         full_clear_interval: int = 50,
@@ -35,8 +65,10 @@ class WaveshareDisplay(ImageDisplayAdapter):
         one_shot_major_transitions: bool = True,
         region_partial_enabled: bool = True,
     ) -> None:
-        self.width = width
-        self.height = height
+        self.model_spec = display_model_spec(display_model)
+        self.display_model = self.model_spec.model
+        self.width = width or self.model_spec.width
+        self.height = height or self.model_spec.height
         self.rotate_degrees = rotate_degrees % 360
         self.clear_on_exit = clear_on_exit
         self.full_clear_interval = max(0, full_clear_interval)
@@ -51,7 +83,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
             if disable_partial is None
             else disable_partial
         )
-        self.driver_name = EPD_DRIVER_NAME
+        self.driver_name = self.model_spec.driver_name
         self._epd_module: ModuleType | None = None
         self._epd = None
         self._initialized = False
@@ -140,11 +172,11 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 self.log.warning(
                     "GPIOZERO_PIN_FACTORY=lgpio is recommended for live e-paper output."
                 )
-            epd5in83 = self._epd_module or self._load_driver()
-            epd = epd5in83.EPD()
+            epd_driver = self._epd_module or self._load_driver()
+            epd = epd_driver.EPD()
             epd.init()
-            epd_width = int(getattr(epd, "width", getattr(epd5in83, "EPD_WIDTH", self.width)))
-            epd_height = int(getattr(epd, "height", getattr(epd5in83, "EPD_HEIGHT", self.height)))
+            epd_width = int(getattr(epd, "width", getattr(epd_driver, "EPD_WIDTH", self.width)))
+            epd_height = int(getattr(epd, "height", getattr(epd_driver, "EPD_HEIGHT", self.height)))
             self.width = epd_width
             self.height = epd_height
             stat = image_path.stat()
@@ -409,17 +441,18 @@ class WaveshareDisplay(ImageDisplayAdapter):
                     "GPIOZERO_PIN_FACTORY=lgpio is recommended for live e-paper output."
                 )
             started = time.perf_counter()
-            epd5in83 = self._load_driver()
-            self._epd = epd5in83.EPD()
-            self.width = int(getattr(self._epd, "width", getattr(epd5in83, "EPD_WIDTH", self.width)))
-            self.height = int(getattr(self._epd, "height", getattr(epd5in83, "EPD_HEIGHT", self.height)))
+            epd_driver = self._load_driver()
+            self._epd = epd_driver.EPD()
+            self.width = int(getattr(self._epd, "width", getattr(epd_driver, "EPD_WIDTH", self.width)))
+            self.height = int(getattr(self._epd, "height", getattr(epd_driver, "EPD_HEIGHT", self.height)))
             self._epd.init()
             self._initialized = True
             self._sleeping = False
             self._display_mode = MODE_FULL
             self.log.info(
-                "Waveshare %s initialized successfully resolution=%sx%s duration_ms=%.1f",
+                "Waveshare %s initialized successfully model=%s resolution=%sx%s duration_ms=%.1f",
                 self.driver_name,
+                self.display_model,
                 self.width,
                 self.height,
                 (time.perf_counter() - started) * 1000,
@@ -456,10 +489,10 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 "Force update reinitializing %s before display write...",
                 self.driver_name,
             )
-            epd5in83 = self._epd_module or self._load_driver()
-            self._epd = epd5in83.EPD()
-            self.width = int(getattr(self._epd, "width", getattr(epd5in83, "EPD_WIDTH", self.width)))
-            self.height = int(getattr(self._epd, "height", getattr(epd5in83, "EPD_HEIGHT", self.height)))
+            epd_driver = self._epd_module or self._load_driver()
+            self._epd = epd_driver.EPD()
+            self.width = int(getattr(self._epd, "width", getattr(epd_driver, "EPD_WIDTH", self.width)))
+            self.height = int(getattr(self._epd, "height", getattr(epd_driver, "EPD_HEIGHT", self.height)))
             self._epd.init()
             self._initialized = True
             self._sleeping = False
@@ -540,11 +573,14 @@ class WaveshareDisplay(ImageDisplayAdapter):
 
     def _load_driver(self) -> ModuleType:
         self._add_waveshare_paths()
-        from waveshare_epd import epd5in83_V2 as epd5in83
-
-        self._epd_module = epd5in83
-        self.log.info("Using Waveshare e-paper driver module=%s", self.driver_name)
-        return epd5in83
+        module = import_module(f"waveshare_epd.{self.driver_name}")
+        self._epd_module = module
+        self.log.info(
+            "Using Waveshare e-paper driver module=%s model=%s",
+            self.driver_name,
+            self.display_model,
+        )
+        return module
 
     def _add_waveshare_paths(self) -> None:
         candidates = [
@@ -600,3 +636,9 @@ def _env_bool(name: str, default: bool) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def display_model_spec(display_model: str | None) -> DisplayModelSpec:
+    if display_model and display_model.strip().lower() in DISPLAY_MODELS:
+        return DISPLAY_MODELS[display_model.strip().lower()]
+    return DISPLAY_MODELS[DEFAULT_DISPLAY_MODEL]

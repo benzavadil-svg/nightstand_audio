@@ -30,6 +30,7 @@ def main() -> None:
             "screen_path": str(settings.screen_path),
             "screen_exists": settings.screen_path.exists(),
             "screen_size_bytes": _file_size(settings.screen_path),
+            "display_model": settings.display_model,
             "resolution": f"{settings.display_width}x{settings.display_height}",
             "use_real_epd": settings.use_real_epd,
             "clear_epd_on_exit": settings.clear_epd_on_exit,
@@ -53,6 +54,8 @@ def main() -> None:
         },
         "audio": {
             "active_or_preferred_sink": store.get_app_state_value("preferred_output") or "dac",
+            "audio_backend": settings.audio_backend,
+            "audio_device": settings.audio_device,
             "bluetooth_debug": _env_bool("DEBUG_AUDIO"),
         },
         "playlist": {

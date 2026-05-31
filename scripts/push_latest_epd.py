@@ -24,6 +24,7 @@ def main() -> None:
     display = WaveshareDisplay(
         width=settings.display_width,
         height=settings.display_height,
+        display_model=settings.display_model,
         rotate_degrees=settings.epd_rotate_degrees,
         clear_on_exit=False,
         full_clear_interval=0,

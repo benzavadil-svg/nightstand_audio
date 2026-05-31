@@ -10,7 +10,7 @@ class EpaperDisplay(DisplayAdapter):
     Contract:
     - Accept the same RenderState used by the Mac simulator.
     - Render through EInkRenderer or equivalent 1-bit image generation.
-    - Push the final 600x448 black/white image to the 5.83 inch Waveshare HAT.
+    - Push the final model-sized black/white image to the selected Waveshare HAT.
 
     TODO: Retire this stub once waveshare_display.py is fully validated on the Pi.
     TODO: Keep SPI bus setup and busy/reset/data-command pins isolated here.

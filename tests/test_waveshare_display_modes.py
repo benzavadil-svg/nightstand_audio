@@ -4,7 +4,12 @@ import unittest
 
 from PIL import Image
 
-from app.display.waveshare_display import MODE_FULL, MODE_PARTIAL, WaveshareDisplay
+from app.display.waveshare_display import (
+    MODE_FULL,
+    MODE_PARTIAL,
+    WaveshareDisplay,
+    display_model_spec,
+)
 
 
 class FakeEpd:
@@ -47,6 +52,23 @@ class FakeDriver:
     def EPD(self) -> FakeEpd:
         self.calls.append("EPD")
         return FakeEpd(self.calls)
+
+
+class Fake4In2Epd(FakeEpd):
+    width = 400
+    height = 300
+
+
+class Fake4In2Driver:
+    EPD_WIDTH = 400
+    EPD_HEIGHT = 300
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    def EPD(self) -> Fake4In2Epd:
+        self.calls.append("EPD")
+        return Fake4In2Epd(self.calls)
 
 
 class WaveshareDisplayModeTest(unittest.TestCase):
@@ -137,14 +159,37 @@ class WaveshareDisplayModeTest(unittest.TestCase):
         self.assertTrue(display._sleeping)
         self.assertEqual(display._display_mode, MODE_FULL)
 
-    def _write_preview_image(self):
+    def test_4in2_model_uses_400x300_driver_dimensions(self) -> None:
+        driver = Fake4In2Driver()
+        display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)
+        display._epd_module = driver
+        path = self._write_preview_image(size=(600, 448))
+
+        self.assertEqual(display.driver_name, "epd4in2_V2")
+        self.assertEqual(display_model_spec("waveshare_4in2_v2").width, 400)
+        self.assertTrue(
+            display.one_shot_render_path(
+                str(path),
+                reason="major_layout_transition",
+                displayed_hash="abc123",
+            )
+        )
+
+        self.assertEqual(
+            driver.calls,
+            ["EPD", "init", "getbuffer:400x300", "display:buffer", "sleep"],
+        )
+        self.assertEqual(display.width, 400)
+        self.assertEqual(display.height, 300)
+
+    def _write_preview_image(self, size=(600, 448)):
         import tempfile
         from pathlib import Path
 
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         path = Path(tmp.name) / "latest_screen.png"
-        Image.new("1", (600, 448), 1).save(path)
+        Image.new("1", size, 1).save(path)
         return path
 
 

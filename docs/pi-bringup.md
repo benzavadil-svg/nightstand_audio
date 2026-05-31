@@ -5,7 +5,9 @@ This is the working hardware bring-up plan for `nightstand-audio`. Treat it as a
 ## Hardware Target
 
 - Raspberry Pi Zero 2 W with 40-pin header
-- Waveshare 5.83inch e-Paper HAT, 600x448, black/white, SPI
+- Waveshare e-paper HAT over SPI:
+  - current 5.83inch V2, 600x448, black/white
+  - supported alternate 4.2inch V2, 400x300, black/white
 - InnoMaker DAC Mini HAT PCM5122 for wired headphones
 - USB sound card to MonkMakes amplified speaker for alarm/fallback audio
 - Bluetooth earbuds for normal private listening
@@ -61,7 +63,7 @@ Planned numbering uses BCM GPIO numbers. Physical pin numbers are included to re
 ```mermaid
 flowchart LR
   Pi["Raspberry Pi Zero 2 W"]
-  EPD["Waveshare 5.83in e-paper HAT\nSPI, 600x448"]
+  EPD["Waveshare e-paper HAT\nSPI, 5.83in or 4.2in V2"]
   DAC["InnoMaker DAC Mini HAT PCM5122\n3.5mm headphones"]
   USB["USB audio adapter\nspeaker / alarm sink"]
   SPK["MonkMakes amplified speaker\nalarm / fallback"]
@@ -212,12 +214,15 @@ source .venv/bin/activate
 pip install pillow spidev gpiozero RPi.GPIO
 ```
 
-Then run the matching 5.83-inch black/white demo from the Waveshare repo. The app adapter uses `from waveshare_epd import epd5in83_V2 as epd5in83`, matching the tested `epd5in83_V2` driver path.
+Then run the matching black/white demo from the Waveshare repo. The app supports:
+
+- `DISPLAY_MODEL=waveshare_5in83_v2`, using `waveshare_epd.epd5in83_V2`, default resolution `600x448`.
+- `DISPLAY_MODEL=waveshare_4in2_v2`, using `waveshare_epd.epd4in2_V2`, default resolution `400x300`.
 
 App integration target:
 
 - Keep all Waveshare code inside `app/display/waveshare_display.py`.
-- The app renderer now targets `600x448`.
+- The app renderer targets the selected display model resolution.
 - The adapter converts each Pillow image with `.convert("1")`, resizes/rotates if needed, and pushes it to the display.
 - Appliance live mode initializes the display once and leaves it awake during the simulator session.
 - On shutdown or Ctrl+C, the display adapter calls `sleep()` again as a safe cleanup.
@@ -240,6 +245,7 @@ Useful environment:
 
 ```text
 USE_REAL_EPD=true
+DISPLAY_MODEL=waveshare_5in83_v2
 FORCE_EPD_UPDATE=false
 EPD_REINIT_EVERY_UPDATE=false
 CLEAR_BEFORE_EPD_UPDATE=false
@@ -250,8 +256,8 @@ NIGHTSTAND_EPD_ROTATE=0
 CLEAR_EPD_ON_EXIT=false
 EPD_FULL_CLEAR_INTERVAL=50
 EPD_RENDER_DEBOUNCE_MS=750
-EPD_VOLUME_REFRESH_DEBOUNCE_MS=2000
-EPD_REFRESH_ON_VOLUME_CHANGE=false
+EPD_VOLUME_REFRESH_DEBOUNCE_MS=600
+EPD_REFRESH_ON_VOLUME_CHANGE=true
 EPD_PARTIAL_UPDATE_ENABLED=true
 EPD_DISABLE_PARTIAL=false
 EPD_ONE_SHOT_MAJOR_TRANSITIONS=true
@@ -263,6 +269,8 @@ EPD_FORCE_CLEAN_REFRESH=false
 EPD_CLOCK_REFRESH_SECONDS=60
 EPD_DISABLE_CLOCK_AUTO_REFRESH=false
 WAVESHARE_EPD_PYTHON_PATH=/home/pi/e-Paper/RaspberryPi_JetsonNano/python
+AUDIO_BACKEND=alsa
+AUDIO_DEVICE=default
 ```
 
 E-paper retains the last image after sleep. Live mode sleeps the display on exit without clearing by default and logs `Display sleeping; last image remains visible by design.` To clear on exit, set `CLEAR_EPD_ON_EXIT=true`.
@@ -280,19 +288,19 @@ GPIOZERO_PIN_FACTORY=lgpio python -m scripts.push_latest_epd
 GPIOZERO_PIN_FACTORY=lgpio python -m scripts.push_latest_epd --full
 ```
 
-The live adapter uses `epd5in83_V2`, initializes the display once at startup, keeps it awake during the simulator session, and calls `sleep()` on shutdown. Each physical update opens `data/latest_screen.png`, converts to 1-bit, and resizes to `epd.width`/`epd.height`.
+The live adapter uses the selected driver from `DISPLAY_MODEL`, initializes the display once at startup, keeps it awake during the simulator session, and calls `sleep()` on shutdown. Each physical update opens `data/latest_screen.png`, converts to 1-bit, and resizes to `epd.width`/`epd.height`.
 
 Full updates run in true full mode with `epd.init()` and `epd.display(epd.getbuffer(img))`. Partial updates run in partial mode with `init_Part()` and `display_Partial()` when those methods are present in the installed Waveshare driver. Major clean transitions switch from partial mode back to full mode before `Clear()` and `display()`, which avoids the muddy mixed-screen artifacts caused by using the partial LUT for full-looking updates.
 
-`EPD_ONE_SHOT_MAJOR_TRANSITIONS=true` is the current default for major transitions. It matches the working manual push lifecycle: create a fresh `epd5in83_V2.EPD()`, call `init()`, open `data/latest_screen.png`, convert to 1-bit, resize to `epd.width`/`epd.height`, call `display(epd.getbuffer(img))`, then call `sleep()`. The display scheduler cancels pending debounced physical updates before this one-shot push so a stale queued frame cannot immediately overwrite the transition.
+`EPD_ONE_SHOT_MAJOR_TRANSITIONS=true` is the current default for major transitions. It matches the working manual push lifecycle: create a fresh selected-driver `EPD()`, call `init()`, open `data/latest_screen.png`, convert to 1-bit, resize to `epd.width`/`epd.height`, call `display(epd.getbuffer(img))`, then call `sleep()`. The display scheduler cancels pending debounced physical updates before this one-shot push so a stale queued frame cannot immediately overwrite the transition.
 
-Partial updates are only allowed for same-layout changes after a clean screen is already displayed. HOME-to-MENU, MENU-to-HOME, HOME-to-SLEEP_TIMER, source/track-list changes, and title/layout changes use full clean refreshes to avoid mixed stale regions. One exception is switching playlists while already on the playback home layout; that can use a `main_content` partial refresh because the clock and bottom status row remain stable. Same-layout partial refresh requests carry named dirty regions (`clock`, `main_content`, `bottom_bar`, `menu_list`, `sleep_timer_value`). The current 5.83 V2 driver path logs `region_emulated=true` when the installed driver only supports full-buffer partial refresh.
+Partial updates are only allowed for same-layout changes after a clean screen is already displayed. HOME-to-MENU, MENU-to-HOME, HOME-to-SLEEP_TIMER, source/track-list changes, and title/layout changes use full clean refreshes to avoid mixed stale regions. One exception is switching playlists while already on the playback home layout; that can use a `main_content` partial refresh because the clock and bottom status row remain stable. Same-layout partial refresh requests carry named dirty regions (`clock`, `main_content`, `bottom_bar`, `menu_list`, `sleep_timer_value`). The selected driver path logs `region_emulated=true` when the installed driver only supports full-buffer partial refresh.
 
 `EPD_REINIT_EVERY_UPDATE=false` is the appliance default. Set it to `true` only for hardware debugging if you need the old bring-up behavior.
 
 `CLEAR_BEFORE_EPD_UPDATE=false` is the default. Set it to `true` only if you intentionally want `Clear()` before every forced display write.
 
-`EPD_RENDER_DEBOUNCE_MS=750` coalesces rapid sequential state changes into one physical display write. Volume changes skip physical e-paper updates by default with `EPD_REFRESH_ON_VOLUME_CHANGE=false`; if enabled, `EPD_VOLUME_REFRESH_DEBOUNCE_MS=2000` waits until knob movement settles before pushing the final value. `EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500` prevents rapid partial-refresh bursts. `EPD_PARTIAL_STREAK_LIMIT=8` forces a clean full refresh after eight consecutive partial updates. `EPD_CLOCK_REFRESH_SECONDS=60` prevents second-by-second e-paper refreshes, and `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` disables automatic clock refreshes entirely.
+`EPD_RENDER_DEBOUNCE_MS=750` coalesces rapid sequential state changes into one physical display write. Volume changes refresh by default with `EPD_REFRESH_ON_VOLUME_CHANGE=true`; `EPD_VOLUME_REFRESH_DEBOUNCE_MS=600` waits briefly until knob movement settles before pushing the final value. `EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500` prevents rapid partial-refresh bursts. `EPD_PARTIAL_STREAK_LIMIT=8` forces a clean full refresh after eight consecutive partial updates. `EPD_CLOCK_REFRESH_SECONDS=60` prevents second-by-second e-paper refreshes, and `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` disables automatic clock refreshes entirely.
 
 Set `EPD_DISABLE_PARTIAL=true` if partial refresh artifacts show up during real use and you want to avoid `init_Part()` / `display_Partial()` entirely. Set `EPD_PARTIAL_UPDATE_ENABLED=false` to keep app policy from requesting partial updates.
 
@@ -302,6 +310,66 @@ Ghosting/artifact notes:
 - Periodic clean refreshes can still run every `EPD_FULL_CLEAR_INTERVAL` renders, default `50`.
 - A clean full refresh is forced after 8 partial refreshes or when the policy switches from partial back to full.
 - Set `EPD_FULL_CLEAR_INTERVAL=0` to disable periodic clears.
+
+## Switching to Waveshare 4.2 inch V2
+
+The 4.2 inch V2 panel uses the same SPI-style wiring as the 5.83 inch HAT:
+
+| Waveshare Pin | Raspberry Pi Signal | BCM GPIO | Physical Pin |
+| --- | --- | ---: | ---: |
+| VCC | 3.3V | n/a | 1 or 17 |
+| GND | GND | n/a | 6, 9, 14, 20, 25, 30, 34, or 39 |
+| DIN | MOSI | GPIO10 | 19 |
+| CLK | SCLK | GPIO11 | 23 |
+| CS | CE0 | GPIO8 | 24 |
+| DC | Data/command | GPIO25 | 22 |
+| RST | Reset | GPIO17 | 11 |
+| BUSY | Busy/status | GPIO24 | 18 |
+
+Confirm SPI is enabled:
+
+```bash
+ls -l /dev/spidev*
+python - <<'PY'
+import spidev
+spi = spidev.SpiDev()
+spi.open(0, 0)
+print("SPI0 CE0 OK")
+spi.close()
+PY
+```
+
+Confirm the Waveshare driver module is importable:
+
+```bash
+cd ~/e-Paper/RaspberryPi_JetsonNano/python
+python - <<'PY'
+from waveshare_epd import epd4in2_V2
+epd = epd4in2_V2.EPD()
+print(epd.width, epd.height)
+PY
+```
+
+Render 400x300 previews on any machine:
+
+```bash
+cd ~/nightstand-audio
+python -m scripts.render_display_previews --model waveshare_4in2_v2
+```
+
+Run live mode against the 4.2 inch display:
+
+```bash
+cd ~/nightstand-audio
+source .venv/bin/activate
+DISPLAY_MODEL=waveshare_4in2_v2 \
+NIGHTSTAND_DISPLAY_WIDTH=400 \
+NIGHTSTAND_DISPLAY_HEIGHT=300 \
+GPIOZERO_PIN_FACTORY=lgpio \
+python -m scripts.run_live_epd
+```
+
+`NIGHTSTAND_DISPLAY_WIDTH` and `NIGHTSTAND_DISPLAY_HEIGHT` are optional when `DISPLAY_MODEL=waveshare_4in2_v2`; the app defaults to `400x300` for that model. Keep them explicit during bench testing so the logs are easy to read.
 
 ## InnoMaker DAC Setup
 
@@ -317,6 +385,14 @@ wpctl status
 
 Raspberry Pi audio HAT overlays vary by board revision. Validate the exact InnoMaker DAC Mini HAT PCM5122 overlay/configuration against the board documentation before finalizing `/boot/firmware/config.txt` on Bookworm. Do not assume the old official DAC+ / IQaudio overlay is correct without testing it on this board.
 
+Possible `/boot/firmware/config.txt` work will likely involve enabling I2S and a PCM5122-compatible overlay, but keep this explicit and verified against the exact InnoMaker board revision:
+
+```text
+# Example only. Validate before keeping.
+dtparam=i2s=on
+# dtoverlay=<exact-innomaker-or-compatible-overlay>
+```
+
 Useful checks:
 
 ```bash
@@ -327,6 +403,40 @@ speaker-test -t wav -c 2
 ```
 
 MPD should eventually target the chosen DAC/PipeWire sink through `MPDPlayer`, not through controller logic.
+
+## Testing InnoMaker DAC
+
+Use the project audio test helper to keep ALSA checks repeatable:
+
+```bash
+cd ~/nightstand-audio
+source .venv/bin/activate
+python -m scripts.test_audio_output --list-only
+```
+
+Look for the InnoMaker/PCM5122 card in:
+
+```bash
+aplay -l
+aplay -L
+wpctl status
+pactl list short sinks
+```
+
+Test the default output first:
+
+```bash
+AUDIO_BACKEND=alsa AUDIO_DEVICE=default python -m scripts.test_audio_output
+```
+
+Then test explicit ALSA devices reported by `aplay -l`:
+
+```bash
+AUDIO_BACKEND=alsa AUDIO_DEVICE=hw:0,0 python -m scripts.test_audio_output
+AUDIO_BACKEND=alsa AUDIO_DEVICE=hw:1,0 python -m scripts.test_audio_output
+```
+
+The script prints the selected backend/device, lists ALSA outputs, and plays a short generated WAV through `aplay -D <device>`. It is independent of the main app and does not change MPD or PipeWire configuration.
 
 ## USB Sound Card / Speaker Setup
 
@@ -526,4 +636,5 @@ journalctl -u mpd --since "10 min ago"
 - [Raspberry Pi hardware documentation](https://www.raspberrypi.com/documentation/hardware/raspberrypi/)
 - [Raspberry Pi audio accessories documentation](https://www.raspberrypi.com/documentation/accessories/audio.html)
 - [Waveshare 5.83inch e-Paper HAT manual](https://www.waveshare.com/wiki/5.83inch_e-Paper_HAT_Manual)
+- [Waveshare 4.2inch e-Paper Module Manual](https://www.waveshare.com/wiki/4.2inch_e-Paper_Module_Manual)
 - [Waveshare e-Paper example repository](https://github.com/waveshareteam/e-Paper)

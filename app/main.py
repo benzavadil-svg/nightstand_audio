@@ -5,7 +5,7 @@ import os
 from app.config import get_settings
 from app.display.renderer import EInkRenderer
 from app.display.simulator_display import SimulatorDisplay
-from app.display.waveshare_display import WaveshareDisplay
+from app.display.waveshare_display import WaveshareDisplay, display_model_spec
 from app.input.keyboard_input import KeyboardInput
 from app.media_library import MediaLibrary
 from app.playback.mock_player import MockPlayer
@@ -16,8 +16,9 @@ from app.state_store import StateStore
 
 def build_simulator_controller() -> NightstandController:
     settings = get_settings()
+    display_spec = display_model_spec(settings.display_model)
     log_startup_banner(
-        display="Waveshare 5.83",
+        display=display_spec.label,
         resolution=f"{settings.display_width}x{settings.display_height}",
         gpio_backend=os.getenv("GPIOZERO_PIN_FACTORY", "default"),
         audio="simulator",
@@ -34,6 +35,7 @@ def build_simulator_controller() -> NightstandController:
         physical_display = WaveshareDisplay(
             width=settings.display_width,
             height=settings.display_height,
+            display_model=settings.display_model,
             rotate_degrees=settings.epd_rotate_degrees,
             clear_on_exit=settings.clear_epd_on_exit,
             full_clear_interval=settings.epd_full_clear_interval,

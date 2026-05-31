@@ -10,8 +10,8 @@ The goal is not to recreate a phone with apps. This is a calm nightstand media p
 - Scans the `media/` folders into SQLite.
 - Creates demo tracks if no audio files exist.
 - Simulates playback with a mock player.
-- Renders a 600x448 black/white e-ink-style PNG to `data/latest_screen.png`.
-- Can optionally push every render to the real Waveshare 5.83 V2 e-paper display on Raspberry Pi.
+- Renders a model-sized black/white e-ink-style PNG to `data/latest_screen.png`.
+- Can optionally push every render to real Waveshare 5.83 V2 or 4.2 V2 e-paper displays on Raspberry Pi.
 - Supports Ambient Mode, Active Mode, and Night Mode / Sleep Screen behavior.
 - Supports alarm, snooze, sleep timer, preset buttons, and rotary-style menu navigation.
 - Treats each button as a persistent resumable folder playlist stream.
@@ -23,7 +23,9 @@ The goal is not to recreate a phone with apps. This is a calm nightstand media p
 - Raspberry Pi Zero 2 W
 - InnoMaker DAC Mini HAT PCM5122 / 3.5mm headphone output
 - USB sound card feeding MonkMakes amplified speaker for alarm output
-- 5.83 inch Waveshare-style SPI e-paper HAT, 600x448, black/white
+- Waveshare-style SPI e-paper HAT:
+  - 5.83 inch V2, 600x448, black/white
+  - 4.2 inch V2, 400x300, black/white
 - Rotary encoder with push button
 - Three momentary preset buttons mapped to folders:
   - Button 1
@@ -47,6 +49,7 @@ This is a living hardware plan. Items are not final just because they appear her
 | Micro USB OTG adapter | Posdou USB 2.0 Micro USB Male to USB Female OTG Adapter, 2 pack | Connect USB audio adapter or other USB accessories to Pi Zero 2 W | TODO | Ordered | Ordered May 25, 2026; expected May 28, 2026 |
 | Audio patch cable | CNCESS CESS-067 Short 3.5mm Audio Shielded Patch Cable, right-angle, 3 inch | Short internal/external headphone/audio patching during prototyping | TODO | Ordered | Ordered May 25, 2026; expected May 28, 2026 |
 | Display | Waveshare 5.83inch E-Paper E-Ink Display HAT, 600x448, black/white, SPI interface | Main e-ink UI | TODO | Ordered | Ordered May 25, 2026; expected May 28, 2026. Target renderer resolution is 600x448; no backlight |
+| Alternate display | Waveshare 4.2inch e-Paper V2, 400x300, black/white, SPI interface | Smaller alternate e-ink UI | TODO | Planned | Select with `DISPLAY_MODEL=waveshare_4in2_v2`; uses the same SPI pin mapping |
 | Bluetooth earbuds | Nothing Ear (a) | Dedicated Bluetooth sleep earbuds | [Nothing Ear (a)](https://us.nothing.tech/products/ear-a) | Planned | Dedicated pairing to this appliance preferred |
 | Amplified speaker | MonkMakes amplified speaker | v1 alarm/fallback speaker | TODO | Ordered | Driven from the USB sound card 3.5mm output; this is the dedicated alarm/fallback speaker path |
 | Internal speaker amp | Adafruit MAX98357A I2S 3W Class D Amplifier Breakout | Former internal speaker amp plan | [Adafruit MAX98357A](https://www.adafruit.com/product/3006) | Replaced | Replaced by the USB sound card + MonkMakes speaker path for v1, keeping I2S dedicated to the InnoMaker DAC HAT |
@@ -186,6 +189,7 @@ Required/optional environment variables:
 
 ```text
 USE_REAL_EPD=true
+DISPLAY_MODEL=waveshare_5in83_v2
 FORCE_EPD_UPDATE=false
 EPD_REINIT_EVERY_UPDATE=false
 CLEAR_BEFORE_EPD_UPDATE=false
@@ -218,18 +222,21 @@ ACTIVE_MODE_TIMEOUT_SECONDS=30
 AMBIENT_CLOCK_REFRESH_SECONDS=60
 AMBIENT_SHOW_PLAYBACK_GLYPH=true
 WAVESHARE_EPD_PYTHON_PATH=/home/pi/e-Paper/RaspberryPi_JetsonNano/python
+AUDIO_BACKEND=alsa
+AUDIO_DEVICE=default
 ```
 
 Notes:
 
-- The live adapter uses `from waveshare_epd import epd5in83_V2 as epd5in83`.
-- Appliance live mode initializes `epd5in83_V2` once, keeps the panel awake during the simulator session, and sleeps the display on shutdown.
+- `DISPLAY_MODEL=waveshare_5in83_v2` uses the Waveshare `epd5in83_V2` driver and defaults to `600x448`.
+- `DISPLAY_MODEL=waveshare_4in2_v2` uses the Waveshare `epd4in2_V2` driver and defaults to `400x300`.
+- Appliance live mode initializes the selected Waveshare driver once, keeps the panel awake during the simulator session, and sleeps the display on shutdown.
 - Physical e-paper writes are skipped when the rendered image is unchanged.
 - Rapid sequential renders are coalesced with `EPD_RENDER_DEBOUNCE_MS`, default `750`.
 - Volume changes update software/audio immediately, then physical e-paper refreshes the final settled value by default with `EPD_REFRESH_ON_VOLUME_CHANGE=true`.
 - `EPD_VOLUME_REFRESH_DEBOUNCE_MS=600` waits briefly until knob movement settles, then pushes a bottom-bar partial refresh instead of flashing for every tick.
 - Partial refresh is enabled by default, but only for same-layout changes after a clean screen is already established.
-- Same-layout partial refreshes carry a named dirty region such as `clock`, `menu_list`, `sleep_timer_value`, `bottom_bar`, or `main_content`; the current 5.83 V2 path logs `region_emulated=true` when the driver only accepts a full-buffer partial write.
+- Same-layout partial refreshes carry a named dirty region such as `clock`, `menu_list`, `sleep_timer_value`, `bottom_bar`, or `main_content`; the adapter logs `region_emulated=true` when the selected driver only accepts a full-buffer partial write.
 - Menu highlight movement may use partial refresh only within the same menu. Opening the menu from HOME, returning HOME, entering Sleep Timer, changing to a source/track list, or changing any screen title/layout uses a full clean refresh.
 - Volume on HOME, sleep timer changes while already on the Sleep Timer screen, alarm toggle while already on the Alarm screen, play/pause, clock minute updates on HOME, and playlist switches while already on the playback home layout are partial candidates.
 - Full refresh is used for startup, source changes, playback start/stop, major layout transitions, screen mode/title changes, playlist completion, and periodic ghosting cleanup.
@@ -264,6 +271,12 @@ To push the current `data/latest_screen.png` once through the same adapter path:
 ```bash
 GPIOZERO_PIN_FACTORY=lgpio python -m scripts.push_latest_epd
 GPIOZERO_PIN_FACTORY=lgpio python -m scripts.push_latest_epd --full
+```
+
+To render 4.2-inch preview screens locally:
+
+```bash
+python -m scripts.render_display_previews --model waveshare_4in2_v2
 ```
 
 Ghosting notes:
@@ -324,6 +337,29 @@ Troubleshooting:
 - If keyboard controls feel wrong, enable `DEBUG_INPUT=true`.
 - If Bluetooth/output routing is confusing, enable `DEBUG_AUDIO=true` and run `python -m scripts.log_snapshot`.
 - If UI latency is unclear, set `SHOW_RENDER_TIMINGS=true` to print render time, display push time, and total refresh latency.
+
+## Audio Output Testing
+
+The app keeps output routing abstract while the exact Pi audio stack is validated. For the InnoMaker PCM5122 DAC HAT, start with ALSA/PipeWire device discovery and test tones before wiring MPD into it.
+
+Environment overrides:
+
+```text
+AUDIO_BACKEND=alsa
+AUDIO_DEVICE=default
+# AUDIO_DEVICE=hw:0,0
+# AUDIO_DEVICE=hw:1,0
+```
+
+List devices and play a short tone:
+
+```bash
+python -m scripts.test_audio_output --list-only
+python -m scripts.test_audio_output
+python -m scripts.test_audio_output --device hw:1,0
+```
+
+The script uses `aplay` when `AUDIO_BACKEND=alsa`, prints `aplay -l` and `aplay -L`, then plays a short generated WAV through the selected ALSA device. This does not affect the main simulator or MPD adapter.
 
 ## Simulator Controls
 
@@ -513,7 +549,7 @@ Adapter TODO contracts:
 
 - GPIO rotary encoder: turn emits `InputEvent("turn", +/-1)`, short press emits `press`, long press emits `long_press`.
 - GPIO buttons: preset buttons emit `InputEvent("source", source_id)`, and long-press Button 3 emits `sleep_timer`.
-- Waveshare e-paper: `SimulatorDisplay` renders the same 600x448 1-bit image to PNG and forwards it to `WaveshareDisplay` when `USE_REAL_EPD=true`.
+- Waveshare e-paper: `SimulatorDisplay` renders the selected model's 1-bit image to PNG and forwards it to `WaveshareDisplay` when `USE_REAL_EPD=true`.
 - MPD playback: match the `PlaybackAdapter` API used by `MockPlayer`.
 - InnoMaker DAC audio: document and validate the exact Bookworm overlay/config separately from app logic.
 - USB speaker output: route alarm/fallback audio to the USB sound card -> MonkMakes speaker sink by default.
@@ -544,11 +580,13 @@ scripts/
   import_gpodder_to_button2.py
   log_snapshot.py
   push_latest_epd.py
+  render_display_previews.py
   seed_library.py
   render_once.py
   run_live_epd.py
   run_simulator.py
   tail_logs.sh
+  test_audio_output.py
   watch_screen.py
 tests/
   test_*.py

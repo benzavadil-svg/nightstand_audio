@@ -15,6 +15,7 @@ class Settings:
     data_dir: Path
     db_path: Path
     screen_path: Path
+    display_model: str
     display_width: int
     display_height: int
     menu_timeout_seconds: int
@@ -47,19 +48,26 @@ class Settings:
     active_mode_timeout_seconds: int
     ambient_clock_refresh_seconds: int
     ambient_show_playback_glyph: bool
+    audio_backend: str
+    audio_device: str
 
     @classmethod
     def from_env(cls) -> "Settings":
         _load_env_file(PROJECT_ROOT / ".env")
         data_dir = PROJECT_ROOT / "data"
+        display_model = _normalize_display_model(
+            os.getenv("DISPLAY_MODEL", "waveshare_5in83_v2")
+        )
+        default_width, default_height = _display_dimensions(display_model)
         return cls(
             project_root=PROJECT_ROOT,
             media_dir=Path(os.getenv("NIGHTSTAND_MEDIA_DIR", PROJECT_ROOT / "media")),
             data_dir=data_dir,
             db_path=Path(os.getenv("NIGHTSTAND_DB_PATH", data_dir / "nightstand.sqlite")),
             screen_path=Path(os.getenv("NIGHTSTAND_SCREEN_PATH", data_dir / "latest_screen.png")),
-            display_width=int(os.getenv("NIGHTSTAND_DISPLAY_WIDTH", "600")),
-            display_height=int(os.getenv("NIGHTSTAND_DISPLAY_HEIGHT", "448")),
+            display_model=display_model,
+            display_width=int(os.getenv("NIGHTSTAND_DISPLAY_WIDTH", str(default_width))),
+            display_height=int(os.getenv("NIGHTSTAND_DISPLAY_HEIGHT", str(default_height))),
             menu_timeout_seconds=int(os.getenv("NIGHTSTAND_MENU_TIMEOUT_SECONDS", "15")),
             use_real_epd=_env_bool("USE_REAL_EPD", False),
             epd_rotate_degrees=int(os.getenv("NIGHTSTAND_EPD_ROTATE", "0")),
@@ -102,6 +110,8 @@ class Settings:
             active_mode_timeout_seconds=int(os.getenv("ACTIVE_MODE_TIMEOUT_SECONDS", "30")),
             ambient_clock_refresh_seconds=int(os.getenv("AMBIENT_CLOCK_REFRESH_SECONDS", "60")),
             ambient_show_playback_glyph=_env_bool("AMBIENT_SHOW_PLAYBACK_GLYPH", True),
+            audio_backend=os.getenv("AUDIO_BACKEND", "alsa"),
+            audio_device=os.getenv("AUDIO_DEVICE", "default"),
         )
 
     def ensure_dirs(self) -> None:
@@ -134,3 +144,16 @@ def _load_env_file(path: Path) -> None:
         key = key.strip()
         value = value.strip().strip('"').strip("'")
         os.environ.setdefault(key, value)
+
+
+def _normalize_display_model(value: str) -> str:
+    normalized = value.strip().lower()
+    if normalized in {"waveshare_5in83_v2", "waveshare_4in2_v2"}:
+        return normalized
+    return "waveshare_5in83_v2"
+
+
+def _display_dimensions(display_model: str) -> tuple[int, int]:
+    if display_model == "waveshare_4in2_v2":
+        return 400, 300
+    return 600, 448
