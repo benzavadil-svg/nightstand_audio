@@ -107,6 +107,7 @@ class SimulatorDisplay(DisplayAdapter):
         self._durations_ms: list[float] = []
         self.log = get_logger("DISPLAY")
         self.epd_log = get_logger("EPD")
+        self.startup_profiler = None
 
     def render(self, state: RenderState, reason: str | None = None) -> None:
         total_started = time.perf_counter()
@@ -119,6 +120,8 @@ class SimulatorDisplay(DisplayAdapter):
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
         image.save(self.output_path)
         png_ms = (time.perf_counter() - png_started) * 1000
+        if self.startup_profiler and reason == "startup":
+            self.startup_profiler.record("initial_render_png", render_ms + png_ms)
         self.log.debug("PNG generated path=%s duration_ms=%.1f", self.output_path, png_ms)
 
         push_ms = 0.0
@@ -286,6 +289,8 @@ class SimulatorDisplay(DisplayAdapter):
             region=dirty_region.as_payload() if dirty_region else None,
         )
         push_ms = (time.perf_counter() - started) * 1000
+        if self.startup_profiler and reason == "startup":
+            self.startup_profiler.record("first_physical_epd_update", push_ms)
         if result is False:
             self._last_push_finished_at = time.monotonic()
             self._pending_hash = None
@@ -356,6 +361,8 @@ class SimulatorDisplay(DisplayAdapter):
                 clean_refresh=True,
             )
         push_ms = (time.perf_counter() - started) * 1000
+        if self.startup_profiler and reason == "startup":
+            self.startup_profiler.record("first_physical_epd_update", push_ms)
         if result is False:
             self._last_push_finished_at = time.monotonic()
             self.log.warning(

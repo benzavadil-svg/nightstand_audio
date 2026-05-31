@@ -98,6 +98,8 @@ class NightstandController:
         self._source_button_click_window_seconds = 1.0
         self._last_logged_mode = self.nav.current_mode
         self._last_logged_playback_state: PlaybackState | None = None
+        self.startup_profiler = None
+        self._startup_summary_logged = False
         self._restore_active_session()
         self._refresh_main_menu_labels()
         self._evaluate_night_mode(datetime.now(), initial=True)
@@ -278,6 +280,9 @@ class NightstandController:
             reason,
         )
         self.display.render(state, reason=reason)
+        if reason == "startup" and self.startup_profiler and not self._startup_summary_logged:
+            self.startup_profiler.total()
+            self._startup_summary_logged = True
         self._dirty = False
         self._dirty_reason = None
         self._last_clock_refresh_at = time.monotonic()

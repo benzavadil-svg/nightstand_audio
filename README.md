@@ -333,7 +333,7 @@ DEBUG_EPD=true SHOW_RENDER_TIMINGS=true GPIOZERO_PIN_FACTORY=lgpio python -m scr
 DEBUG_INPUT=true python -m scripts.run_simulator
 ```
 
-Startup logs include a banner with display type, resolution, GPIO backend, audio mode, and whether live EPD output is enabled.
+Startup logs include a banner with display type, resolution, GPIO backend, audio mode, and whether live EPD output is enabled. They also include `[STARTUP]` timing spans for `config_load`, `audio_device_detection`, `media_library_scan`, `playback_service_init`, `display_driver_import`, `display_init`, `initial_render_png`, `first_physical_epd_update`, and final `total_ms`.
 
 Troubleshooting:
 

@@ -295,6 +295,8 @@ The live adapter uses the selected driver from `DISPLAY_MODEL`, initializes the 
 
 `scripts.run_live_epd` sets appliance defaults before the app starts: `RUNTIME_MODE=appliance`, `DISPLAY_BACKEND=waveshare`, `AUDIO_BACKEND=alsa`, `AUDIO_DEVICE=auto`, and `HARDWARE_FALLBACK_TO_SIMULATOR=false`. If Waveshare initialization fails in this mode, the app logs the failure clearly instead of silently pretending the hardware path is working.
 
+Startup performance instrumentation logs `[STARTUP] step=<name> duration_ms=<value>` for config load, audio detection, media scan, playback/controller init, display driver import, display init, initial PNG render, and first physical EPD update. The final summary is `[STARTUP] total_ms=...`, which is the quickest way to see whether startup is dominated by ALSA, media scanning, driver import, panel init, or the first refresh.
+
 Full updates run in true full mode with `epd.init()` and `epd.display(epd.getbuffer(img))`. Partial updates run in partial mode after discovering the installed Waveshare driver's partial API (`display_Partial`, `display_part`, `DisplayPart`, or similar) and calling the matching partial init method when available. Major clean transitions switch from partial mode back to full mode before `Clear()` and `display()`, which avoids the muddy mixed-screen artifacts caused by using the partial LUT for full-looking updates.
 
 Inspect the exact driver available on the Pi:

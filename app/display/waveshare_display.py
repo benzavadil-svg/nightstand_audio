@@ -128,6 +128,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
         self._full_durations_ms: list[float] = []
         self._partial_durations_ms: list[float] = []
         self.log = get_logger("EPD")
+        self.startup_profiler = None
 
     def render(self, image: Image.Image) -> None:
         if not self._ensure_ready_for_render():
@@ -203,12 +204,18 @@ class WaveshareDisplay(ImageDisplayAdapter):
                     "GPIOZERO_PIN_FACTORY=lgpio is recommended for live e-paper output."
                 )
             epd_driver = self._epd_module or self._load_driver()
+            init_started = time.perf_counter()
             epd = epd_driver.EPD()
             epd.init()
             epd_width = int(getattr(epd, "width", getattr(epd_driver, "EPD_WIDTH", self.width)))
             epd_height = int(getattr(epd, "height", getattr(epd_driver, "EPD_HEIGHT", self.height)))
             self.width = epd_width
             self.height = epd_height
+            if self.startup_profiler:
+                self.startup_profiler.record(
+                    "display_init",
+                    (time.perf_counter() - init_started) * 1000,
+                )
             stat = image_path.stat()
             self.log.info(
                 "Opening latest screen image path=%s mtime=%.6f size_bytes=%s",
@@ -512,13 +519,16 @@ class WaveshareDisplay(ImageDisplayAdapter):
             self._partial_api = None
             self._partial_api = self._discover_partial_api()
             self._partial_supported = self._partial_api.supported
+            init_duration_ms = (time.perf_counter() - started) * 1000
+            if self.startup_profiler:
+                self.startup_profiler.record("display_init", init_duration_ms)
             self.log.info(
                 "Waveshare %s initialized successfully model=%s resolution=%sx%s duration_ms=%.1f",
                 self.driver_name,
                 self.display_model,
                 self.width,
                 self.height,
-                (time.perf_counter() - started) * 1000,
+                init_duration_ms,
             )
             return True
         except Exception as exc:
@@ -705,8 +715,12 @@ class WaveshareDisplay(ImageDisplayAdapter):
             self._partial_durations_ms = self._partial_durations_ms[-20:]
 
     def _load_driver(self) -> ModuleType:
+        started = time.perf_counter()
         self._add_waveshare_paths()
         module = import_module(f"waveshare_epd.{self.driver_name}")
+        duration_ms = (time.perf_counter() - started) * 1000
+        if self.startup_profiler:
+            self.startup_profiler.record("display_driver_import", duration_ms)
         self._epd_module = module
         self.log.info(
             "Using Waveshare e-paper driver module=%s model=%s",
