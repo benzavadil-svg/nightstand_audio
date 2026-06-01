@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_DISPLAY_MODEL = "waveshare_4in2_v2"
 
 
 @dataclass(frozen=True)
@@ -67,7 +68,7 @@ class Settings:
         _load_env_file(PROJECT_ROOT / ".env")
         data_dir = PROJECT_ROOT / "data"
         display_model = _normalize_display_model(
-            os.getenv("DISPLAY_MODEL", "waveshare_5in83_v2")
+            os.getenv("DISPLAY_MODEL", DEFAULT_DISPLAY_MODEL)
         )
         default_width, default_height = _display_dimensions(display_model)
         return cls(
@@ -147,7 +148,7 @@ class Settings:
             audio_start_display_grace_ms=int(os.getenv("AUDIO_START_DISPLAY_GRACE_MS", "5000")),
             epd_suppress_while_audio_playing=_env_bool(
                 "EPD_SUPPRESS_WHILE_AUDIO_PLAYING",
-                True,
+                False,
             ),
         )
 
@@ -187,7 +188,7 @@ def _normalize_display_model(value: str) -> str:
     return _normalize_choice(
         value,
         {"waveshare_5in83_v2", "waveshare_4in2_v2"},
-        "waveshare_5in83_v2",
+        DEFAULT_DISPLAY_MODEL,
     )
 
 

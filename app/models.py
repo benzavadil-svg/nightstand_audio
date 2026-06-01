@@ -93,6 +93,8 @@ class PlaybackStatus:
     volume: int = 35
     track_index: int | None = None
     queue_length: int | None = None
+    ended: bool = False
+    exit_returncode: int | None = None
 
     @property
     def is_audio_active(self) -> bool:

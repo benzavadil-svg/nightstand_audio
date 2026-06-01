@@ -11,7 +11,7 @@ The goal is not to recreate a phone with apps. This is a calm nightstand media p
 - Creates demo tracks if no audio files exist.
 - Simulates playback with a mock player.
 - Renders a model-sized black/white e-ink-style PNG to `data/latest_screen.png`.
-- Can optionally push every render to real Waveshare 5.83 V2 or 4.2 V2 e-paper displays on Raspberry Pi.
+- Can optionally push renders to the real Waveshare 4.2 V2 e-paper display on Raspberry Pi.
 - Supports Ambient Mode, Active Mode, and Night Mode / Sleep Screen behavior.
 - Supports alarm, snooze, sleep timer, preset buttons, and rotary-style menu navigation.
 - Treats each button as a persistent resumable folder playlist stream.
@@ -23,9 +23,7 @@ The goal is not to recreate a phone with apps. This is a calm nightstand media p
 - Raspberry Pi Zero 2 W
 - InnoMaker DAC Mini HAT PCM5122 / 3.5mm headphone output
 - USB sound card feeding MonkMakes amplified speaker for alarm output
-- Waveshare-style SPI e-paper HAT:
-  - 5.83 inch V2, 600x448, black/white
-  - 4.2 inch V2, 400x300, black/white
+- Waveshare 4.2 inch V2 SPI e-paper HAT, 400x300, black/white
 - Rotary encoder with push button
 - Three momentary preset buttons mapped to folders:
   - Button 1
@@ -48,8 +46,8 @@ This is a living hardware plan. Items are not final just because they appear her
 | USB audio adapter | QAJOPFN USB Audio Adapter, External Sound Card, USB Microphone Adapter to 3.5mm headphone/speaker/microphone jack | Speaker / alarm / fallback audio sink | TODO | Ordered | Ordered May 25, 2026; expected May 28, 2026. Drives the MonkMakes amplified speaker path through 3.5mm output; avoids sharing I2S with the InnoMaker DAC HAT |
 | Micro USB OTG adapter | Posdou USB 2.0 Micro USB Male to USB Female OTG Adapter, 2 pack | Connect USB audio adapter or other USB accessories to Pi Zero 2 W | TODO | Ordered | Ordered May 25, 2026; expected May 28, 2026 |
 | Audio patch cable | CNCESS CESS-067 Short 3.5mm Audio Shielded Patch Cable, right-angle, 3 inch | Short internal/external headphone/audio patching during prototyping | TODO | Ordered | Ordered May 25, 2026; expected May 28, 2026 |
-| Display | Waveshare 5.83inch E-Paper E-Ink Display HAT, 600x448, black/white, SPI interface | Main e-ink UI | TODO | Ordered | Ordered May 25, 2026; expected May 28, 2026. Target renderer resolution is 600x448; no backlight |
-| Alternate display | Waveshare 4.2inch e-Paper V2, 400x300, black/white, SPI interface | Smaller alternate e-ink UI | TODO | Planned | Select with `DISPLAY_MODEL=waveshare_4in2_v2`; uses the same SPI pin mapping |
+| Display | Waveshare 4.2inch e-Paper V2, 400x300, black/white, SPI interface | Main e-ink UI | TODO | Tested | Stable appliance display with `DISPLAY_MODEL=waveshare_4in2_v2`; safe wiring keeps Waveshare control pins off BossDAC I2S pins |
+| Alternate display | Waveshare 5.83inch E-Paper E-Ink Display HAT, 600x448, black/white, SPI interface | Earlier larger e-ink option | TODO | Replaced | Supported only as an explicit non-default model with `DISPLAY_MODEL=waveshare_5in83_v2` |
 | Bluetooth earbuds | Nothing Ear (a) | Dedicated Bluetooth sleep earbuds | [Nothing Ear (a)](https://us.nothing.tech/products/ear-a) | Planned | Dedicated pairing to this appliance preferred |
 | Amplified speaker | MonkMakes amplified speaker | v1 alarm/fallback speaker | TODO | Ordered | Driven from the USB sound card 3.5mm output; this is the dedicated alarm/fallback speaker path |
 | Internal speaker amp | Adafruit MAX98357A I2S 3W Class D Amplifier Breakout | Former internal speaker amp plan | [Adafruit MAX98357A](https://www.adafruit.com/product/3006) | Replaced | Replaced by the USB sound card + MonkMakes speaker path for v1, keeping I2S dedicated to the InnoMaker DAC HAT |
@@ -179,6 +177,12 @@ On Raspberry Pi, the same simulator can write `data/latest_screen.png` and push 
 GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_live_epd
 ```
 
+Stable Pi appliance command:
+
+```bash
+GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_pi_appliance
+```
+
 Equivalent manual form:
 
 ```bash
@@ -192,13 +196,13 @@ RUNTIME_MODE=appliance
 DISPLAY_BACKEND=waveshare
 HARDWARE_FALLBACK_TO_SIMULATOR=false
 USE_REAL_EPD=true
-DISPLAY_MODEL=waveshare_5in83_v2
+DISPLAY_MODEL=waveshare_4in2_v2
 FORCE_EPD_UPDATE=false
 EPD_REINIT_EVERY_UPDATE=false
 CLEAR_BEFORE_EPD_UPDATE=false
 GPIOZERO_PIN_FACTORY=lgpio
-NIGHTSTAND_DISPLAY_WIDTH=600
-NIGHTSTAND_DISPLAY_HEIGHT=448
+NIGHTSTAND_DISPLAY_WIDTH=400
+NIGHTSTAND_DISPLAY_HEIGHT=300
 NIGHTSTAND_EPD_ROTATE=0
 CLEAR_EPD_ON_EXIT=false
 EPD_FULL_CLEAR_INTERVAL=50
@@ -231,8 +235,8 @@ AUDIO_DEVICE=auto
 
 Notes:
 
-- `DISPLAY_MODEL=waveshare_5in83_v2` uses the Waveshare `epd5in83_V2` driver and defaults to `600x448`.
-- `DISPLAY_MODEL=waveshare_4in2_v2` uses the Waveshare `epd4in2_V2` driver and defaults to `400x300`.
+- `DISPLAY_MODEL=waveshare_4in2_v2` uses the Waveshare `epd4in2_V2` driver and defaults to `400x300`; this is the stable appliance default.
+- `DISPLAY_MODEL=waveshare_5in83_v2` remains available only as an explicit larger-display override.
 - `scripts.run_live_epd` defaults to appliance mode: `RUNTIME_MODE=appliance`, `DISPLAY_BACKEND=waveshare`, `AUDIO_BACKEND=alsa`, `AUDIO_DEVICE=auto`, and `HARDWARE_FALLBACK_TO_SIMULATOR=false`.
 - Appliance live mode initializes the selected Waveshare driver once, keeps the panel awake during the simulator session, and sleeps the display on shutdown.
 - Physical e-paper writes are skipped when the rendered image is unchanged.
@@ -390,7 +394,7 @@ RESTORE_PLAYBACK_ON_STARTUP=true
 RESUME_ON_STARTUP=false
 PLAYBACK_RESTORE_LAUNCH=false
 VALIDATE_PLAYLIST_ON_PLAY=false
-BACKGROUND_MEDIA_SCAN=true
+BACKGROUND_MEDIA_SCAN=false
 ```
 
 The expected startup log is `[PLAYBACK] restored_state ... launch=false`. After startup, `ps aux | grep mpv` should show no Nightstand-launched player process.
@@ -403,12 +407,16 @@ Physical Waveshare refreshes are deferred briefly when audio first transitions f
 
 ```text
 AUDIO_START_DISPLAY_GRACE_MS=5000
-EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true
+EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false
 ```
 
 Set `AUDIO_START_DISPLAY_GRACE_MS=0` to disable the grace period. When active, logs show `[DISPLAY] Physical update deferred during audio startup grace period remaining_ms=...` followed by `[DISPLAY] Audio startup grace period expired; applying deferred display update`.
 
-The current Pi Zero 2 W + BossDAC + Waveshare policy is audio-first: with `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true`, physical e-paper writes are suppressed for the entire time playback state is `PLAYING`. The app still updates state and writes `data/latest_screen.png`, but one-shot/full/partial Waveshare refreshes wait until playback is paused or stopped. Expected logs are `[DISPLAY] Physical update suppressed because audio is playing` and `[DISPLAY] Audio stopped; applying pending physical display update`. Set `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false` only for comparison testing.
+The current stable Pi command sets `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false` because the GPIO conflict is fixed. Keep `AUDIO_START_DISPLAY_GRACE_MS=5000`, avoid second-by-second physical progress refreshes, and use the suppression flag only if hardware testing shows I2S contention again.
+
+GPIO root cause note: Waveshare stock `epdconfig.py` used `PWR_PIN=18`, which conflicts with BossDAC `GPIO18 = PCM_CLK` and caused `bcm2835-i2s 3f203000.i2s: I2S SYNC error!`. Use `PWR_PIN=5` or another safe non-I2S GPIO. Never assign Waveshare control pins to GPIO18, GPIO19, GPIO20, or GPIO21.
+
+When BossDAC is detected and real EPD is enabled, the app checks Waveshare `epdconfig.py` and refuses physical display startup if `PWR_PIN`, `RST_PIN`, `DC_PIN`, `CS_PIN`, or `BUSY_PIN` uses GPIO18/19/20/21. The only override is explicit bench-mode `ALLOW_UNSAFE_EPD_GPIO=true`.
 
 Rebuild the portable media cache after changing files:
 

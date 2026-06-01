@@ -17,6 +17,7 @@ class FakeProcess:
         self.signals: list[int] = []
         self.terminated = False
         self.killed = False
+        self.stderr = None
 
     def poll(self):
         return self.returncode
@@ -91,6 +92,62 @@ class MPVPlayerTest(unittest.TestCase):
             player.play(item)
 
         self.assertEqual(player.status().state, PlaybackState.STOPPED)
+
+    def test_normal_mpv_eof_marks_status_ended(self) -> None:
+        tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
+        tmp_path = Path(tmp.name)
+        tmp.close()
+        self.addCleanup(lambda: tmp_path.unlink(missing_ok=True))
+        process = FakeProcess(["mpv"])
+        player = MPVPlayer(audio_device="plughw:1,0")
+        item = MediaItem(
+            source_id="button-1",
+            file_path=str(tmp_path),
+            title="Example",
+            id=42,
+            duration_seconds=120,
+        )
+
+        with (
+            patch("subprocess.Popen", return_value=process),
+            patch.object(MPVPlayer, "_send_mpv_command", return_value=True),
+        ):
+            player.play(item)
+            process.returncode = 0
+            status = player.status()
+
+        self.assertEqual(status.state, PlaybackState.STOPPED)
+        self.assertTrue(status.ended)
+        self.assertEqual(status.exit_returncode, 0)
+        self.assertEqual(status.position_seconds, 120)
+
+    def test_seek_past_unknown_duration_is_treated_as_probable_eof(self) -> None:
+        tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
+        tmp_path = Path(tmp.name)
+        tmp.close()
+        self.addCleanup(lambda: tmp_path.unlink(missing_ok=True))
+        process = FakeProcess(["mpv"])
+        player = MPVPlayer(audio_device="plughw:1,0")
+        item = MediaItem(
+            source_id="button-1",
+            file_path=str(tmp_path),
+            title="Example",
+            id=42,
+            duration_seconds=None,
+        )
+
+        with (
+            patch("subprocess.Popen", return_value=process),
+            patch.object(MPVPlayer, "_send_mpv_command", return_value=True),
+        ):
+            player.play(item, 1242.8)
+            process.returncode = 2
+            status = player.status()
+
+        self.assertEqual(status.state, PlaybackState.STOPPED)
+        self.assertTrue(status.ended)
+        self.assertEqual(status.exit_returncode, 2)
+        self.assertAlmostEqual(status.position_seconds, 1242.8)
 
 
 if __name__ == "__main__":

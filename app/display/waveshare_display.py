@@ -13,10 +13,11 @@ from typing import Any, Callable
 from PIL import Image
 
 from app.display.base import ImageDisplayAdapter
+from app.display.gpio_safety import validate_waveshare_gpio_config, verify_gpio18_pcm_clk
 from app.services.logger import get_logger, is_debug_enabled
 
 
-DEFAULT_DISPLAY_MODEL = "waveshare_5in83_v2"
+DEFAULT_DISPLAY_MODEL = "waveshare_4in2_v2"
 MODE_FULL = "FULL"
 MODE_PARTIAL = "PARTIAL"
 PARTIAL_DISPLAY_METHODS = (
@@ -90,6 +91,7 @@ class WaveshareDisplay(ImageDisplayAdapter):
         one_shot_major_transitions: bool = True,
         region_partial_enabled: bool = True,
         allow_hardware_fallback: bool = True,
+        protect_i2s_gpio: bool = False,
     ) -> None:
         self.model_spec = display_model_spec(display_model)
         self.display_model = self.model_spec.model
@@ -105,6 +107,8 @@ class WaveshareDisplay(ImageDisplayAdapter):
         self.one_shot_major_transitions = one_shot_major_transitions
         self.region_partial_enabled = region_partial_enabled
         self.allow_hardware_fallback = allow_hardware_fallback
+        self.protect_i2s_gpio = protect_i2s_gpio
+        self._gpio_safety_failed = False
         self.disable_partial = (
             _env_bool("EPD_DISABLE_PARTIAL", False)
             if disable_partial is None
@@ -205,9 +209,14 @@ class WaveshareDisplay(ImageDisplayAdapter):
                     "GPIOZERO_PIN_FACTORY=lgpio is recommended for live e-paper output."
                 )
             epd_driver = self._epd_module or self._load_driver()
+            if self.protect_i2s_gpio:
+                validate_waveshare_gpio_config(self.log)
             init_started = time.perf_counter()
             epd = epd_driver.EPD()
             epd.init()
+            if self.protect_i2s_gpio and not verify_gpio18_pcm_clk(self.log):
+                self._gpio_safety_failed = True
+                return False
             epd_width = int(getattr(epd, "width", getattr(epd_driver, "EPD_WIDTH", self.width)))
             epd_height = int(getattr(epd, "height", getattr(epd_driver, "EPD_HEIGHT", self.height)))
             self.width = epd_width
@@ -519,6 +528,8 @@ class WaveshareDisplay(ImageDisplayAdapter):
             return True
         if self._failed:
             return False
+        if self._gpio_safety_failed:
+            return False
         try:
             if os.getenv("GPIOZERO_PIN_FACTORY") != "lgpio":
                 self.log.warning(
@@ -526,10 +537,15 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 )
             started = time.perf_counter()
             epd_driver = self._epd_module or self._load_driver()
+            if self.protect_i2s_gpio:
+                validate_waveshare_gpio_config(self.log)
             self._epd = epd_driver.EPD()
             self.width = int(getattr(self._epd, "width", getattr(epd_driver, "EPD_WIDTH", self.width)))
             self.height = int(getattr(self._epd, "height", getattr(epd_driver, "EPD_HEIGHT", self.height)))
             self._epd.init()
+            if self.protect_i2s_gpio and not verify_gpio18_pcm_clk(self.log):
+                self._gpio_safety_failed = True
+                return False
             self._initialized = True
             self._sleeping = False
             self._display_mode = MODE_FULL
@@ -574,6 +590,8 @@ class WaveshareDisplay(ImageDisplayAdapter):
             return self._initialized
         if self._failed:
             return False
+        if self._gpio_safety_failed:
+            return False
         try:
             started = time.perf_counter()
             if os.getenv("GPIOZERO_PIN_FACTORY") != "lgpio":
@@ -585,10 +603,15 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 self.driver_name,
             )
             epd_driver = self._epd_module or self._load_driver()
+            if self.protect_i2s_gpio:
+                validate_waveshare_gpio_config(self.log)
             self._epd = epd_driver.EPD()
             self.width = int(getattr(self._epd, "width", getattr(epd_driver, "EPD_WIDTH", self.width)))
             self.height = int(getattr(self._epd, "height", getattr(epd_driver, "EPD_HEIGHT", self.height)))
             self._epd.init()
+            if self.protect_i2s_gpio and not verify_gpio18_pcm_clk(self.log):
+                self._gpio_safety_failed = True
+                return False
             self._initialized = True
             self._sleeping = False
             self._display_mode = MODE_FULL

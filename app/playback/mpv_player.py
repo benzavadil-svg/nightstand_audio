@@ -25,6 +25,7 @@ class MPVPlayer(PlaybackAdapter):
         self._process: subprocess.Popen | None = None
         self._ipc_socket_path: Path | None = None
         self._started_monotonic: float | None = None
+        self._process_started_monotonic: float | None = None
         self._base_position = 0.0
         self._stderr_logged = False
         self.log = get_logger("PLAYBACK")
@@ -65,16 +66,19 @@ class MPVPlayer(PlaybackAdapter):
                 stderr=subprocess.PIPE,
                 text=True,
             )
+            self._process_started_monotonic = time.monotonic()
             self._stderr_logged = False
         except FileNotFoundError:
             self._process = None
             self._started_monotonic = None
+            self._process_started_monotonic = None
             self._status.state = PlaybackState.STOPPED
             self.log.error("mpv executable not found command=%s", self.executable)
             return
         except OSError as exc:
             self._process = None
             self._started_monotonic = None
+            self._process_started_monotonic = None
             self._status.state = PlaybackState.STOPPED
             self.log.error("mpv launch failed file=%s error=%s", resolved_path, exc)
             return
@@ -142,6 +146,7 @@ class MPVPlayer(PlaybackAdapter):
         self._started_monotonic = None
         self._process = None
         self._stderr_logged = False
+        self._process_started_monotonic = None
 
     def toggle_play_pause(self) -> None:
         if self._status.state == PlaybackState.PLAYING:
@@ -163,10 +168,18 @@ class MPVPlayer(PlaybackAdapter):
 
     def tick(self) -> None:
         if self._process and self._process.poll() is not None:
-            self._log_unexpected_exit()
+            return_code = self._process.returncode
+            probable_eof = self._probable_eof_after_seek(return_code)
+            self._log_process_exit(return_code, probable_eof=probable_eof)
             self._status.state = PlaybackState.STOPPED
+            self._status.exit_returncode = return_code
+            self._status.ended = return_code == 0 or probable_eof
+            if self._status.duration_seconds and self._status.ended:
+                self._status.position_seconds = float(self._status.duration_seconds)
             self._started_monotonic = None
+            self._process_started_monotonic = None
             self._cleanup_ipc_socket()
+            self._process = None
             return
         if self._status.state != PlaybackState.PLAYING or self._started_monotonic is None:
             return
@@ -179,10 +192,20 @@ class MPVPlayer(PlaybackAdapter):
         else:
             self._status.position_seconds = position
 
-    def _log_unexpected_exit(self) -> None:
+    def _probable_eof_after_seek(self, return_code: int | None) -> bool:
+        if return_code != 2:
+            return False
+        if self._status.duration_seconds is not None:
+            return False
+        if self._base_position < 30:
+            return False
+        if self._process_started_monotonic is None:
+            return False
+        return time.monotonic() - self._process_started_monotonic < 5
+
+    def _log_process_exit(self, return_code: int | None, probable_eof: bool = False) -> None:
         if not self._process or self._stderr_logged:
             return
-        return_code = self._process.returncode
         stderr_text = ""
         if self._process.stderr:
             try:
@@ -190,7 +213,16 @@ class MPVPlayer(PlaybackAdapter):
             except OSError:
                 stderr_text = ""
         self._stderr_logged = True
-        if return_code not in (0, None):
+        if return_code in (0, None) or probable_eof:
+            self.log.info(
+                "mpv playback complete returncode=%s source=%s item_id=%s position=%.1fs probable_eof=%s",
+                return_code,
+                self._status.source_id,
+                self._status.item_id,
+                self._status.position_seconds,
+                str(probable_eof).lower(),
+            )
+        else:
             self.log.error(
                 "mpv exited unexpectedly returncode=%s stderr=%s",
                 return_code,

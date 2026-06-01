@@ -4,6 +4,7 @@ import tempfile
 import unittest
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 from app.media_library import MediaLibrary
 from app.models import MediaItem
@@ -125,6 +126,21 @@ class MediaLibraryBehaviorTest(unittest.TestCase):
             self.assertEqual(library.get_source_label("button-2"), "Sleep Baseball")
             self.assertEqual(queue[0].title, "Northwoods Baseball")
             self.assertEqual(queue[0].artist, "Ep 040")
+
+    def test_scan_stores_discovered_duration_seconds(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            media_dir = root / "media"
+            button_dir = media_dir / "buttons" / "button-1"
+            button_dir.mkdir(parents=True)
+            (button_dir / "001-first.mp3").write_text("not real audio", encoding="utf-8")
+            store = StateStore(root / "test.sqlite")
+            library = MediaLibrary(media_dir, store)
+
+            with patch.object(MediaLibrary, "_duration_seconds_for_file", return_value=123):
+                library.scan()
+
+            self.assertEqual(library.get_queue("button-1")[0].duration_seconds, 123)
 
     def test_scan_strips_repeated_podcast_branding_from_episode_titles(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

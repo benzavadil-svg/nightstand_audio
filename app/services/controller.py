@@ -574,6 +574,8 @@ class NightstandController:
             return
         item, index, position = self._session_cursor(source_id)
         if not item:
+            if self.library.is_source_complete(source_id):
+                self._show_completed_source(source_id)
             return
         self._save_position()
         previous_source = self.current_source_id
@@ -827,9 +829,13 @@ class NightstandController:
         if not next_item and self.library.should_loop(source_id):
             next_item = self.library.get_item_at_index(source_id, 0)
             index = -1
+        if next_item and next_item.completed and not self.library.should_loop(source_id):
+            next_item, next_index = self.library.next_uncompleted_after(source_id, index)
+            index = next_index - 1
         if not next_item:
             self.player.stop()
             self._save_session(source_id, item_id, index, 0, is_playing=False)
+            self.log_playback.info("Playlist exhausted source=%s last_index=%s", source_id, index)
             if self.library.is_source_complete(source_id):
                 self.log_playback.info("Playlist complete source=%s", source_id)
                 self._show_completed_source(source_id)
@@ -862,12 +868,15 @@ class NightstandController:
             return
         if not self._is_completed(status):
             return
-        self.store.update_playback_position(status.item_id, status.position_seconds, completed=True)
+        completed_position = status.duration_seconds or status.position_seconds
+        self.store.update_playback_position(status.item_id, completed_position, completed=True)
         self.log_playback.info(
-            "Track complete source=%s item_id=%s position=%.1fs",
+            "Track complete source=%s item_id=%s position=%.1fs ended=%s returncode=%s",
             status.source_id,
             status.item_id,
             status.position_seconds,
+            str(status.ended).lower(),
+            status.exit_returncode,
         )
         self._last_completed_item_id = status.item_id
         self._advance_after_completion(status.source_id, status.item_id)
@@ -893,6 +902,26 @@ class NightstandController:
             if session.current_track_id == item.id
             else item.last_position_seconds
         )
+        if self._item_position_is_complete(source_id, item, position):
+            self.store.update_playback_position(item.id, item.duration_seconds or position, completed=True)
+            self.log_playback.info(
+                "Saved position is at or past EOF; advancing source=%s item_id=%s index=%s position=%.1fs duration=%s",
+                source_id,
+                item.id,
+                index,
+                position,
+                item.duration_seconds,
+            )
+            next_item, next_index = self.library.next_uncompleted_after(source_id, index or 0)
+            if next_item is None and self.library.should_loop(source_id):
+                next_item = self.library.get_item_at_index(source_id, 0)
+                next_index = 0
+            if next_item is None:
+                self._save_session(source_id, item.id, index or 0, 0, is_playing=False)
+                return None, 0, 0.0
+            item = next_item
+            index = next_index
+            position = 0.0
         if session.queue_order != [item.id for item in queue if item.id is not None]:
             self._save_session(source_id, item.id, index or 0, position, session.is_playing)
         return item, index or 0, position
@@ -1127,10 +1156,18 @@ class NightstandController:
         self._mark_dirty("playlist_complete")
 
     def _is_completed(self, status: PlaybackStatus) -> bool:
+        if status.ended:
+            return True
         if not status.duration_seconds:
             return False
         threshold = self.library.completion_threshold(status.source_id)
         return status.position_seconds >= status.duration_seconds * threshold
+
+    def _item_position_is_complete(self, source_id: str, item, position: float) -> bool:
+        if not item or not item.id or not item.duration_seconds:
+            return False
+        threshold = self.library.completion_threshold(source_id)
+        return position >= item.duration_seconds * threshold
 
     def _refresh_main_menu_labels(self) -> None:
         for item in self.nav.current_menu:

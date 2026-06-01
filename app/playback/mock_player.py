@@ -97,6 +97,8 @@ class MockPlayer(PlaybackAdapter):
         if self._status.duration_seconds and position >= self._status.duration_seconds:
             self._status.position_seconds = float(self._status.duration_seconds)
             self._status.state = PlaybackState.STOPPED
+            self._status.ended = True
+            self._status.exit_returncode = 0
             self._started_monotonic = None
         else:
             self._status.position_seconds = position

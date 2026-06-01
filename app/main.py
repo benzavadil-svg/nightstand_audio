@@ -67,6 +67,7 @@ def build_simulator_controller() -> NightstandController:
             one_shot_major_transitions=settings.epd_one_shot_major_transitions,
             region_partial_enabled=settings.epd_region_partial_enabled,
             allow_hardware_fallback=settings.hardware_fallback_to_simulator,
+            protect_i2s_gpio=bool(audio_selection.hardware_dac_detected),
         )
         physical_display.startup_profiler = profiler
     else:

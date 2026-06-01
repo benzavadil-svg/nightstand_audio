@@ -10,11 +10,11 @@ class MPDPlayer(PlaybackAdapter):
     Contract:
     - Expose the same play/pause/resume/stop/volume/status API as MockPlayer.
     - Treat MPD as the server-side local media playback engine.
-    - Keep DAC+, ALSA/PipeWire, and Bluetooth setup out of controller logic.
+    - Keep ALSA/PipeWire, BossDAC/InnoMaker setup, and Bluetooth setup out of controller logic.
 
     TODO: Connect to MPD using python-mpd2 or an equivalent client.
     TODO: Map local media paths into MPD's configured music directory.
-    TODO: Document Raspberry Pi DAC+ audio config for Bookworm.
+    TODO: Document MPD output setup for the selected Pi audio sink.
     TODO: Add Bluetooth output support as a later selectable output target.
     """
 

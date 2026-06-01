@@ -241,6 +241,13 @@ class WaveshareDisplayModeTest(unittest.TestCase):
         self.assertEqual(display.width, 400)
         self.assertEqual(display.height, 300)
 
+    def test_default_display_model_is_4in2(self) -> None:
+        spec = display_model_spec(None)
+
+        self.assertEqual(spec.model, "waveshare_4in2_v2")
+        self.assertEqual(spec.width, 400)
+        self.assertEqual(spec.height, 300)
+
     def test_4in2_lowercase_partial_api_is_detected_and_used(self) -> None:
         driver = FakeLowercasePartialDriver()
         display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)

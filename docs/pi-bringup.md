@@ -5,9 +5,7 @@ This is the working hardware bring-up plan for `nightstand-audio`. Treat it as a
 ## Hardware Target
 
 - Raspberry Pi Zero 2 W with 40-pin header
-- Waveshare e-paper HAT over SPI:
-  - current 5.83inch V2, 600x448, black/white
-  - supported alternate 4.2inch V2, 400x300, black/white
+- Waveshare 4.2inch V2 e-paper HAT over SPI, 400x300, black/white
 - InnoMaker DAC Mini HAT PCM5122 for wired headphones
 - USB sound card to MonkMakes amplified speaker for alarm/fallback audio
 - Bluetooth earbuds for normal private listening
@@ -30,27 +28,29 @@ Planned numbering uses BCM GPIO numbers. Physical pin numbers are included to re
 | EPD DC | e-paper | GPIO25 | 22 | Output | Planned | Data/command pin |
 | EPD RST | e-paper | GPIO17 | 11 | Output | Planned | Reset pin |
 | EPD BUSY | e-paper | GPIO24 | 18 | Input | Planned | Busy/status pin |
+| EPD PWR | e-paper | GPIO5 | 29 | Output | Tested | Safe replacement for Waveshare stock `PWR_PIN=18`; only needed if the selected driver uses PWR |
 | I2C SDA | HAT EEPROM / DAC | GPIO2 | 3 | Bidirectional | Reserved | Used by HAT ID/I2C; avoid buttons |
 | I2C SCL | HAT EEPROM / DAC | GPIO3 | 5 | Bidirectional | Reserved | Used by HAT ID/I2C; avoid buttons |
 | I2S BCLK | InnoMaker DAC / audio | GPIO18 | 12 | Output | Reserved | InnoMaker PCM5122 HAT uses I2S/PCM; conflicts with simple GPIO use |
 | I2S LRCLK | InnoMaker DAC / audio | GPIO19 | 35 | Output | Reserved | InnoMaker PCM5122 HAT uses I2S/PCM |
 | I2S DOUT | InnoMaker DAC / audio | GPIO21 | 40 | Output | Reserved | InnoMaker DAC audio data out |
 | I2S DIN | optional audio input | GPIO20 | 38 | Input | Reserved | Keep free for I2S/audio compatibility |
-| Encoder A / CLK | EC11 rotary | GPIO5 | 29 | Input | Planned | Pull-up input; debounced in software |
-| Encoder B / DT | EC11 rotary | GPIO6 | 31 | Input | Planned | Pull-up input; debounced in software |
-| Encoder SW | EC11 push | GPIO13 | 33 | Input | Planned | Short press, double/triple press, long press |
-| Button 1 | Source button | GPIO16 | 36 | Input | Planned | Maps to `media/buttons/button-1` |
-| Button 2 | Source button | GPIO26 | 37 | Input | Planned | Maps to `media/buttons/button-2` |
-| Button 3 | Source button | GPIO27 | 13 | Input | Planned | Maps to `media/buttons/button-3`; long press may cycle sleep timer |
-| Spare GPIO | Future | GPIO22 | 15 | Input/Output | Spare | Candidate for frontlight control |
+| Encoder A / CLK | EC11 rotary | GPIO6 | 31 | Input | Planned | Pull-up input; debounced in software |
+| Encoder B / DT | EC11 rotary | GPIO13 | 33 | Input | Planned | Pull-up input; debounced in software |
+| Encoder SW | EC11 push | GPIO16 | 36 | Input | Planned | Short press, double/triple press, long press |
+| Button 1 | Source button | GPIO26 | 37 | Input | Planned | Maps to `media/buttons/button-1` |
+| Button 2 | Source button | GPIO27 | 13 | Input | Planned | Maps to `media/buttons/button-2` |
+| Button 3 | Source button | GPIO22 | 15 | Input | Planned | Maps to `media/buttons/button-3`; long press may cycle sleep timer |
 | Spare GPIO | Future | GPIO23 | 16 | Input/Output | Spare | Candidate for future frontlight or output-control experiments |
 | UART TX | Debug serial | GPIO14 | 8 | Output | Reserved | Avoid unless serial console intentionally disabled |
 | UART RX | Debug serial | GPIO15 | 10 | Input | Reserved | Avoid unless serial console intentionally disabled |
 
 ## Known Pin Usage / Collision Notes
 
-- The Waveshare e-paper HAT uses SPI0 plus GPIO pins for `DC`, `RST`, and `BUSY`.
+- The Waveshare e-paper HAT uses SPI0 plus GPIO pins for `DC`, `RST`, `BUSY`, and optionally `PWR`.
+- Waveshare stock `epdconfig.py` used `PWR_PIN=18`, which conflicts with BossDAC `GPIO18 = PCM_CLK` and caused `bcm2835-i2s 3f203000.i2s: I2S SYNC error!`. Use `PWR_PIN=5` or another safe non-I2S GPIO.
 - The InnoMaker PCM5122 DAC HAT uses the Pi audio/I2S pins. Do not assign controls to GPIO18, GPIO19, GPIO20, or GPIO21.
+- The app now checks `waveshare_epd.epdconfig` at startup when BossDAC is detected. It refuses real EPD startup if `PWR_PIN`, `RST_PIN`, `DC_PIN`, `CS_PIN`, or `BUSY_PIN` uses GPIO18/19/20/21. Override only for deliberate bench testing with `ALLOW_UNSAFE_EPD_GPIO=true`.
 - The speaker / alarm output uses a USB sound card through the Pi Zero USB OTG port, so it does not compete for the InnoMaker DAC HAT's I2S pins.
 - The earlier MAX98357A I2S amp idea is replaced for v1. Revisit only if a later enclosure needs a raw passive internal speaker and a separate amp.
 - UART pins are left reserved for debugging.
@@ -63,7 +63,7 @@ Planned numbering uses BCM GPIO numbers. Physical pin numbers are included to re
 ```mermaid
 flowchart LR
   Pi["Raspberry Pi Zero 2 W"]
-  EPD["Waveshare e-paper HAT\nSPI, 5.83in or 4.2in V2"]
+  EPD["Waveshare 4.2in V2 e-paper HAT\nSPI"]
   DAC["InnoMaker DAC Mini HAT PCM5122\n3.5mm headphones"]
   USB["USB audio adapter\nspeaker / alarm sink"]
   SPK["MonkMakes amplified speaker\nalarm / fallback"]
@@ -214,10 +214,10 @@ source .venv/bin/activate
 pip install pillow spidev gpiozero RPi.GPIO
 ```
 
-Then run the matching black/white demo from the Waveshare repo. The app supports:
+Then run the matching black/white demo from the Waveshare repo. The app default is:
 
-- `DISPLAY_MODEL=waveshare_5in83_v2`, using `waveshare_epd.epd5in83_V2`, default resolution `600x448`.
 - `DISPLAY_MODEL=waveshare_4in2_v2`, using `waveshare_epd.epd4in2_V2`, default resolution `400x300`.
+- `DISPLAY_MODEL=waveshare_5in83_v2` remains available only as an explicit larger-display override.
 
 App integration target:
 
@@ -232,6 +232,14 @@ Live display mode:
 ```bash
 cd ~/nightstand-audio
 source .venv/bin/activate
+GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_pi_appliance
+```
+
+`scripts.run_pi_appliance` is the standard stable Pi command. It sets appliance defaults for BossDAC + Waveshare 4.2" V2: `DISPLAY_MODEL=waveshare_4in2_v2`, `DISPLAY_BACKEND=waveshare`, `USE_REAL_EPD=true`, `AUDIO_DEVICE=auto`, `BACKGROUND_MEDIA_SCAN=false`, `VALIDATE_PLAYLIST_ON_PLAY=false`, `PLAYBACK_RESTORE_LAUNCH=false`, and `RESUME_ON_STARTUP=false`.
+
+Legacy live display entry point:
+
+```bash
 GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_live_epd
 ```
 
@@ -248,13 +256,13 @@ RUNTIME_MODE=appliance
 DISPLAY_BACKEND=waveshare
 HARDWARE_FALLBACK_TO_SIMULATOR=false
 USE_REAL_EPD=true
-DISPLAY_MODEL=waveshare_5in83_v2
+DISPLAY_MODEL=waveshare_4in2_v2
 FORCE_EPD_UPDATE=false
 EPD_REINIT_EVERY_UPDATE=false
 CLEAR_BEFORE_EPD_UPDATE=false
 GPIOZERO_PIN_FACTORY=lgpio
-NIGHTSTAND_DISPLAY_WIDTH=600
-NIGHTSTAND_DISPLAY_HEIGHT=448
+NIGHTSTAND_DISPLAY_WIDTH=400
+NIGHTSTAND_DISPLAY_HEIGHT=300
 NIGHTSTAND_EPD_ROTATE=0
 CLEAR_EPD_ON_EXIT=false
 EPD_FULL_CLEAR_INTERVAL=50
@@ -337,7 +345,7 @@ Ghosting/artifact notes:
 
 ## Switching to Waveshare 4.2 inch V2
 
-The 4.2 inch V2 panel uses the same SPI-style wiring as the 5.83 inch HAT:
+The 4.2 inch V2 panel uses SPI plus a small set of control pins:
 
 | Waveshare Pin | Raspberry Pi Signal | BCM GPIO | Physical Pin |
 | --- | --- | ---: | ---: |
@@ -483,7 +491,7 @@ RESTORE_PLAYBACK_ON_STARTUP=true
 RESUME_ON_STARTUP=false
 PLAYBACK_RESTORE_LAUNCH=false
 VALIDATE_PLAYLIST_ON_PLAY=false
-BACKGROUND_MEDIA_SCAN=true
+BACKGROUND_MEDIA_SCAN=false
 ```
 
 After startup and before pressing a source/play control, this should not show a Nightstand MPV process:
@@ -500,7 +508,7 @@ To avoid SPI/e-paper refresh contention during the first seconds of BossDAC audi
 
 ```text
 AUDIO_START_DISPLAY_GRACE_MS=5000
-EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true
+EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false
 ```
 
 During this window, the app still renders `data/latest_screen.png` and updates state, but physical Waveshare writes are deferred. Expected logs:
@@ -512,14 +520,7 @@ During this window, the app still renders `data/latest_screen.png` and updates s
 
 Use `AUDIO_START_DISPLAY_GRACE_MS=0` only to disable this behavior for comparison testing.
 
-Current Phase 1 hardware policy is stricter: physical Waveshare writes stay suppressed for the entire time audio is actively playing. The screen model and PNG continue updating, but one-shot/full/partial EPD writes wait until playback pauses or stops. Expected logs:
-
-```text
-[DISPLAY] Physical update suppressed because audio is playing
-[DISPLAY] Audio stopped; applying pending physical display update
-```
-
-Use `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false` only when deliberately comparing old behavior.
+With the GPIO18 conflict fixed, stable appliance mode allows physical e-paper refresh during playback for meaningful state changes. Avoid second-by-second progress refreshes. Set `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true` only if you need to re-enable the conservative audio-first suppression policy for comparison testing.
 
 Test a single file through the same adapter:
 

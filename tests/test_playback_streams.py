@@ -365,6 +365,110 @@ class PlaybackStreamsTest(unittest.TestCase):
             self.assertEqual(status.title, "Day 002")
             self.assertEqual(status.state, PlaybackState.PLAYING)
 
+    def test_saved_position_at_eof_advances_before_launch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            first = controller.store.get_source_queue("button-1")[0]
+            controller.store.set_current_source_id("button-1")
+            controller.store.save_playback_session(
+                PlaybackSession(
+                    source_id="button-1",
+                    current_track_id=first.id,
+                    current_track_index=0,
+                    last_position_seconds=0.96,
+                    is_playing=False,
+                    queue_order=[item.id for item in controller.library.get_queue("button-1")],
+                )
+            )
+
+            controller.handle_event(InputEvent("source", "button-1"))
+            status = controller.player.status()
+            completed_first = controller.store.get_item(first.id)
+
+            self.assertTrue(completed_first.completed)
+            self.assertEqual(status.title, "Day 002")
+            self.assertLess(status.position_seconds, 0.1)
+
+    def test_player_eof_with_null_duration_advances_to_next_track(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                        duration_seconds=None,
+                    ),
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/002",
+                        title="Day 002",
+                        sort_key="002",
+                        duration_seconds=None,
+                    ),
+                ]
+            )
+            controller = NightstandController(
+                store=store,
+                library=MediaLibrary(Path(tmp) / "media", store),
+                player=MockPlayer(),
+                display=MemoryDisplay(),
+            )
+            controller.handle_event(InputEvent("source", "button-1"))
+            first_id = controller.player.status().item_id
+            controller.player.status().state = PlaybackState.STOPPED
+            controller.player.status().ended = True
+            controller.player.status().exit_returncode = 0
+
+            controller.tick()
+
+            self.assertTrue(store.get_item(first_id).completed)
+            self.assertEqual(controller.player.status().title, "Day 002")
+            self.assertEqual(
+                store.get_playback_session("button-1").current_track_index,
+                1,
+            )
+
+    def test_playlist_exhausted_persists_stopped_complete_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                        duration_seconds=None,
+                    )
+                ]
+            )
+            metadata_dir = Path(tmp) / "media" / "buttons" / "button-1"
+            metadata_dir.mkdir(parents=True, exist_ok=True)
+            (metadata_dir / ".source.json").write_text(
+                '{"display_name":"Daily Podcast","source_type":"podcast"}',
+                encoding="utf-8",
+            )
+            controller = NightstandController(
+                store=store,
+                library=MediaLibrary(Path(tmp) / "media", store),
+                player=MockPlayer(),
+                display=MemoryDisplay(),
+            )
+            controller.handle_event(InputEvent("source", "button-1"))
+            first_id = controller.player.status().item_id
+            controller.player.status().state = PlaybackState.STOPPED
+            controller.player.status().ended = True
+            controller.player.status().exit_returncode = 0
+
+            controller.tick()
+
+            self.assertTrue(store.get_item(first_id).completed)
+            self.assertFalse(store.get_playback_session("button-1").is_playing)
+            self.assertTrue(controller.build_render_state().source_complete)
+
     def test_double_press_next_and_triple_press_restart_or_previous(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             controller = self.make_controller(tmp)

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
+import subprocess
 import time
 import threading
 from dataclasses import replace
@@ -62,12 +64,14 @@ class MediaLibrary:
                 for index, path in enumerate(self._ordered_audio_files(scan_dir, metadata.ordering)):
                     self._raise_if_cancelled(cancel_event)
                     display = self._display_metadata_for_file(path, metadata.display_name)
+                    duration_seconds = self._duration_seconds_for_file(path)
                     items.append(
                         MediaItem(
                             source_id=source.id,
                             file_path=self._relative_media_path(path),
                             title=display.title,
                             artist=display.metadata_label,
+                            duration_seconds=duration_seconds,
                             sort_key=self._sort_key(scan_dir, path, index),
                         )
                     )
@@ -224,6 +228,14 @@ class MediaLibrary:
         if 0 <= index < len(queue):
             return queue[index]
         return None
+
+    def next_uncompleted_after(self, source_id: str, index: int) -> tuple[MediaItem | None, int]:
+        queue = self.get_queue(source_id)
+        for next_index in range(index + 1, len(queue)):
+            item = queue[next_index]
+            if not item.completed:
+                return item, next_index
+        return None, len(queue)
 
     def index_for_item(self, source_id: str, item_id: int | None) -> int | None:
         if item_id is None:
@@ -440,6 +452,55 @@ class MediaLibrary:
             if text:
                 tags[key] = clean_metadata_text(text)
         return tags
+
+    def _duration_seconds_for_file(self, path: Path) -> int | None:
+        if path.stat().st_size == 0:
+            return None
+        try:
+            from mutagen import File as MutagenFile
+        except ImportError:
+            MutagenFile = None
+
+        if MutagenFile is not None:
+            try:
+                audio = MutagenFile(path)
+                length = getattr(getattr(audio, "info", None), "length", None)
+                if length:
+                    return max(1, int(round(float(length))))
+            except Exception as exc:
+                self.log.debug("Audio duration read failed path=%s error=%s", path, exc)
+
+        ffprobe = shutil.which("ffprobe")
+        if not ffprobe:
+            return None
+        try:
+            result = subprocess.run(
+                [
+                    ffprobe,
+                    "-v",
+                    "error",
+                    "-show_entries",
+                    "format=duration",
+                    "-of",
+                    "default=nokey=1:noprint_wrappers=1",
+                    str(path),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            self.log.debug("ffprobe duration read failed path=%s error=%s", path, exc)
+            return None
+        if result.returncode:
+            self.log.debug("ffprobe duration read failed path=%s stderr=%s", path, result.stderr.strip())
+            return None
+        try:
+            length = float(result.stdout.strip())
+        except ValueError:
+            return None
+        return max(1, int(round(length))) if length > 0 else None
 
     def _first_tag_value(self, value: Any) -> str:
         if isinstance(value, (list, tuple)):
