@@ -496,6 +496,21 @@ Keep `VALIDATE_PLAYLIST_ON_PLAY=false` on the Pi. Source button handling should 
 
 For clean BossDAC playback isolation, set `BACKGROUND_MEDIA_SCAN=false` while testing. When background scanning is enabled, Nightstand skips starting it during active playback and cancels a running scan before launching MPV.
 
+To avoid SPI/e-paper refresh contention during the first seconds of BossDAC audio startup, keep the physical display grace period enabled:
+
+```text
+AUDIO_START_DISPLAY_GRACE_MS=5000
+```
+
+During this window, the app still renders `data/latest_screen.png` and updates state, but physical Waveshare writes are deferred. Expected logs:
+
+```text
+[DISPLAY] Physical update deferred during audio startup grace period remaining_ms=...
+[DISPLAY] Audio startup grace period expired; applying deferred display update
+```
+
+Use `AUDIO_START_DISPLAY_GRACE_MS=0` only to disable this behavior for comparison testing.
+
 Test a single file through the same adapter:
 
 ```bash

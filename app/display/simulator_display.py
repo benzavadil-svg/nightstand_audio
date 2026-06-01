@@ -73,6 +73,7 @@ class SimulatorDisplay(DisplayAdapter):
         one_shot_major_transitions: bool = True,
         region_partial_enabled: bool = True,
         partial_streak_limit: int = 8,
+        audio_start_display_grace_ms: int = 0,
     ) -> None:
         self.renderer = renderer
         self.output_path = output_path
@@ -88,6 +89,7 @@ class SimulatorDisplay(DisplayAdapter):
         self.one_shot_major_transitions = one_shot_major_transitions
         self.region_partial_enabled = region_partial_enabled
         self.partial_streak_limit = max(1, partial_streak_limit)
+        self.audio_start_display_grace_seconds = max(0, audio_start_display_grace_ms) / 1000
         self._last_pushed_hash: str | None = None
         self._pending_hash: str | None = None
         self._pending_reason: str | None = None
@@ -95,7 +97,10 @@ class SimulatorDisplay(DisplayAdapter):
         self._pending_dirty_region: DirtyRegion | None = None
         self._pending_update_mode = "full"
         self._pending_clean_refresh = False
+        self._pending_one_shot = False
+        self._pending_deferred_by_audio_grace = False
         self._pending_requested_at = 0.0
+        self._audio_start_grace_deadline = 0.0
         self._last_push_finished_at = 0.0
         self._last_partial_finished_at = 0.0
         self._last_pushed_screen_signature: tuple[str, str, str] | None = None
@@ -108,6 +113,14 @@ class SimulatorDisplay(DisplayAdapter):
         self.log = get_logger("DISPLAY")
         self.epd_log = get_logger("EPD")
         self.startup_profiler = None
+
+    def begin_audio_start_grace(self) -> None:
+        if self.audio_start_display_grace_seconds <= 0:
+            return
+        self._audio_start_grace_deadline = max(
+            self._audio_start_grace_deadline,
+            time.monotonic() + self.audio_start_display_grace_seconds,
+        )
 
     def render(self, state: RenderState, reason: str | None = None) -> None:
         total_started = time.perf_counter()
@@ -154,6 +167,15 @@ class SimulatorDisplay(DisplayAdapter):
     def tick(self) -> None:
         if not self.physical_display or not self._pending_hash:
             return
+        if self._audio_grace_active():
+            return
+        if self._pending_deferred_by_audio_grace:
+            self.log.info(
+                "Audio startup grace period expired; applying deferred display update"
+            )
+            self._pending_deferred_by_audio_grace = False
+            self._flush_physical_update()
+            return
         if not self._pending_debounce_elapsed():
             return
         self._flush_physical_update()
@@ -193,6 +215,22 @@ class SimulatorDisplay(DisplayAdapter):
             else None
         )
         if self._should_one_shot_major_transition(update_mode, clean_refresh, policy_reason):
+            if self._audio_grace_active():
+                self._store_pending_update(
+                    image_hash=image_hash,
+                    reason=reason,
+                    next_screen=next_screen,
+                    dirty_region=dirty_region,
+                    update_mode=update_mode,
+                    clean_refresh=clean_refresh,
+                    one_shot=True,
+                    deferred_by_audio_grace=True,
+                )
+                self.log.info(
+                    "Physical update deferred during audio startup grace period remaining_ms=%.0f",
+                    self._audio_grace_remaining_ms(),
+                )
+                return
             cancelled = self._cancel_pending_update()
             self.log.info(
                 "One-shot major transition requested reason=%s policy=%s pending_updates_cancelled=%s displayed_hash=%s one_shot_major_transition=true",
@@ -205,19 +243,16 @@ class SimulatorDisplay(DisplayAdapter):
             return
 
         already_pending = self._pending_hash is not None
-        if already_pending and self._pending_update_mode == "full":
-            update_mode = "full"
-            clean_refresh = clean_refresh or self._pending_clean_refresh
-            dirty_region = None
-        elif already_pending and self._pending_update_mode == "partial" and update_mode == "partial":
-            dirty_region = self._merge_dirty_regions(self._pending_dirty_region, dirty_region)
-        self._pending_hash = image_hash
-        self._pending_reason = reason
-        self._pending_screen_signature = next_screen
-        self._pending_dirty_region = dirty_region
-        self._pending_update_mode = update_mode
-        self._pending_clean_refresh = clean_refresh
-        self._pending_requested_at = time.monotonic()
+        update_mode, clean_refresh, dirty_region = self._store_pending_update(
+            image_hash=image_hash,
+            reason=reason,
+            next_screen=next_screen,
+            dirty_region=dirty_region,
+            update_mode=update_mode,
+            clean_refresh=clean_refresh,
+            one_shot=False,
+            deferred_by_audio_grace=self._audio_grace_active(),
+        )
         self.log.info(
             "EPD refresh classified previous=%s next=%s selected=%s selected_update_mode=%s clean=%s reason=%s normalized_reason=%s policy=%s dirty_region=%s bounds=%s partial_streak=%s",
             _format_screen(self._last_pushed_screen_signature),
@@ -232,6 +267,13 @@ class SimulatorDisplay(DisplayAdapter):
             dirty_region.bounds if dirty_region else None,
             self._partial_since_clean,
         )
+
+        if self._audio_grace_active():
+            self.log.info(
+                "Physical update deferred during audio startup grace period remaining_ms=%.0f",
+                self._audio_grace_remaining_ms(),
+            )
+            return
 
         if self._last_pushed_hash is None and reason == "startup":
             self._flush_physical_update()
@@ -263,6 +305,14 @@ class SimulatorDisplay(DisplayAdapter):
         update_mode = self._pending_update_mode
         clean_refresh = self._pending_clean_refresh
         dirty_region = self._pending_dirty_region
+        if self._pending_one_shot:
+            image_hash = self._pending_hash
+            next_screen = self._pending_screen_signature
+            result = self._push_one_shot_major_transition(image_hash, reason, next_screen)
+            self._clear_pending_update()
+            if result is False:
+                self.log.warning("Deferred one-shot display update failed reason=%s", reason)
+            return
         self.epd_log.info(
             "%s update reason=%s normalized_reason=%s dirty_region=%s bounds=%s partial_streak=%s",
             "Full" if update_mode == "full" else "Partial",
@@ -293,11 +343,7 @@ class SimulatorDisplay(DisplayAdapter):
             self.startup_profiler.record("first_physical_epd_update", push_ms)
         if result is False:
             self._last_push_finished_at = time.monotonic()
-            self._pending_hash = None
-            self._pending_reason = None
-            self._pending_screen_signature = None
-            self._pending_dirty_region = None
-            self._pending_requested_at = 0.0
+            self._clear_pending_update()
             self.log.warning(
                 "Physical e-paper update failed reason=%s duration_ms=%.1f",
                 reason,
@@ -306,13 +352,7 @@ class SimulatorDisplay(DisplayAdapter):
             return
         self._last_pushed_hash = self._pending_hash
         self._last_pushed_screen_signature = self._pending_screen_signature
-        self._pending_hash = None
-        self._pending_reason = None
-        self._pending_screen_signature = None
-        self._pending_dirty_region = None
-        self._pending_update_mode = "full"
-        self._pending_clean_refresh = False
-        self._pending_requested_at = 0.0
+        self._clear_pending_update()
         self._last_push_finished_at = time.monotonic()
         if update_mode == "partial":
             self._last_partial_finished_at = self._last_push_finished_at
@@ -343,9 +383,9 @@ class SimulatorDisplay(DisplayAdapter):
         image_hash: str,
         reason: str,
         next_screen: tuple[str, str, str] | None,
-    ) -> None:
+    ) -> bool | None:
         if not self.physical_display:
-            return
+            return None
         started = time.perf_counter()
         if hasattr(self.physical_display, "one_shot_render_path"):
             result = self.physical_display.one_shot_render_path(
@@ -371,7 +411,7 @@ class SimulatorDisplay(DisplayAdapter):
                 push_ms,
                 image_hash,
             )
-            return
+            return False
         self._last_pushed_hash = image_hash
         self._last_pushed_screen_signature = next_screen
         self._pending_dirty_region = None
@@ -388,19 +428,69 @@ class SimulatorDisplay(DisplayAdapter):
             push_ms,
             image_hash,
         )
+        return True
 
     def _cancel_pending_update(self) -> int:
         if not self._pending_hash:
             return 0
+        self._clear_pending_update()
+        self._cancelled_pending_count += 1
+        return 1
+
+    def _clear_pending_update(self) -> None:
         self._pending_hash = None
         self._pending_reason = None
         self._pending_screen_signature = None
         self._pending_dirty_region = None
         self._pending_update_mode = "full"
         self._pending_clean_refresh = False
+        self._pending_one_shot = False
+        self._pending_deferred_by_audio_grace = False
         self._pending_requested_at = 0.0
-        self._cancelled_pending_count += 1
-        return 1
+
+    def _store_pending_update(
+        self,
+        image_hash: str,
+        reason: str,
+        next_screen: tuple[str, str, str] | None,
+        dirty_region: DirtyRegion | None,
+        update_mode: str,
+        clean_refresh: bool,
+        one_shot: bool,
+        deferred_by_audio_grace: bool,
+    ) -> tuple[str, bool, DirtyRegion | None]:
+        already_pending = self._pending_hash is not None
+        if already_pending and (self._pending_one_shot or one_shot):
+            one_shot = self._pending_one_shot or one_shot
+            update_mode = "full"
+            clean_refresh = clean_refresh or self._pending_clean_refresh
+            dirty_region = None
+        elif already_pending and self._pending_update_mode == "full":
+            update_mode = "full"
+            clean_refresh = clean_refresh or self._pending_clean_refresh
+            dirty_region = None
+        elif already_pending and self._pending_update_mode == "partial" and update_mode == "partial":
+            dirty_region = self._merge_dirty_regions(self._pending_dirty_region, dirty_region)
+        self._pending_hash = image_hash
+        self._pending_reason = reason
+        self._pending_screen_signature = next_screen
+        self._pending_dirty_region = dirty_region
+        self._pending_update_mode = update_mode
+        self._pending_clean_refresh = clean_refresh
+        self._pending_one_shot = one_shot
+        self._pending_deferred_by_audio_grace = (
+            self._pending_deferred_by_audio_grace or deferred_by_audio_grace
+        )
+        self._pending_requested_at = time.monotonic()
+        return update_mode, clean_refresh, dirty_region
+
+    def _audio_grace_active(self) -> bool:
+        return self._audio_grace_remaining_ms() > 0
+
+    def _audio_grace_remaining_ms(self) -> float:
+        if self._audio_start_grace_deadline <= 0:
+            return 0.0
+        return max(0.0, (self._audio_start_grace_deadline - time.monotonic()) * 1000)
 
     def _pending_debounce_elapsed(self) -> bool:
         wait_seconds = self._pending_wait_seconds()

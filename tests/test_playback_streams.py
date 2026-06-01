@@ -29,6 +29,15 @@ class MemoryDisplay(DisplayAdapter):
         self.last_state = state
 
 
+class GraceMemoryDisplay(MemoryDisplay):
+    def __init__(self) -> None:
+        super().__init__()
+        self.audio_grace_calls = 0
+
+    def begin_audio_start_grace(self) -> None:
+        self.audio_grace_calls += 1
+
+
 class SpyPlayer(MockPlayer):
     def __init__(self) -> None:
         super().__init__()
@@ -292,6 +301,31 @@ class PlaybackStreamsTest(unittest.TestCase):
             self.assertEqual(library.resolved_paths, ["buttons/button-1/001-first.mp3"])
             self.assertEqual(library.cancel_background_scan_reasons, ["playback_active"])
             self.assertEqual(controller.player.status().title, "Track 001")
+
+    def test_source_playback_starts_display_audio_grace(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                    )
+                ]
+            )
+            display = GraceMemoryDisplay()
+            controller = NightstandController(
+                store=store,
+                library=MediaLibrary(Path(tmp) / "media", store),
+                player=MockPlayer(),
+                display=display,
+            )
+
+            controller.handle_event(InputEvent("source", "button-1"))
+
+            self.assertEqual(display.audio_grace_calls, 1)
 
     def test_background_scan_is_skipped_while_playback_active(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

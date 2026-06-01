@@ -59,6 +59,7 @@ class Settings:
     playback_restore_launch: bool
     validate_playlist_on_play: bool
     background_media_scan: bool
+    audio_start_display_grace_ms: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -142,6 +143,7 @@ class Settings:
             playback_restore_launch=_env_bool("PLAYBACK_RESTORE_LAUNCH", False),
             validate_playlist_on_play=_env_bool("VALIDATE_PLAYLIST_ON_PLAY", False),
             background_media_scan=_env_bool("BACKGROUND_MEDIA_SCAN", True),
+            audio_start_display_grace_ms=int(os.getenv("AUDIO_START_DISPLAY_GRACE_MS", "5000")),
         )
 
     def ensure_dirs(self) -> None:

@@ -399,6 +399,14 @@ Source button presses use the cached playlist index and resolve only the selecte
 
 For isolated audio debugging on the Pi, set `BACKGROUND_MEDIA_SCAN=false`. That keeps the startup background scanner from running before playback tests. Even when enabled, the app skips starting a background scan while audio is active and asks any running background scan to cancel before MPV launch.
 
+Physical Waveshare refreshes are deferred briefly when audio first transitions from stopped/paused to playing. This protects I2S startup on the Pi Zero 2 W while still rendering `data/latest_screen.png` immediately:
+
+```text
+AUDIO_START_DISPLAY_GRACE_MS=5000
+```
+
+Set `AUDIO_START_DISPLAY_GRACE_MS=0` to disable the grace period. When active, logs show `[DISPLAY] Physical update deferred during audio startup grace period remaining_ms=...` followed by `[DISPLAY] Audio startup grace period expired; applying deferred display update`.
+
 Rebuild the portable media cache after changing files:
 
 ```bash

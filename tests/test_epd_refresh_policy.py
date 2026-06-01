@@ -302,6 +302,89 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
         self.assertEqual(physical.one_shot_calls[0][1:], ("major_layout_transition", "home-hash"))
         self.assertEqual(physical.render_path_calls, [])
 
+    def test_audio_start_grace_defers_one_shot_physical_update_until_expired(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            audio_start_display_grace_ms=5000,
+        )
+        display._last_pushed_hash = "old-hash"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        display.begin_audio_start_grace()
+        display._request_physical_update(
+            "playback-hash",
+            "source_change",
+            ("HOME", "Sleep Baseball", "playback_home"),
+        )
+
+        self.assertEqual(physical.one_shot_calls, [])
+        self.assertEqual(physical.render_path_calls, [])
+        self.assertEqual(display._pending_hash, "playback-hash")
+        self.assertTrue(display._pending_one_shot)
+        self.assertTrue(display._pending_deferred_by_audio_grace)
+
+        display._audio_start_grace_deadline = 0
+        display.tick()
+
+        self.assertEqual(len(physical.one_shot_calls), 1)
+        self.assertEqual(physical.one_shot_calls[0][1:], ("source_change", "playback-hash"))
+        self.assertIsNone(display._pending_hash)
+
+    def test_audio_start_grace_keeps_latest_pending_screen_only(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            audio_start_display_grace_ms=5000,
+        )
+        display._last_pushed_hash = "old-hash"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        display.begin_audio_start_grace()
+        display._request_physical_update(
+            "first-hash",
+            "source_change",
+            ("HOME", "Bible in a Year", "playback_home"),
+        )
+        display._request_physical_update(
+            "latest-hash",
+            "playback_toggle",
+            ("HOME", "Bible in a Year", "playback_home"),
+        )
+        display._audio_start_grace_deadline = 0
+        display.tick()
+
+        self.assertEqual(len(physical.one_shot_calls), 1)
+        self.assertEqual(physical.one_shot_calls[0][2], "latest-hash")
+
+    def test_zero_audio_start_grace_preserves_immediate_physical_update(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            audio_start_display_grace_ms=0,
+        )
+        display._last_pushed_hash = "old-hash"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        display.begin_audio_start_grace()
+        display._request_physical_update(
+            "playback-hash",
+            "source_change",
+            ("HOME", "Sleep Baseball", "playback_home"),
+        )
+
+        self.assertEqual(len(physical.one_shot_calls), 1)
+        self.assertIsNone(display._pending_hash)
+
     def test_minor_same_screen_update_still_uses_debounced_fast_path(self) -> None:
         physical = FakePhysicalDisplay()
         display = SimulatorDisplay(

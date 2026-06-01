@@ -607,7 +607,9 @@ class NightstandController:
     def resume_last(self) -> None:
         status = self.player.status()
         if status.item_id:
+            previous_state = status.state
             self.player.resume()
+            self._begin_audio_start_display_grace_if_needed(previous_state)
             self._save_session_from_status(is_playing=True)
             self.nav.go_home()
             self.log_playback.info("Playback resumed from current item.")
@@ -667,7 +669,9 @@ class NightstandController:
     def toggle_play_pause_or_resume(self) -> None:
         status = self.player.status()
         if status.state in {PlaybackState.PLAYING, PlaybackState.PAUSED}:
+            previous_state = status.state
             self.player.toggle_play_pause()
+            self._begin_audio_start_display_grace_if_needed(previous_state)
             self._save_session_from_status(
                 is_playing=self.player.status().state == PlaybackState.PLAYING
             )
@@ -1001,8 +1005,19 @@ class NightstandController:
             )
             return False
         self._restored_status = None
+        previous_state = self.player.status().state
         self.player.play(resolved_item, position)
+        self._begin_audio_start_display_grace_if_needed(previous_state)
         return True
+
+    def _begin_audio_start_display_grace_if_needed(self, previous_state: PlaybackState) -> None:
+        if previous_state == PlaybackState.PLAYING:
+            return
+        if self.player.status().state != PlaybackState.PLAYING:
+            return
+        begin_grace = getattr(self.display, "begin_audio_start_grace", None)
+        if callable(begin_grace):
+            begin_grace()
 
     def _start_background_media_scan_if_needed(self) -> None:
         if not self.start_background_media_scan_after_first_render:
