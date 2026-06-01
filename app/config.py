@@ -60,6 +60,7 @@ class Settings:
     validate_playlist_on_play: bool
     background_media_scan: bool
     audio_start_display_grace_ms: int
+    epd_suppress_while_audio_playing: bool
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -144,6 +145,10 @@ class Settings:
             validate_playlist_on_play=_env_bool("VALIDATE_PLAYLIST_ON_PLAY", False),
             background_media_scan=_env_bool("BACKGROUND_MEDIA_SCAN", True),
             audio_start_display_grace_ms=int(os.getenv("AUDIO_START_DISPLAY_GRACE_MS", "5000")),
+            epd_suppress_while_audio_playing=_env_bool(
+                "EPD_SUPPRESS_WHILE_AUDIO_PLAYING",
+                True,
+            ),
         )
 
     def ensure_dirs(self) -> None:

@@ -500,6 +500,7 @@ To avoid SPI/e-paper refresh contention during the first seconds of BossDAC audi
 
 ```text
 AUDIO_START_DISPLAY_GRACE_MS=5000
+EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true
 ```
 
 During this window, the app still renders `data/latest_screen.png` and updates state, but physical Waveshare writes are deferred. Expected logs:
@@ -510,6 +511,15 @@ During this window, the app still renders `data/latest_screen.png` and updates s
 ```
 
 Use `AUDIO_START_DISPLAY_GRACE_MS=0` only to disable this behavior for comparison testing.
+
+Current Phase 1 hardware policy is stricter: physical Waveshare writes stay suppressed for the entire time audio is actively playing. The screen model and PNG continue updating, but one-shot/full/partial EPD writes wait until playback pauses or stops. Expected logs:
+
+```text
+[DISPLAY] Physical update suppressed because audio is playing
+[DISPLAY] Audio stopped; applying pending physical display update
+```
+
+Use `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false` only when deliberately comparing old behavior.
 
 Test a single file through the same adapter:
 

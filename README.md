@@ -403,9 +403,12 @@ Physical Waveshare refreshes are deferred briefly when audio first transitions f
 
 ```text
 AUDIO_START_DISPLAY_GRACE_MS=5000
+EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true
 ```
 
 Set `AUDIO_START_DISPLAY_GRACE_MS=0` to disable the grace period. When active, logs show `[DISPLAY] Physical update deferred during audio startup grace period remaining_ms=...` followed by `[DISPLAY] Audio startup grace period expired; applying deferred display update`.
+
+The current Pi Zero 2 W + BossDAC + Waveshare policy is audio-first: with `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true`, physical e-paper writes are suppressed for the entire time playback state is `PLAYING`. The app still updates state and writes `data/latest_screen.png`, but one-shot/full/partial Waveshare refreshes wait until playback is paused or stopped. Expected logs are `[DISPLAY] Physical update suppressed because audio is playing` and `[DISPLAY] Audio stopped; applying pending physical display update`. Set `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false` only for comparison testing.
 
 Rebuild the portable media cache after changing files:
 

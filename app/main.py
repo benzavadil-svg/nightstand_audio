@@ -95,6 +95,7 @@ def build_simulator_controller() -> NightstandController:
         region_partial_enabled=settings.epd_region_partial_enabled,
         partial_streak_limit=settings.epd_partial_streak_limit,
         audio_start_display_grace_ms=settings.audio_start_display_grace_ms,
+        suppress_while_audio_playing=settings.epd_suppress_while_audio_playing,
     )
     display.startup_profiler = profiler
     with profiler.span("playback_service_init"):

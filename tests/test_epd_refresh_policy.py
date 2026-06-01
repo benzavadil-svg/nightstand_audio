@@ -385,6 +385,134 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
         self.assertEqual(len(physical.one_shot_calls), 1)
         self.assertIsNone(display._pending_hash)
 
+    def test_audio_playback_suppresses_physical_epd_writes(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            suppress_while_audio_playing=True,
+        )
+        display._last_pushed_hash = "idle-hash"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        display._request_physical_update(
+            "playback-hash",
+            "source_change",
+            ("HOME", "Sleep Baseball", "playback_home"),
+            audio_playing=True,
+        )
+
+        self.assertEqual(physical.one_shot_calls, [])
+        self.assertEqual(physical.render_path_calls, [])
+        self.assertEqual(display._pending_hash, "playback-hash")
+        self.assertTrue(display._pending_suppressed_by_audio_playback)
+
+    def test_audio_playback_suppression_keeps_newest_pending_screen(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            suppress_while_audio_playing=True,
+        )
+        display._last_pushed_hash = "idle-hash"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        display._request_physical_update(
+            "first-hash",
+            "source_change",
+            ("HOME", "Bible in a Year", "playback_home"),
+            audio_playing=True,
+        )
+        display._request_physical_update(
+            "latest-hash",
+            "clock_refresh",
+            ("HOME", "Bible in a Year", "playback_home"),
+            audio_playing=True,
+        )
+
+        self.assertEqual(display._pending_hash, "latest-hash")
+        self.assertEqual(physical.one_shot_calls, [])
+        self.assertEqual(physical.render_path_calls, [])
+
+    def test_pending_audio_playback_update_flushes_once_after_audio_stops(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            suppress_while_audio_playing=True,
+        )
+        display._last_pushed_hash = "idle-hash"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        display._request_physical_update(
+            "playing-hash",
+            "source_change",
+            ("HOME", "Sleep Baseball", "playback_home"),
+            audio_playing=True,
+        )
+        display._request_physical_update(
+            "paused-hash",
+            "playback_toggle",
+            ("HOME", "Sleep Baseball", "playback_home"),
+            audio_playing=False,
+        )
+
+        self.assertEqual(len(physical.one_shot_calls), 1)
+        self.assertEqual(physical.one_shot_calls[0][2], "paused-hash")
+        self.assertEqual(physical.render_path_calls, [])
+        self.assertIsNone(display._pending_hash)
+
+    def test_progress_timer_changes_do_not_write_physical_epd_while_playing(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            suppress_while_audio_playing=True,
+        )
+        display._last_pushed_hash = "playback-hash"
+        display._last_pushed_screen_signature = ("HOME", "Sleep Baseball", "playback_home")
+
+        display._request_physical_update(
+            "progress-hash",
+            "progress_tick",
+            ("HOME", "Sleep Baseball", "playback_home"),
+            audio_playing=True,
+        )
+
+        self.assertEqual(physical.one_shot_calls, [])
+        self.assertEqual(physical.render_path_calls, [])
+        self.assertEqual(display._pending_hash, "progress-hash")
+
+    def test_audio_playback_suppression_can_be_disabled(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            audio_start_display_grace_ms=0,
+            suppress_while_audio_playing=False,
+        )
+        display._last_pushed_hash = "idle-hash"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+
+        display._request_physical_update(
+            "playback-hash",
+            "source_change",
+            ("HOME", "Sleep Baseball", "playback_home"),
+            audio_playing=True,
+        )
+
+        self.assertEqual(len(physical.one_shot_calls), 1)
+        self.assertIsNone(display._pending_hash)
+
     def test_minor_same_screen_update_still_uses_debounced_fast_path(self) -> None:
         physical = FakePhysicalDisplay()
         display = SimulatorDisplay(

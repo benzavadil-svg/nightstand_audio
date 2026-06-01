@@ -74,6 +74,7 @@ class SimulatorDisplay(DisplayAdapter):
         region_partial_enabled: bool = True,
         partial_streak_limit: int = 8,
         audio_start_display_grace_ms: int = 0,
+        suppress_while_audio_playing: bool = True,
     ) -> None:
         self.renderer = renderer
         self.output_path = output_path
@@ -90,6 +91,7 @@ class SimulatorDisplay(DisplayAdapter):
         self.region_partial_enabled = region_partial_enabled
         self.partial_streak_limit = max(1, partial_streak_limit)
         self.audio_start_display_grace_seconds = max(0, audio_start_display_grace_ms) / 1000
+        self.suppress_while_audio_playing = suppress_while_audio_playing
         self._last_pushed_hash: str | None = None
         self._pending_hash: str | None = None
         self._pending_reason: str | None = None
@@ -99,8 +101,10 @@ class SimulatorDisplay(DisplayAdapter):
         self._pending_clean_refresh = False
         self._pending_one_shot = False
         self._pending_deferred_by_audio_grace = False
+        self._pending_suppressed_by_audio_playback = False
         self._pending_requested_at = 0.0
         self._audio_start_grace_deadline = 0.0
+        self._audio_playback_active = False
         self._last_push_finished_at = 0.0
         self._last_partial_finished_at = 0.0
         self._last_pushed_screen_signature: tuple[str, str, str] | None = None
@@ -139,11 +143,13 @@ class SimulatorDisplay(DisplayAdapter):
 
         push_ms = 0.0
         if self.physical_display:
+            self._audio_playback_active = state.playback.state == PlaybackState.PLAYING
             push_started = time.perf_counter()
             self._request_physical_update(
                 image_hash,
                 reason or "state_changed",
                 _screen_signature(state),
+                audio_playing=self._audio_playback_active,
             )
             push_ms = (time.perf_counter() - push_started) * 1000
 
@@ -166,6 +172,8 @@ class SimulatorDisplay(DisplayAdapter):
 
     def tick(self) -> None:
         if not self.physical_display or not self._pending_hash:
+            return
+        if self._should_suppress_for_audio_playback(self._audio_playback_active):
             return
         if self._audio_grace_active():
             return
@@ -193,12 +201,20 @@ class SimulatorDisplay(DisplayAdapter):
         image_hash: str,
         reason: str,
         next_screen: tuple[str, str, str] | None = None,
+        audio_playing: bool = False,
     ) -> None:
+        apply_suppressed_after_request = (
+            self._pending_suppressed_by_audio_playback and not audio_playing
+        )
         if reason == "volume_change" and not self.refresh_on_volume_change:
             self._skipped_count += 1
             self.log.info("Skipping physical update for volume_change")
             return
         if image_hash == self._last_pushed_hash:
+            if apply_suppressed_after_request and self._pending_hash:
+                self.log.info("Audio stopped; applying pending physical display update")
+                self._flush_physical_update()
+                return
             self._skipped_count += 1
             self.epd_log.info(
                 "Skipped update reason=image_unchanged source_reason=%s selected_update_mode=skipped previous=%s next=%s",
@@ -214,8 +230,27 @@ class SimulatorDisplay(DisplayAdapter):
             if update_mode == "partial" and self.region_partial_enabled
             else None
         )
-        if self._should_one_shot_major_transition(update_mode, clean_refresh, policy_reason):
-            if self._audio_grace_active():
+        one_shot = self._should_one_shot_major_transition(update_mode, clean_refresh, policy_reason)
+        if self._should_suppress_for_audio_playback(audio_playing):
+            self._store_pending_update(
+                image_hash=image_hash,
+                reason=reason,
+                next_screen=next_screen,
+                dirty_region=dirty_region,
+                update_mode=update_mode,
+                clean_refresh=clean_refresh,
+                one_shot=one_shot,
+                deferred_by_audio_grace=False,
+                suppressed_by_audio_playback=True,
+                replace_existing=True,
+            )
+            self.log.info("Physical update suppressed because audio is playing")
+            return
+
+        if one_shot:
+            if apply_suppressed_after_request:
+                self.log.info("Audio stopped; applying pending physical display update")
+            if self._audio_grace_active() and not apply_suppressed_after_request:
                 self._store_pending_update(
                     image_hash=image_hash,
                     reason=reason,
@@ -225,6 +260,8 @@ class SimulatorDisplay(DisplayAdapter):
                     clean_refresh=clean_refresh,
                     one_shot=True,
                     deferred_by_audio_grace=True,
+                    suppressed_by_audio_playback=False,
+                    replace_existing=False,
                 )
                 self.log.info(
                     "Physical update deferred during audio startup grace period remaining_ms=%.0f",
@@ -252,6 +289,8 @@ class SimulatorDisplay(DisplayAdapter):
             clean_refresh=clean_refresh,
             one_shot=False,
             deferred_by_audio_grace=self._audio_grace_active(),
+            suppressed_by_audio_playback=False,
+            replace_existing=False,
         )
         self.log.info(
             "EPD refresh classified previous=%s next=%s selected=%s selected_update_mode=%s clean=%s reason=%s normalized_reason=%s policy=%s dirty_region=%s bounds=%s partial_streak=%s",
@@ -267,6 +306,11 @@ class SimulatorDisplay(DisplayAdapter):
             dirty_region.bounds if dirty_region else None,
             self._partial_since_clean,
         )
+
+        if apply_suppressed_after_request:
+            self.log.info("Audio stopped; applying pending physical display update")
+            self._flush_physical_update()
+            return
 
         if self._audio_grace_active():
             self.log.info(
@@ -446,6 +490,7 @@ class SimulatorDisplay(DisplayAdapter):
         self._pending_clean_refresh = False
         self._pending_one_shot = False
         self._pending_deferred_by_audio_grace = False
+        self._pending_suppressed_by_audio_playback = False
         self._pending_requested_at = 0.0
 
     def _store_pending_update(
@@ -458,8 +503,10 @@ class SimulatorDisplay(DisplayAdapter):
         clean_refresh: bool,
         one_shot: bool,
         deferred_by_audio_grace: bool,
+        suppressed_by_audio_playback: bool,
+        replace_existing: bool,
     ) -> tuple[str, bool, DirtyRegion | None]:
-        already_pending = self._pending_hash is not None
+        already_pending = self._pending_hash is not None and not replace_existing
         if already_pending and (self._pending_one_shot or one_shot):
             one_shot = self._pending_one_shot or one_shot
             update_mode = "full"
@@ -481,8 +528,14 @@ class SimulatorDisplay(DisplayAdapter):
         self._pending_deferred_by_audio_grace = (
             self._pending_deferred_by_audio_grace or deferred_by_audio_grace
         )
+        self._pending_suppressed_by_audio_playback = (
+            self._pending_suppressed_by_audio_playback or suppressed_by_audio_playback
+        )
         self._pending_requested_at = time.monotonic()
         return update_mode, clean_refresh, dirty_region
+
+    def _should_suppress_for_audio_playback(self, audio_playing: bool) -> bool:
+        return self.suppress_while_audio_playing and audio_playing
 
     def _audio_grace_active(self) -> bool:
         return self._audio_grace_remaining_ms() > 0
