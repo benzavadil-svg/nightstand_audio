@@ -414,6 +414,15 @@ Set `AUDIO_START_DISPLAY_GRACE_MS=0` to disable the grace period. When active, l
 
 The current stable Pi command sets `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false` because the GPIO conflict is fixed. Keep `AUDIO_START_DISPLAY_GRACE_MS=5000`, avoid second-by-second physical progress refreshes, and use the suppression flag only if hardware testing shows I2S contention again.
 
+Sleep timer shutdown is a dedicated transition, not a natural EOF. When sleep triggers, the app saves the current track position immediately, fades audio down, stops MPV after the fade, and keeps the saved session marked as paused due to sleep:
+
+```text
+SLEEP_FADE_SECONDS=10
+SLEEP_FADE_STEPS=20
+```
+
+The saved resume position is the start of the fade, so pressing the same source button later resumes intentionally from that point instead of advancing because the fade ran for several more seconds.
+
 GPIO root cause note: Waveshare stock `epdconfig.py` used `PWR_PIN=18`, which conflicts with BossDAC `GPIO18 = PCM_CLK` and caused `bcm2835-i2s 3f203000.i2s: I2S SYNC error!`. Use `PWR_PIN=5` or another safe non-I2S GPIO. Never assign Waveshare control pins to GPIO18, GPIO19, GPIO20, or GPIO21.
 
 When BossDAC is detected and real EPD is enabled, the app checks Waveshare `epdconfig.py` and refuses physical display startup if `PWR_PIN`, `RST_PIN`, `DC_PIN`, `CS_PIN`, or `BUSY_PIN` uses GPIO18/19/20/21. The only override is explicit bench-mode `ALLOW_UNSAFE_EPD_GPIO=true`.
@@ -494,7 +503,7 @@ Each preset button is a persistent playlist stream:
 - `2` resumes the Button 2 playlist from its saved track and position.
 - `3` resumes the Button 3 playlist from its saved track and position.
 
-Playback continues track-to-track until paused, another source is selected, the sleep timer expires, or the playlist ends. Podcast-style folders stop when fully completed and do not loop automatically. Sleep sounds loop forever.
+Playback continues track-to-track until paused, the same source button is pressed again, another source is selected, the sleep timer fades out and stops playback, or the playlist ends. Podcast-style folders stop when fully completed and do not loop automatically. Sleep sounds loop forever.
 
 ## Folder-Based Button Sources
 

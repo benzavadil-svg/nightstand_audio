@@ -522,6 +522,15 @@ Use `AUDIO_START_DISPLAY_GRACE_MS=0` only to disable this behavior for compariso
 
 With the GPIO18 conflict fixed, stable appliance mode allows physical e-paper refresh during playback for meaningful state changes. Avoid second-by-second progress refreshes. Set `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=true` only if you need to re-enable the conservative audio-first suppression policy for comparison testing.
 
+Sleep timer shutdown fades audio instead of abruptly stopping MPV:
+
+```text
+SLEEP_FADE_SECONDS=10
+SLEEP_FADE_STEPS=20
+```
+
+The controller saves the resume cursor before the fade starts, records the session with `stop_reason=sleep`, and stops audio after the fade without marking the item completed. Repeated sleep triggers during the fade are ignored.
+
 Test a single file through the same adapter:
 
 ```bash

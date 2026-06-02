@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import time
 import unittest
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from app.display.base import DisplayAdapter
@@ -51,6 +52,16 @@ class SpyPlayer(MockPlayer):
     def status(self) -> PlaybackStatus:
         self.status_calls += 1
         return super().status()
+
+
+class CountingStopPlayer(MockPlayer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.stop_calls = 0
+
+    def stop(self) -> None:
+        self.stop_calls += 1
+        super().stop()
 
 
 class CountingMediaLibrary(MediaLibrary):
@@ -364,6 +375,110 @@ class PlaybackStreamsTest(unittest.TestCase):
             self.assertNotEqual(status.item_id, first_id)
             self.assertEqual(status.title, "Day 002")
             self.assertEqual(status.state, PlaybackState.PLAYING)
+
+    def test_sleep_timer_fade_saves_start_position_without_completion_or_advance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            controller.store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                        duration_seconds=100,
+                    )
+                ]
+            )
+            controller.sleep_fade_seconds = 10
+            controller.sleep_fade_steps = 5
+            controller.handle_event(InputEvent("source", "button-1"))
+            first_id = controller.player.status().item_id
+            controller.player.status().position_seconds = 12.34
+            controller.player._started_monotonic = None
+            controller.sleep_timer.deadline = datetime.now() - timedelta(seconds=1)
+
+            controller.tick()
+
+            session = controller.store.get_playback_session("button-1")
+            self.assertTrue(controller._sleep_transitioning)
+            self.assertEqual(session.stop_reason, "sleep")
+            self.assertFalse(session.is_playing)
+            self.assertAlmostEqual(session.last_position_seconds, 12.34)
+            self.assertFalse(controller.store.get_item(first_id).completed)
+
+            controller._sleep_fade_started_at -= 11
+            controller.tick()
+
+            session = controller.store.get_playback_session("button-1")
+            self.assertFalse(controller._sleep_transitioning)
+            self.assertEqual(controller.player.status().state, PlaybackState.STOPPED)
+            self.assertEqual(session.current_track_id, first_id)
+            self.assertEqual(session.current_track_index, 0)
+            self.assertEqual(session.stop_reason, "sleep")
+            self.assertAlmostEqual(session.last_position_seconds, 12.34)
+            self.assertFalse(controller.store.get_item(first_id).completed)
+            self.assertEqual(controller.build_render_state().mode, UIMode.AMBIENT)
+
+    def test_sleep_trigger_is_idempotent_during_fade(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                        duration_seconds=60,
+                    )
+                ]
+            )
+            player = CountingStopPlayer()
+            controller = NightstandController(
+                store=store,
+                library=MediaLibrary(Path(tmp) / "media", store),
+                player=player,
+                display=MemoryDisplay(),
+                sleep_fade_seconds=10,
+                sleep_fade_steps=5,
+            )
+            controller.handle_event(InputEvent("source", "button-1"))
+            player.status().position_seconds = 8
+            player._started_monotonic = None
+
+            controller._begin_sleep_transition("manual_test")
+            controller._begin_sleep_transition("duplicate_test")
+
+            self.assertTrue(controller._sleep_transitioning)
+            self.assertEqual(player.stop_calls, 0)
+            self.assertAlmostEqual(
+                store.get_playback_session("button-1").last_position_seconds,
+                8,
+            )
+
+            controller._sleep_fade_started_at -= 11
+            controller.tick()
+
+            self.assertEqual(player.stop_calls, 1)
+            self.assertFalse(controller._sleep_transitioning)
+
+    def test_source_button_after_sleep_resumes_pre_fade_position_even_near_eof(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            first = controller.store.get_source_queue("button-1")[0]
+            controller.sleep_fade_seconds = 0
+            controller.handle_event(InputEvent("source", "button-1"))
+            controller.player.status().position_seconds = 0.96
+            controller.player._started_monotonic = None
+
+            controller._begin_sleep_transition("manual_test")
+            controller.handle_event(InputEvent("source", "button-1"))
+            status = controller.player.status()
+
+            self.assertEqual(status.item_id, first.id)
+            self.assertGreaterEqual(status.position_seconds, 0.96)
+            self.assertFalse(controller.store.get_item(first.id).completed)
 
     def test_saved_position_at_eof_advances_before_launch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

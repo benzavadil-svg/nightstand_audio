@@ -88,6 +88,8 @@ def _settings(runtime_mode: str, playback_backend: str) -> Settings:
         background_media_scan=True,
         audio_start_display_grace_ms=5000,
         epd_suppress_while_audio_playing=True,
+        sleep_fade_seconds=10,
+        sleep_fade_steps=20,
     )
 
 

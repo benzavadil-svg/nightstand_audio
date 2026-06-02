@@ -124,6 +124,8 @@ def build_simulator_controller() -> NightstandController:
             resume_on_startup=settings.resume_on_startup,
             playback_restore_launch=settings.playback_restore_launch,
             validate_playlist_on_play=settings.validate_playlist_on_play,
+            sleep_fade_seconds=settings.sleep_fade_seconds,
+            sleep_fade_steps=settings.sleep_fade_steps,
         )
     controller.startup_profiler = profiler
     if settings.runtime_mode == "appliance" and settings.background_media_scan:

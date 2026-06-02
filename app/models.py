@@ -114,6 +114,7 @@ class PlaybackSession:
     current_track_index: int = 0
     last_position_seconds: float = 0
     is_playing: bool = False
+    stop_reason: str | None = None
     queue_order: list[int] = field(default_factory=list)
     updated_at: datetime | None = None
 

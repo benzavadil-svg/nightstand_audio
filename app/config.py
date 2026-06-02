@@ -62,6 +62,8 @@ class Settings:
     background_media_scan: bool
     audio_start_display_grace_ms: int
     epd_suppress_while_audio_playing: bool
+    sleep_fade_seconds: float
+    sleep_fade_steps: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -150,6 +152,8 @@ class Settings:
                 "EPD_SUPPRESS_WHILE_AUDIO_PLAYING",
                 False,
             ),
+            sleep_fade_seconds=float(os.getenv("SLEEP_FADE_SECONDS", "10")),
+            sleep_fade_steps=int(os.getenv("SLEEP_FADE_STEPS", "20")),
         )
 
     def ensure_dirs(self) -> None:

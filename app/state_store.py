@@ -77,6 +77,7 @@ class StateStore:
                     current_track_index INTEGER NOT NULL DEFAULT 0,
                     last_position_seconds REAL NOT NULL DEFAULT 0,
                     is_playing INTEGER NOT NULL DEFAULT 0,
+                    stop_reason TEXT,
                     queue_order TEXT NOT NULL DEFAULT '[]',
                     updated_at TEXT
                 );
@@ -88,6 +89,7 @@ class StateStore:
                 """
             )
             self._ensure_column(conn, "media_items", "sort_key", "TEXT NOT NULL DEFAULT ''")
+            self._ensure_column(conn, "playback_sessions", "stop_reason", "TEXT")
 
     def _ensure_column(
         self, conn: sqlite3.Connection, table_name: str, column_name: str, declaration: str
@@ -231,6 +233,7 @@ class StateStore:
                     current_track_index = 0,
                     last_position_seconds = 0,
                     is_playing = 0,
+                    stop_reason = NULL,
                     updated_at = ?
                 WHERE source_id = ?
                 """,
@@ -327,6 +330,7 @@ class StateStore:
             current_track_index=int(row["current_track_index"]),
             last_position_seconds=float(row["last_position_seconds"]),
             is_playing=bool(row["is_playing"]),
+            stop_reason=str(row["stop_reason"]) if row["stop_reason"] else None,
             queue_order=json.loads(row["queue_order"] or "[]"),
             updated_at=datetime.fromisoformat(row["updated_at"]) if row["updated_at"] else None,
         )
@@ -341,15 +345,17 @@ class StateStore:
                     current_track_index,
                     last_position_seconds,
                     is_playing,
+                    stop_reason,
                     queue_order,
                     updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(source_id) DO UPDATE SET
                     current_track_id = excluded.current_track_id,
                     current_track_index = excluded.current_track_index,
                     last_position_seconds = excluded.last_position_seconds,
                     is_playing = excluded.is_playing,
+                    stop_reason = excluded.stop_reason,
                     queue_order = excluded.queue_order,
                     updated_at = excluded.updated_at
                 """,
@@ -359,6 +365,7 @@ class StateStore:
                     session.current_track_index,
                     max(0, session.last_position_seconds),
                     int(session.is_playing),
+                    session.stop_reason,
                     json.dumps(session.queue_order),
                     datetime.now().isoformat(timespec="seconds"),
                 ),

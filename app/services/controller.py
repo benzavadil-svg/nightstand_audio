@@ -52,6 +52,8 @@ class NightstandController:
         resume_on_startup: bool = False,
         playback_restore_launch: bool = False,
         validate_playlist_on_play: bool = False,
+        sleep_fade_seconds: float = 10,
+        sleep_fade_steps: int = 20,
     ) -> None:
         self.store = store
         self.library = library
@@ -85,7 +87,16 @@ class NightstandController:
         self.resume_on_startup = resume_on_startup
         self.playback_restore_launch = playback_restore_launch
         self.validate_playlist_on_play = validate_playlist_on_play
+        self.sleep_fade_seconds = max(0.0, float(sleep_fade_seconds))
+        self.sleep_fade_steps = max(1, int(sleep_fade_steps))
         self._startup_initializing = True
+        self._sleep_transitioning = False
+        self._sleep_stop_reason: str | None = None
+        self._sleep_fade_started_at: float = 0.0
+        self._sleep_fade_last_step = -1
+        self._sleep_saved_status: PlaybackStatus | None = None
+        self._sleep_saved_track_index = 0
+        self._sleep_original_volume = PlaybackStatus().volume
         self.is_night_mode_active = False
         self.is_sleep_screen_locked = False
         self.last_display_wake_at: datetime | None = None
@@ -263,11 +274,8 @@ class NightstandController:
         if self.bluetooth.tick(now):
             self._mark_dirty("bluetooth_reconnect")
         if self.sleep_timer.expired(now):
-            self.player.pause()
-            self.sleep_timer.clear()
-            self._save_session_from_status(is_playing=False)
-            self.log_state.info("Sleep timer expired; playback paused.")
-            self._mark_dirty("playback_stop")
+            self._begin_sleep_transition("sleep_timer")
+        self._tick_sleep_transition()
         if self.nav.timeout_to_home(now):
             self._mark_dirty("menu_timeout")
         self._return_to_passive_if_due(now)
@@ -275,7 +283,7 @@ class NightstandController:
         if self._clock_refresh_due():
             self._mark_dirty("clock_refresh")
 
-        if time.monotonic() - self._last_position_save > 5:
+        if not self._sleep_transitioning and time.monotonic() - self._last_position_save > 5:
             self._save_position()
             self._last_position_save = time.monotonic()
 
@@ -625,6 +633,130 @@ class NightstandController:
         self.log_state.info("Sleep timer changed label=%s", self.sleep_timer.label())
         self._mark_dirty("sleep_timer")
 
+    def _begin_sleep_transition(self, reason: str) -> None:
+        if self._sleep_transitioning:
+            self.log_state.info(
+                "Sleep transition already active; ignoring duplicate trigger reason=%s",
+                reason,
+            )
+            self.sleep_timer.clear()
+            return
+        status = self._status_with_queue_context()
+        self.sleep_timer.clear()
+        if status.state != PlaybackState.PLAYING or not status.item_id or not status.source_id:
+            self.log_state.info("Sleep triggered with no active playback reason=%s", reason)
+            self._enter_safe_sleep_display_state(reason)
+            self._mark_dirty("playback_stop")
+            return
+
+        captured_position = max(0.0, float(status.position_seconds))
+        track_index = self._current_index(status.source_id, status.item_id)
+        self._sleep_transitioning = True
+        self._sleep_stop_reason = "sleep"
+        self._sleep_fade_started_at = time.monotonic()
+        self._sleep_fade_last_step = -1
+        self._sleep_original_volume = status.volume
+        self._sleep_saved_track_index = track_index
+        self._sleep_saved_status = PlaybackStatus(
+            state=PlaybackState.PAUSED,
+            source_id=status.source_id,
+            item_id=status.item_id,
+            title=status.title,
+            subtitle=status.subtitle,
+            position_seconds=captured_position,
+            duration_seconds=status.duration_seconds,
+            volume=status.volume,
+            track_index=track_index,
+            queue_length=status.queue_length,
+        )
+        self.store.update_playback_position(status.item_id, captured_position, completed=False)
+        self._save_session(
+            status.source_id,
+            status.item_id,
+            track_index,
+            captured_position,
+            is_playing=False,
+            stop_reason="sleep",
+        )
+        self._restored_status = self._sleep_saved_status
+        self.log_state.info(
+            "Sleep transition started reason=%s source=%s item_id=%s position=%.1fs fade_seconds=%.1f steps=%s",
+            reason,
+            status.source_id,
+            status.item_id,
+            captured_position,
+            self.sleep_fade_seconds,
+            self.sleep_fade_steps,
+        )
+        self._enter_safe_sleep_display_state(reason)
+        self._mark_dirty("playback_stop")
+        if self.sleep_fade_seconds <= 0:
+            self._finish_sleep_transition()
+        else:
+            self._tick_sleep_transition()
+
+    def _tick_sleep_transition(self) -> None:
+        if not self._sleep_transitioning:
+            return
+        if self.sleep_fade_seconds <= 0:
+            self._finish_sleep_transition()
+            return
+        elapsed = max(0.0, time.monotonic() - self._sleep_fade_started_at)
+        ratio = min(1.0, elapsed / self.sleep_fade_seconds)
+        step = min(self.sleep_fade_steps, int(ratio * self.sleep_fade_steps))
+        if step != self._sleep_fade_last_step:
+            next_volume = round(self._sleep_original_volume * (1.0 - step / self.sleep_fade_steps))
+            self.player.set_volume(next_volume)
+            self._sleep_fade_last_step = step
+            self.log_state.info(
+                "Sleep fade step=%s/%s volume=%s",
+                step,
+                self.sleep_fade_steps,
+                next_volume,
+            )
+        if ratio >= 1.0:
+            self._finish_sleep_transition()
+
+    def _finish_sleep_transition(self) -> None:
+        if not self._sleep_transitioning:
+            return
+        saved_status = self._sleep_saved_status
+        self.log_state.info(
+            "Sleep fade complete; stopping playback source=%s item_id=%s saved_position=%.1fs",
+            saved_status.source_id if saved_status else None,
+            saved_status.item_id if saved_status else None,
+            saved_status.position_seconds if saved_status else 0,
+        )
+        self.player.stop()
+        self.player.set_volume(self._sleep_original_volume)
+        if saved_status and saved_status.source_id and saved_status.item_id:
+            self.store.update_playback_position(
+                saved_status.item_id,
+                saved_status.position_seconds,
+                completed=False,
+            )
+            self._save_session(
+                saved_status.source_id,
+                saved_status.item_id,
+                self._sleep_saved_track_index,
+                saved_status.position_seconds,
+                is_playing=False,
+                stop_reason="sleep",
+            )
+            self._restored_status = saved_status
+        self._sleep_transitioning = False
+        self._sleep_stop_reason = "sleep"
+        self._sleep_fade_last_step = -1
+        self._last_completed_item_id = saved_status.item_id if saved_status else self._last_completed_item_id
+        self.log_state.info("Sleep transition finished; playback stopped without completion.")
+        self._mark_dirty("playback_stop")
+
+    def _enter_safe_sleep_display_state(self, reason: str) -> None:
+        if self.is_night_mode_active and self.night_mode_display_lock:
+            self._lock_sleep_screen(reason)
+            return
+        self._enter_ambient_mode(reason)
+
     def build_render_state(self) -> RenderState:
         now = datetime.now()
         status = self._status_with_queue_context()
@@ -670,6 +802,7 @@ class NightstandController:
 
     def toggle_play_pause_or_resume(self) -> None:
         status = self.player.status()
+        self._clear_sleep_stop_reason_on_intentional_play()
         if status.state in {PlaybackState.PLAYING, PlaybackState.PAUSED}:
             previous_state = status.state
             self.player.toggle_play_pause()
@@ -795,6 +928,7 @@ class NightstandController:
         self.current_source_id = source_id
         self.store.set_current_source_id(source_id)
         self._last_completed_item_id = None
+        self._clear_sleep_stop_reason_on_intentional_play()
         if not self._play_item_through_adapter(item, position):
             return
         if item.id:
@@ -849,11 +983,22 @@ class NightstandController:
         self._save_session(source_id, next_item.id, index + 1, 0, is_playing=True)
 
     def _save_position(self) -> None:
+        if self._sleep_transitioning:
+            return
         status = self._status_with_queue_context()
         if status.item_id:
             completed = self._is_completed(status)
+            if (
+                self._sleep_stop_reason == "sleep"
+                and self._sleep_saved_status
+                and status.item_id == self._sleep_saved_status.item_id
+            ):
+                completed = False
             self.store.update_playback_position(status.item_id, status.position_seconds, completed)
-            self._save_session_from_status(is_playing=status.state == PlaybackState.PLAYING)
+            self._save_session_from_status(
+                is_playing=status.state == PlaybackState.PLAYING,
+                stop_reason=self._sleep_stop_reason,
+            )
             self.log_playback.debug(
                 "Playback timestamp source=%s item_id=%s position=%.1fs completed=%s",
                 status.source_id,
@@ -863,8 +1008,16 @@ class NightstandController:
             )
 
     def _handle_completed_playback(self) -> None:
+        if self._sleep_transitioning:
+            return
         status = self._status_with_queue_context()
         if not status.item_id or status.item_id == self._last_completed_item_id:
+            return
+        if (
+            self._sleep_stop_reason == "sleep"
+            and self._sleep_saved_status
+            and status.item_id == self._sleep_saved_status.item_id
+        ):
             return
         if not self._is_completed(status):
             return
@@ -903,6 +1056,24 @@ class NightstandController:
             else item.last_position_seconds
         )
         if self._item_position_is_complete(source_id, item, position):
+            if session.stop_reason == "sleep":
+                self.log_playback.info(
+                    "Saved position is near EOF but stop_reason=sleep; resuming intentionally source=%s item_id=%s index=%s position=%.1fs",
+                    source_id,
+                    item.id,
+                    index,
+                    position,
+                )
+                if session.queue_order != [item.id for item in queue if item.id is not None]:
+                    self._save_session(
+                        source_id,
+                        item.id,
+                        index or 0,
+                        position,
+                        session.is_playing,
+                        stop_reason="sleep",
+                    )
+                return item, index or 0, position
             self.store.update_playback_position(item.id, item.duration_seconds or position, completed=True)
             self.log_playback.info(
                 "Saved position is at or past EOF; advancing source=%s item_id=%s index=%s position=%.1fs duration=%s",
@@ -939,6 +1110,7 @@ class NightstandController:
         track_index: int,
         position: float,
         is_playing: bool,
+        stop_reason: str | None = None,
     ) -> None:
         queue = self.library.get_queue(source_id)
         self.store.save_playback_session(
@@ -948,11 +1120,12 @@ class NightstandController:
                 current_track_index=track_index,
                 last_position_seconds=position,
                 is_playing=is_playing,
+                stop_reason=stop_reason,
                 queue_order=[item.id for item in queue if item.id is not None],
             )
         )
 
-    def _save_session_from_status(self, is_playing: bool) -> None:
+    def _save_session_from_status(self, is_playing: bool, stop_reason: str | None = None) -> None:
         status = self._status_with_queue_context()
         if not status.source_id or not status.item_id:
             return
@@ -962,6 +1135,7 @@ class NightstandController:
             self._current_index(status.source_id, status.item_id),
             status.position_seconds,
             is_playing,
+            stop_reason=stop_reason,
         )
 
     def _restore_active_session(self) -> None:
@@ -1016,6 +1190,7 @@ class NightstandController:
             )
             return False
         self.library.cancel_background_scan("playback_active")
+        self._clear_sleep_stop_reason_on_intentional_play()
         resolved_item = self.library.resolve_item(item)
         exists = resolved_item.file_path.startswith("demo://") or Path(resolved_item.file_path).exists()
         self.log_playback.info(
@@ -1038,6 +1213,13 @@ class NightstandController:
         self.player.play(resolved_item, position)
         self._begin_audio_start_display_grace_if_needed(previous_state)
         return True
+
+    def _clear_sleep_stop_reason_on_intentional_play(self) -> None:
+        if self._sleep_transitioning:
+            return
+        if self._sleep_stop_reason:
+            self.log_state.info("Clearing sleep stop state after intentional playback action.")
+        self._sleep_stop_reason = None
 
     def _begin_audio_start_display_grace_if_needed(self, previous_state: PlaybackState) -> None:
         if previous_state == PlaybackState.PLAYING:
