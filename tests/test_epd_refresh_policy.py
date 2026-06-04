@@ -276,6 +276,47 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             ("full", True),
         )
 
+    def test_partial_streak_cleanup_uses_live_full_clear_not_one_shot(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("AMBIENT", "Ambient", "ambient")
+        display._partial_since_clean = 8
+
+        update_mode, clean_refresh, policy = display._classify_update(
+            "clock_refresh",
+            ("AMBIENT", "Ambient", "ambient"),
+        )
+
+        self.assertEqual((update_mode, clean_refresh, policy), ("full", True, "partial_streak_limit"))
+        self.assertFalse(display._should_one_shot_major_transition(update_mode, clean_refresh, policy))
+
+    def test_periodic_full_clear_uses_live_full_clear_not_one_shot(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("AMBIENT", "Ambient", "ambient")
+        display._physical_update_count = 49
+
+        update_mode, clean_refresh, policy = display._classify_update(
+            "clock_refresh",
+            ("AMBIENT", "Ambient", "ambient"),
+        )
+
+        self.assertEqual((update_mode, clean_refresh, policy), ("full", True, "periodic_full_clear"))
+        self.assertFalse(display._should_one_shot_major_transition(update_mode, clean_refresh, policy))
+
+    def test_screen_transition_still_uses_one_shot_major_transition(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("AMBIENT", "Ambient", "ambient")
+
+        update_mode, clean_refresh, policy = display._classify_update(
+            "active_mode_enter",
+            ("HOME", "Home", "idle_home"),
+        )
+
+        self.assertEqual((update_mode, clean_refresh, policy), ("full", True, "screen_mode_or_title_changed"))
+        self.assertTrue(display._should_one_shot_major_transition(update_mode, clean_refresh, policy))
+
     def test_partial_streak_limit_is_configurable(self) -> None:
         display = SimulatorDisplay(
             renderer=None,

@@ -697,6 +697,8 @@ class SimulatorDisplay(DisplayAdapter):
             return False
         if update_mode != "full":
             return False
+        if policy_reason in {"partial_streak_limit", "periodic_full_clear"}:
+            return False
         return clean_refresh or policy_reason in {
             "screen_mode_or_title_changed",
             "explicit_full_reason",
