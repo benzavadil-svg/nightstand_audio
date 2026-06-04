@@ -42,6 +42,7 @@ class Settings:
     epd_force_full_refresh: bool
     epd_force_clean_refresh: bool
     epd_menu_navigation_update_mode: str
+    epd_clock_partial_update_enabled: bool
     epd_clock_refresh_seconds: int
     epd_disable_clock_auto_refresh: bool
     night_mode_enabled: bool
@@ -130,6 +131,10 @@ class Settings:
                 os.getenv("EPD_MENU_NAVIGATION_UPDATE_MODE", "full"),
                 {"full", "partial", "skip"},
                 "full",
+            ),
+            epd_clock_partial_update_enabled=_env_bool(
+                "EPD_CLOCK_PARTIAL_UPDATE_ENABLED",
+                False,
             ),
             epd_clock_refresh_seconds=int(os.getenv("EPD_CLOCK_REFRESH_SECONDS", "60")),
             epd_disable_clock_auto_refresh=_env_bool("EPD_DISABLE_CLOCK_AUTO_REFRESH", False),

@@ -103,6 +103,7 @@ def build_simulator_controller() -> NightstandController:
         audio_start_display_grace_ms=settings.audio_start_display_grace_ms,
         suppress_while_audio_playing=settings.epd_suppress_while_audio_playing,
         menu_navigation_update_mode=settings.epd_menu_navigation_update_mode,
+        clock_partial_update_enabled=settings.epd_clock_partial_update_enabled,
     )
     display.startup_profiler = profiler
     with profiler.span("playback_service_init"):

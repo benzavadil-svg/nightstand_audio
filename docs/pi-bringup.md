@@ -308,6 +308,7 @@ EPD_REGION_PARTIAL_ENABLED=true
 EPD_PARTIAL_STREAK_LIMIT=8
 EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500
 EPD_MENU_NAVIGATION_UPDATE_MODE=full
+EPD_CLOCK_PARTIAL_UPDATE_ENABLED=false
 EPD_FORCE_FULL_REFRESH=false
 EPD_FORCE_CLEAN_REFRESH=false
 EPD_CLOCK_REFRESH_SECONDS=60
@@ -365,7 +366,7 @@ Partial updates are only allowed for same-layout changes after a clean screen is
 
 `CLEAR_BEFORE_EPD_UPDATE=false` is the default. Set it to `true` only if you intentionally want `Clear()` before every forced display write.
 
-`EPD_RENDER_DEBOUNCE_MS=750` coalesces rapid sequential state changes into one physical display write. Volume changes refresh by default with `EPD_REFRESH_ON_VOLUME_CHANGE=true`; `EPD_VOLUME_REFRESH_DEBOUNCE_MS=600` waits briefly until knob movement settles before pushing the final value. `EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500` prevents rapid partial-refresh bursts. `EPD_PARTIAL_STREAK_LIMIT=8` forces a clean full refresh after eight consecutive partial updates. `EPD_MENU_NAVIGATION_UPDATE_MODE=full` keeps menu/list labels clean on the 4.2" V2 panel because its partial API is full-buffer partial, not true windowed row refresh. `EPD_CLOCK_REFRESH_SECONDS=60` prevents second-by-second e-paper refreshes, and `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` disables automatic clock refreshes entirely.
+`EPD_RENDER_DEBOUNCE_MS=750` coalesces rapid sequential state changes into one physical display write. Volume changes refresh by default with `EPD_REFRESH_ON_VOLUME_CHANGE=true`; `EPD_VOLUME_REFRESH_DEBOUNCE_MS=600` waits briefly until knob movement settles before pushing the final value. `EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500` prevents rapid partial-refresh bursts. `EPD_PARTIAL_STREAK_LIMIT=8` forces a clean full refresh after eight consecutive partial updates. `EPD_MENU_NAVIGATION_UPDATE_MODE=full` keeps menu/list labels clean on the 4.2" V2 panel because its partial API is full-buffer partial, not true windowed row refresh. `EPD_CLOCK_PARTIAL_UPDATE_ENABLED=false` applies the same caution to idle minute updates so the clock does not slowly turn muddy. `EPD_CLOCK_REFRESH_SECONDS=60` prevents second-by-second e-paper refreshes, and `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` disables automatic clock refreshes entirely.
 
 Set `EPD_DISABLE_PARTIAL=true` if partial refresh artifacts show up during real use and you want to avoid `init_Part()` / `display_Partial()` entirely. Set `EPD_PARTIAL_UPDATE_ENABLED=false` to keep app policy from requesting partial updates.
 

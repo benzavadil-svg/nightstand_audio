@@ -80,6 +80,7 @@ class SimulatorDisplay(DisplayAdapter):
         audio_start_display_grace_ms: int = 0,
         suppress_while_audio_playing: bool = True,
         menu_navigation_update_mode: str = "full",
+        clock_partial_update_enabled: bool = False,
     ) -> None:
         self.renderer = renderer
         self.output_path = output_path
@@ -100,6 +101,7 @@ class SimulatorDisplay(DisplayAdapter):
         self.menu_navigation_update_mode = _normalize_menu_navigation_update_mode(
             menu_navigation_update_mode
         )
+        self.clock_partial_update_enabled = clock_partial_update_enabled
         self._last_pushed_hash: str | None = None
         self._pending_hash: str | None = None
         self._pending_reason: str | None = None
@@ -631,6 +633,8 @@ class SimulatorDisplay(DisplayAdapter):
             if self.menu_navigation_update_mode == "partial":
                 return "partial", False, "same_layout_partial_reason"
             return "full", True, "menu_navigation_full_clean"
+        if reason == "clock_refresh" and not self.clock_partial_update_enabled:
+            return "full", False, "clock_partial_disabled"
         if self._partial_since_clean >= self.partial_streak_limit:
             return "partial", False, "menu_navigation_defers_partial_streak_cleanup"
         if reason in FULL_UPDATE_REASONS:

@@ -96,7 +96,7 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             ("full", True),
         )
 
-    def test_menu_navigation_is_clean_full_by_default_and_clock_is_partial(self) -> None:
+    def test_menu_navigation_and_clock_are_full_by_default(self) -> None:
         display = self.make_display()
         display._last_pushed_hash = "already-rendered"
         menu_screen = ("MENU", "Home", "menu")
@@ -110,7 +110,24 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
         display._last_pushed_screen_signature = home_screen
         self.assertEqual(
             display._classify_update("clock_refresh", home_screen)[:2],
-            ("partial", False),
+            ("full", False),
+        )
+
+    def test_clock_partial_can_be_explicitly_enabled(self) -> None:
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            partial_update_enabled=True,
+            full_clear_interval=50,
+            clock_partial_update_enabled=True,
+        )
+        display._last_pushed_hash = "already-rendered"
+        home_screen = ("HOME", "Clock", "idle_home")
+        display._last_pushed_screen_signature = home_screen
+
+        self.assertEqual(
+            display._classify_update("clock_refresh", home_screen)[:3],
+            ("partial", False, "same_layout_partial_reason"),
         )
 
     def test_menu_navigation_partial_can_be_explicitly_enabled(self) -> None:
@@ -288,6 +305,19 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
         )
 
         self.assertEqual((update_mode, clean_refresh, policy), ("full", True, "partial_streak_limit"))
+        self.assertFalse(display._should_one_shot_major_transition(update_mode, clean_refresh, policy))
+
+    def test_clock_partial_disabled_uses_live_full_write_not_one_shot(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("AMBIENT", "Ambient", "ambient")
+
+        update_mode, clean_refresh, policy = display._classify_update(
+            "clock_refresh",
+            ("AMBIENT", "Ambient", "ambient"),
+        )
+
+        self.assertEqual((update_mode, clean_refresh, policy), ("full", False, "clock_partial_disabled"))
         self.assertFalse(display._should_one_shot_major_transition(update_mode, clean_refresh, policy))
 
     def test_periodic_full_clear_uses_live_full_clear_not_one_shot(self) -> None:
@@ -665,6 +695,7 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             output_path=Path(tempfile.mkdtemp()) / "screen.png",
             physical_display=physical,
             one_shot_major_transitions=True,
+            clock_partial_update_enabled=True,
         )
         display._last_pushed_hash = "old-hash"
         display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
