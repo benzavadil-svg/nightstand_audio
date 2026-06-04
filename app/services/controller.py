@@ -131,6 +131,9 @@ class NightstandController:
         self._source_button_click_count = 0
         self._last_source_button_click_at = 0.0
         self._source_button_click_window_seconds = 1.0
+        self._audio_route_switch_recovery_until = 0.0
+        self._audio_route_switch_recovery_attempted = False
+        self._audio_route_switch_status: PlaybackStatus | None = None
         self._last_logged_mode = self.nav.current_mode
         self._last_logged_playback_state: PlaybackState | None = None
         self._restored_status: PlaybackStatus | None = None
@@ -414,6 +417,7 @@ class NightstandController:
         now = now or datetime.now()
         self._flush_pending_home_press()
         self.player.tick()
+        self._recover_playback_after_audio_route_switch()
         self._handle_completed_playback()
         if self.alarm.tick(now):
             self._mark_dirty("alarm_stage")
@@ -1207,10 +1211,85 @@ class NightstandController:
 
     def _apply_bluetooth_playback_device(self) -> None:
         audio_device = self.bluetooth.playback_audio_device()
+        previous_device = getattr(self.player, "audio_device", None)
+        previous_status = self.player.status()
         setter = getattr(self.player, "set_audio_device", None)
         if callable(setter):
             setter(audio_device)
+        if (
+            previous_status.state == PlaybackState.PLAYING
+            and audio_device
+            and previous_device is not None
+            and audio_device != previous_device
+        ):
+            self._audio_route_switch_recovery_until = time.monotonic() + 15.0
+            self._audio_route_switch_recovery_attempted = False
+            self._audio_route_switch_status = self._copy_playback_status(previous_status)
+            self.log_playback.info(
+                "Audio route switched while playing; recovery armed device=%s source=%s item_id=%s position=%.1fs",
+                audio_device,
+                previous_status.source_id,
+                previous_status.item_id,
+                previous_status.position_seconds,
+            )
         self.output_label = self.bluetooth.output_label()
+
+    def _copy_playback_status(self, status: PlaybackStatus) -> PlaybackStatus:
+        return PlaybackStatus(
+            state=status.state,
+            source_id=status.source_id,
+            item_id=status.item_id,
+            title=status.title,
+            subtitle=status.subtitle,
+            position_seconds=status.position_seconds,
+            duration_seconds=status.duration_seconds,
+            volume=status.volume,
+            track_index=status.track_index,
+            queue_length=status.queue_length,
+            ended=status.ended,
+            exit_returncode=status.exit_returncode,
+        )
+
+    def _recover_playback_after_audio_route_switch(self) -> None:
+        if not self._audio_route_switch_recovery_until:
+            return
+        if time.monotonic() > self._audio_route_switch_recovery_until:
+            self._audio_route_switch_recovery_until = 0.0
+            self._audio_route_switch_recovery_attempted = False
+            self._audio_route_switch_status = None
+            return
+        if self._audio_route_switch_recovery_attempted:
+            return
+        status = self._status_with_queue_context()
+        if status.state != PlaybackState.STOPPED:
+            return
+        if status.ended or status.exit_returncode in (0, None):
+            return
+        snapshot = self._audio_route_switch_status
+        if not snapshot or not snapshot.source_id or not snapshot.item_id:
+            return
+        if status.source_id != snapshot.source_id or status.item_id != snapshot.item_id:
+            return
+        index = self._current_index(snapshot.source_id, snapshot.item_id)
+        item = self.library.get_item_at_index(snapshot.source_id, index)
+        if not item:
+            return
+        position = max(snapshot.position_seconds, status.position_seconds)
+        self._audio_route_switch_recovery_attempted = True
+        self.log_playback.warning(
+            "Playback output switch interrupted mpv; restarting current track source=%s item_id=%s position=%.1fs returncode=%s",
+            snapshot.source_id,
+            snapshot.item_id,
+            position,
+            status.exit_returncode,
+        )
+        if not self._play_item_through_adapter(item, position):
+            return
+        self._save_session(snapshot.source_id, snapshot.item_id, index, position, is_playing=True)
+        self._audio_route_switch_recovery_until = 0.0
+        self._audio_route_switch_recovery_attempted = False
+        self._audio_route_switch_status = None
+        self._mark_dirty("playback_start")
 
     def _start_track_at_index(self, source_id: str, index: int, return_home: bool = True) -> None:
         item = self.library.get_item_at_index(source_id, index)

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from app.display.base import DisplayAdapter
 from app.media_library import MediaLibrary
-from app.models import BluetoothDevice, InputEvent, MediaCommand, RenderState, UIMode
+from app.models import BluetoothDevice, InputEvent, MediaCommand, PlaybackState, RenderState, UIMode
 from app.playback.mock_player import MockPlayer
 from app.services.bluetooth import (
     BluetoothManager,
@@ -143,9 +143,38 @@ class DeviceSpyPlayer(MockPlayer):
     def __init__(self) -> None:
         super().__init__()
         self.audio_devices: list[str] = []
+        self.audio_device = ""
+        self.play_starts: list[tuple[int | None, float]] = []
+
+    def play(self, item, start_position_seconds: float = 0) -> None:
+        self.play_starts.append((item.id, start_position_seconds))
+        super().play(item, start_position_seconds)
 
     def set_audio_device(self, audio_device: str) -> None:
+        self.audio_device = audio_device
         self.audio_devices.append(audio_device)
+
+
+class FailingRouteSwitchPlayer(DeviceSpyPlayer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fail_next_tick_after_bossdac_switch = False
+
+    def set_audio_device(self, audio_device: str) -> None:
+        super().set_audio_device(audio_device)
+        if audio_device == "plughw:1,0" and self.status().state == PlaybackState.PLAYING:
+            self.fail_next_tick_after_bossdac_switch = True
+
+    def tick(self) -> None:
+        if self.fail_next_tick_after_bossdac_switch:
+            self.fail_next_tick_after_bossdac_switch = False
+            self._status.position_seconds = max(self._status.position_seconds, 12.0)
+            self._status.state = PlaybackState.STOPPED
+            self._status.ended = False
+            self._status.exit_returncode = 2
+            self._started_monotonic = None
+            return
+        super().tick()
 
 
 class ScanOutputBluetoothBackend(SubprocessBluetoothBackend):
@@ -1266,6 +1295,42 @@ class BluetoothManagerTest(unittest.TestCase):
             controller.tick(datetime.now() + timedelta(seconds=20))
 
             self.assertEqual(player.audio_devices[-1], "pulse/bluez_output.AA_BB_CC_DD_EE_FF.1")
+
+    def test_bluetooth_loss_restarts_current_track_if_mpv_dies_during_bossdac_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store = StateStore(root / "test.sqlite")
+            store.set_app_state_value("preferred_bluetooth_device_name", "Ben's Headphones")
+            store.set_app_state_value("preferred_bluetooth_device_mac", "AA:BB:CC:DD:EE:FF")
+            library = MediaLibrary(root / "media", store)
+            library.ensure_demo_library()
+            backend = FakeBluetoothBackend()
+            backend.available = True
+            backend.connected = True
+            player = FailingRouteSwitchPlayer()
+            controller = NightstandController(
+                store=store,
+                library=library,
+                player=player,
+                display=MemoryDisplay(),
+                bluetooth_backend=backend,
+                bossdac_audio_device="plughw:1,0",
+            )
+
+            controller.handle_event(InputEvent("source", "button-1"))
+            self.assertEqual(player.audio_devices[-1], "pulse/bluez_output.AA_BB_CC_DD_EE_FF.1")
+            self.assertEqual(controller.player.status().state, PlaybackState.PLAYING)
+
+            backend.connected = False
+            controller.tick(datetime.now() + timedelta(seconds=20))
+            self.assertEqual(player.audio_devices[-1], "plughw:1,0")
+
+            controller.tick(datetime.now() + timedelta(seconds=21))
+
+            status = controller.player.status()
+            self.assertEqual(status.state, PlaybackState.PLAYING)
+            self.assertEqual(player.play_starts[0][0], player.play_starts[1][0])
+            self.assertGreaterEqual(player.play_starts[1][1], 12.0)
 
     def test_paused_playback_reapplies_bluetooth_route_before_resume(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
