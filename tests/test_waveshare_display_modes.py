@@ -130,6 +130,15 @@ class FakeTwoBufferPartialDriver:
         return FakeTwoBufferPartialEpd(self.calls)
 
 
+class BusyGpioDriver:
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    def EPD(self):
+        self.calls.append("EPD")
+        raise RuntimeError("lgpio.error: 'GPIO busy'")
+
+
 class WaveshareDisplayModeTest(unittest.TestCase):
     def make_display(self, *, disable_partial: bool = False) -> tuple[WaveshareDisplay, FakeEpd]:
         epd = FakeEpd()
@@ -218,6 +227,37 @@ class WaveshareDisplayModeTest(unittest.TestCase):
         self.assertTrue(display._sleeping)
         self.assertEqual(display._display_mode, MODE_FULL)
 
+    def test_gpio_busy_init_disables_physical_output_even_when_fallback_disabled(self) -> None:
+        driver = BusyGpioDriver()
+        display = WaveshareDisplay(
+            full_clear_interval=0,
+            allow_hardware_fallback=False,
+        )
+        display._epd_module = driver
+
+        self.assertFalse(display._ensure_initialized())
+        self.assertTrue(display._failed)
+        self.assertEqual(driver.calls, ["EPD"])
+
+    def test_gpio_busy_one_shot_returns_false_even_when_fallback_disabled(self) -> None:
+        driver = BusyGpioDriver()
+        display = WaveshareDisplay(
+            full_clear_interval=0,
+            allow_hardware_fallback=False,
+        )
+        display._epd_module = driver
+        path = self._write_preview_image()
+
+        self.assertFalse(
+            display.one_shot_render_path(
+                str(path),
+                reason="major_layout_transition",
+                displayed_hash="abc123",
+            )
+        )
+        self.assertTrue(display._failed)
+        self.assertEqual(driver.calls, ["EPD"])
+
     def test_4in2_model_uses_400x300_driver_dimensions(self) -> None:
         driver = Fake4In2Driver()
         display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)
@@ -263,7 +303,7 @@ class WaveshareDisplayModeTest(unittest.TestCase):
         self.assertEqual(display._full_update_count, 0)
         self.assertEqual(display._partial_api.display_method_name, "display_part")
 
-    def test_4in2_partial_after_one_shot_uses_full_fallback(self) -> None:
+    def test_4in2_partial_after_one_shot_uses_partial_when_handle_is_valid(self) -> None:
         epd = Fake4In2Epd()
         display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)
         display._epd = epd
@@ -275,7 +315,28 @@ class WaveshareDisplayModeTest(unittest.TestCase):
 
         display.partial_update(Image.new("1", (400, 300), 1), reason="volume_change")
 
+        self.assertEqual(display._display_mode, MODE_PARTIAL)
+        self.assertIn("init_Part", epd.calls)
+        self.assertIn("display_Partial:buffer", epd.calls)
+        self.assertNotIn("display:buffer", epd.calls)
+        self.assertEqual(display._partial_update_count, 1)
+        self.assertEqual(display._full_update_count, 0)
+
+    def test_4in2_partial_after_one_shot_still_falls_back_if_handle_is_asleep(self) -> None:
+        epd = Fake4In2Epd()
+        display = WaveshareDisplay(display_model="waveshare_4in2_v2", full_clear_interval=0)
+        display._epd = epd
+        display._initialized = True
+        display._sleeping = True
+        display._display_mode = MODE_FULL
+        display._previous_update_was_one_shot = True
+        display.width = epd.width
+        display.height = epd.height
+
+        display.partial_update(Image.new("1", (400, 300), 1), reason="volume_change")
+
         self.assertEqual(display._display_mode, MODE_FULL)
+        self.assertIn("init", epd.calls)
         self.assertIn("display:buffer", epd.calls)
         self.assertNotIn("display_Partial:buffer", epd.calls)
         self.assertEqual(display._partial_update_count, 0)

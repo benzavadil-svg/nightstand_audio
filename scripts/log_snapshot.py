@@ -59,6 +59,15 @@ def main() -> None:
             "active_or_preferred_sink": store.get_app_state_value("preferred_output") or "dac",
             "audio_backend": settings.audio_backend,
             "audio_device": settings.audio_device,
+            "preferred_bluetooth_device_name": store.get_app_state_value(
+                "preferred_bluetooth_device_name"
+            ),
+            "preferred_bluetooth_device_mac": store.get_app_state_value(
+                "preferred_bluetooth_device_mac"
+            ),
+            "preferred_bluetooth_last_connected_at": store.get_app_state_value(
+                "preferred_bluetooth_last_connected_at"
+            ),
             "bluetooth_debug": _env_bool("DEBUG_AUDIO"),
         },
         "playlist": {

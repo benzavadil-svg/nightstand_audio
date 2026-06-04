@@ -66,7 +66,14 @@ class StateStore:
                     target_volume INTEGER NOT NULL DEFAULT 40,
                     fade_in_seconds INTEGER NOT NULL DEFAULT 60,
                     snooze_minutes INTEGER NOT NULL DEFAULT 9,
-                    last_triggered_date TEXT
+                    last_triggered_date TEXT,
+                    wake_enabled INTEGER NOT NULL DEFAULT 1,
+                    wake_lead_minutes INTEGER NOT NULL DEFAULT 30,
+                    wake_stages INTEGER NOT NULL DEFAULT 4,
+                    stage_volume_curve TEXT NOT NULL DEFAULT '[5, 10, 20, 35]',
+                    stage_source TEXT NOT NULL DEFAULT 'sounds',
+                    interrupt_active_playback INTEGER NOT NULL DEFAULT 0,
+                    last_dismissed_date TEXT
                 );
 
                 INSERT OR IGNORE INTO alarm_config (id) VALUES (1);
@@ -89,7 +96,24 @@ class StateStore:
                 """
             )
             self._ensure_column(conn, "media_items", "sort_key", "TEXT NOT NULL DEFAULT ''")
-            self._ensure_column(conn, "playback_sessions", "stop_reason", "TEXT")
+            self._ensure_playback_session_schema(conn)
+            self._ensure_column(conn, "alarm_config", "wake_enabled", "INTEGER NOT NULL DEFAULT 1")
+            self._ensure_column(conn, "alarm_config", "wake_lead_minutes", "INTEGER NOT NULL DEFAULT 30")
+            self._ensure_column(conn, "alarm_config", "wake_stages", "INTEGER NOT NULL DEFAULT 4")
+            self._ensure_column(
+                conn,
+                "alarm_config",
+                "stage_volume_curve",
+                "TEXT NOT NULL DEFAULT '[5, 10, 20, 35]'",
+            )
+            self._ensure_column(conn, "alarm_config", "stage_source", "TEXT NOT NULL DEFAULT 'sounds'")
+            self._ensure_column(
+                conn,
+                "alarm_config",
+                "interrupt_active_playback",
+                "INTEGER NOT NULL DEFAULT 0",
+            )
+            self._ensure_column(conn, "alarm_config", "last_dismissed_date", "TEXT")
 
     def _ensure_column(
         self, conn: sqlite3.Connection, table_name: str, column_name: str, declaration: str
@@ -100,6 +124,9 @@ class StateStore:
         }
         if column_name not in columns:
             conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {declaration}")
+
+    def _ensure_playback_session_schema(self, conn: sqlite3.Connection) -> None:
+        self._ensure_column(conn, "playback_sessions", "stop_reason", "TEXT")
 
     def upsert_media_items(
         self,
@@ -217,6 +244,7 @@ class StateStore:
 
     def reset_source_progress(self, source_id: str) -> None:
         with self.connect() as conn:
+            self._ensure_playback_session_schema(conn)
             conn.execute(
                 """
                 UPDATE media_items
@@ -318,6 +346,7 @@ class StateStore:
 
     def get_playback_session(self, source_id: str) -> PlaybackSession:
         with self.connect() as conn:
+            self._ensure_playback_session_schema(conn)
             row = conn.execute(
                 "SELECT * FROM playback_sessions WHERE source_id = ?",
                 (source_id,),
@@ -337,6 +366,7 @@ class StateStore:
 
     def save_playback_session(self, session: PlaybackSession) -> None:
         with self.connect() as conn:
+            self._ensure_playback_session_schema(conn)
             conn.execute(
                 """
                 INSERT INTO playback_sessions (
@@ -415,6 +445,15 @@ class StateStore:
             last_triggered_date=date.fromisoformat(row["last_triggered_date"])
             if row["last_triggered_date"]
             else None,
+            wake_enabled=bool(row["wake_enabled"]),
+            wake_lead_minutes=int(row["wake_lead_minutes"]),
+            wake_stages=int(row["wake_stages"]),
+            stage_volume_curve=_parse_int_list(row["stage_volume_curve"]),
+            stage_source=LEGACY_SOURCE_IDS.get(str(row["stage_source"]), str(row["stage_source"])),
+            interrupt_active_playback=bool(row["interrupt_active_playback"]),
+            last_dismissed_date=date.fromisoformat(row["last_dismissed_date"])
+            if row["last_dismissed_date"]
+            else None,
         )
 
     def save_alarm_config(self, alarm: AlarmConfig) -> None:
@@ -429,7 +468,14 @@ class StateStore:
                     target_volume = ?,
                     fade_in_seconds = ?,
                     snooze_minutes = ?,
-                    last_triggered_date = ?
+                    last_triggered_date = ?,
+                    wake_enabled = ?,
+                    wake_lead_minutes = ?,
+                    wake_stages = ?,
+                    stage_volume_curve = ?,
+                    stage_source = ?,
+                    interrupt_active_playback = ?,
+                    last_dismissed_date = ?
                 WHERE id = 1
                 """,
                 (
@@ -441,6 +487,13 @@ class StateStore:
                     alarm.fade_in_seconds,
                     alarm.snooze_minutes,
                     alarm.last_triggered_date.isoformat() if alarm.last_triggered_date else None,
+                    int(alarm.wake_enabled),
+                    alarm.wake_lead_minutes,
+                    alarm.wake_stages,
+                    json.dumps(alarm.stage_volume_curve),
+                    alarm.stage_source,
+                    int(alarm.interrupt_active_playback),
+                    alarm.last_dismissed_date.isoformat() if alarm.last_dismissed_date else None,
                 ),
             )
 
@@ -460,3 +513,21 @@ class StateStore:
             if row["last_played_at"]
             else None,
         )
+
+
+def _parse_int_list(value: str | None) -> list[int]:
+    if not value:
+        return [5, 10, 20, 35]
+    try:
+        parsed = json.loads(value)
+    except (TypeError, json.JSONDecodeError):
+        return [5, 10, 20, 35]
+    if not isinstance(parsed, list):
+        return [5, 10, 20, 35]
+    values = []
+    for item in parsed:
+        try:
+            values.append(max(0, min(100, int(item))))
+        except (TypeError, ValueError):
+            continue
+    return values or [5, 10, 20, 35]

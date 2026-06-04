@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["app", "app.playback", "app.display", "app.input", "app.services", "scripts"]
+packages = ["app", "app.playback", "app.display", "app.hardware", "app.input", "app.services", "scripts"]
 
 [tool.ruff]
 line-length = 100

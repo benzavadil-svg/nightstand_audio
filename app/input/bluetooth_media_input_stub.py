@@ -17,13 +17,13 @@ class BluetoothMediaInputAdapter(InputAdapter):
     - Previous command -> MediaCommand.PREVIOUS_TRACK
     - Volume up/down commands -> MediaCommand.VOLUME_UP / VOLUME_DOWN
 
-    Nothing Ear (a) expected behavior:
-    - pinch/play-pause toggles playback
-    - double pinch/next skips forward
-    - triple pinch/previous restarts or goes previous using the same controller
-      logic as the box knob
-    - pinch-hold is deliberately not captured so ANC/transparency remains on
-      the earbuds
+    Expected headphone behavior:
+    - play-pause toggles playback
+    - next skips forward
+    - previous restarts or goes previous using the same controller logic as the
+      box knob
+    - device-specific hold gestures should remain on the headphones for their
+      own features, such as ANC/transparency
 
     TODO: Implement Raspberry Pi media-key capture using BlueZ/PipeWire/MPRIS.
     TODO: Decide whether MPD should receive AVRCP/MPRIS commands directly or

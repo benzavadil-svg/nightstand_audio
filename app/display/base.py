@@ -15,6 +15,9 @@ class DisplayAdapter(ABC):
     def tick(self) -> None:
         pass
 
+    def flush(self) -> None:
+        pass
+
     def sleep(self) -> None:
         pass
 

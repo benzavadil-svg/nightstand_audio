@@ -4,11 +4,14 @@ import os
 
 from app.config import get_settings
 from app.display.renderer import EInkRenderer
+from app.display.gpio_safety import validate_appliance_gpio_config
 from app.display.simulator_display import SimulatorDisplay
 from app.display.waveshare_display import WaveshareDisplay, display_model_spec
+from app.input.composite_input import CompositeInput
+from app.input.gpio_input_stub import GPIOInput, GPIOInputUnavailableError
 from app.input.keyboard_input import KeyboardInput
 from app.media_library import MediaLibrary
-from app.playback.factory import build_playback_adapter
+from app.playback.factory import build_alarm_playback_adapter, build_playback_adapter
 from app.services.audio import AudioOutputSelector
 from app.services.controller import NightstandController
 from app.services.logger import get_logger, log_startup_banner
@@ -41,6 +44,8 @@ def build_simulator_controller() -> NightstandController:
     )
     store = StateStore(settings.db_path)
     library = MediaLibrary(settings.media_dir, store)
+    if settings.runtime_mode == "appliance":
+        validate_appliance_gpio_config(get_logger("INPUT"))
     if settings.runtime_mode == "appliance":
         with profiler.span("media_cache_load"):
             library.prepare_startup_index()
@@ -97,17 +102,20 @@ def build_simulator_controller() -> NightstandController:
         partial_streak_limit=settings.epd_partial_streak_limit,
         audio_start_display_grace_ms=settings.audio_start_display_grace_ms,
         suppress_while_audio_playing=settings.epd_suppress_while_audio_playing,
+        menu_navigation_update_mode=settings.epd_menu_navigation_update_mode,
     )
     display.startup_profiler = profiler
     with profiler.span("playback_service_init"):
         player = build_playback_adapter(settings, audio_selection)
-        keyboard = KeyboardInput()
+        alarm_player = build_alarm_playback_adapter(settings, player)
+        input_adapter = _build_input_adapter(settings.input_backend, settings.runtime_mode)
         controller = NightstandController(
             store=store,
             library=library,
             player=player,
             display=display,
-            keyboard=keyboard,
+            alarm_player=alarm_player,
+            keyboard=input_adapter,
             menu_timeout_seconds=settings.menu_timeout_seconds,
             clock_refresh_seconds=settings.epd_clock_refresh_seconds,
             disable_clock_auto_refresh=settings.epd_disable_clock_auto_refresh,
@@ -126,6 +134,10 @@ def build_simulator_controller() -> NightstandController:
             validate_playlist_on_play=settings.validate_playlist_on_play,
             sleep_fade_seconds=settings.sleep_fade_seconds,
             sleep_fade_steps=settings.sleep_fade_steps,
+            bossdac_audio_device=audio_selection.selected_device,
+            bluetooth_auto_reconnect_cooldown_seconds=(
+                settings.bluetooth_auto_reconnect_cooldown_seconds
+            ),
         )
     controller.startup_profiler = profiler
     if settings.runtime_mode == "appliance" and settings.background_media_scan:
@@ -133,6 +145,25 @@ def build_simulator_controller() -> NightstandController:
     elif settings.runtime_mode == "appliance":
         get_logger("MEDIA").info("Background scan disabled")
     return controller
+
+
+def _build_input_adapter(input_backend: str, runtime_mode: str):
+    selected = input_backend
+    if selected == "auto":
+        selected = "gpio" if runtime_mode == "appliance" else "keyboard"
+    get_logger("INPUT").info("Input backend: %s", selected)
+    if selected == "gpio":
+        return GPIOInput()
+    if selected == "gpio_keyboard":
+        try:
+            return CompositeInput(GPIOInput(), KeyboardInput())
+        except GPIOInputUnavailableError as exc:
+            get_logger("INPUT").warning(
+                "GPIO input unavailable; continuing with keyboard input only error=%s",
+                exc,
+            )
+            return KeyboardInput()
+    return KeyboardInput()
 
 
 def run_simulator() -> None:

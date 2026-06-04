@@ -29,6 +29,9 @@ class NavigationController:
         if self.current_mode == UIMode.MENU and self.current_menu:
             self.selected_index = (self.selected_index + delta) % len(self.current_menu)
             return NavigationResult("render")
+        if self.current_mode == UIMode.BLUETOOTH_PAIRING and self.current_menu:
+            self.selected_index = (self.selected_index + delta) % len(self.current_menu)
+            return NavigationResult("bluetooth_pairing_select", delta)
         if self.current_mode == UIMode.SLEEP_TIMER:
             return NavigationResult("sleep_timer")
         if self.current_mode == UIMode.ALARM:
@@ -40,6 +43,9 @@ class NavigationController:
         if self.current_mode == UIMode.HOME:
             return NavigationResult("toggle_play")
         if self.current_mode == UIMode.MENU and self.current_menu:
+            item = self.current_menu[self.selected_index]
+            return NavigationResult(item.action, item.id)
+        if self.current_mode == UIMode.BLUETOOTH_PAIRING and self.current_menu:
             item = self.current_menu[self.selected_index]
             return NavigationResult(item.action, item.id)
         if self.current_mode == UIMode.SLEEP_TIMER:
@@ -78,6 +84,20 @@ class NavigationController:
         self.menu_source_id = source_id
         self._touch()
 
+    def open_custom_menu(
+        self,
+        title: str,
+        items: list[MenuItem],
+        selected_index: int = 0,
+        mode: UIMode = UIMode.MENU,
+    ) -> None:
+        self.current_mode = mode
+        self.current_menu = items
+        self.selected_index = max(0, min(selected_index, len(items) - 1)) if items else 0
+        self.menu_title = title
+        self.menu_source_id = None
+        self._touch()
+
     def open_mode(self, mode: UIMode) -> None:
         self.current_mode = mode
         self._touch()
@@ -90,7 +110,7 @@ class NavigationController:
 
     def timeout_to_home(self, now: datetime | None = None) -> bool:
         now = now or datetime.now()
-        if self.current_mode == UIMode.HOME:
+        if self.current_mode in {UIMode.HOME, UIMode.BLUETOOTH_PAIRING}:
             return False
         if (now - self.last_input_at).total_seconds() >= self.timeout_seconds:
             self.current_mode = UIMode.HOME

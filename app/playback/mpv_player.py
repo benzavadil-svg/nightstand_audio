@@ -162,6 +162,13 @@ class MPVPlayer(PlaybackAdapter):
     def adjust_volume(self, delta: int) -> None:
         self.set_volume(self._status.volume + int(delta))
 
+    def set_audio_device(self, audio_device: str) -> None:
+        if not audio_device or audio_device == self.audio_device:
+            return
+        self.audio_device = audio_device
+        self.log.info("device=%s", self.audio_device)
+        self._send_mpv_command(["set_property", "audio-device", _mpv_audio_device(audio_device)])
+
     def status(self) -> PlaybackStatus:
         self.tick()
         return self._status
@@ -281,7 +288,7 @@ class MPVPlayer(PlaybackAdapter):
 
 
 def _mpv_audio_device(audio_device: str) -> str:
-    if audio_device.startswith("alsa/"):
+    if "/" in audio_device:
         return audio_device
     return f"alsa/{audio_device}"
 

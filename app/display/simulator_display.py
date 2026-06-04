@@ -24,6 +24,7 @@ FULL_UPDATE_REASONS = {
     "manual_render",
     "menu_timeout",
     "bluetooth_reconnect",
+    "bluetooth_pairing_status",
     "night_mode_enter",
     "night_mode_exit",
     "night_mode_wake",
@@ -31,6 +32,9 @@ FULL_UPDATE_REASONS = {
     "ambient_mode_enter",
     "active_mode_enter",
     "active_timeout",
+    "alarm_stage",
+    "alarm_stop",
+    "alarm_dismissed",
 }
 
 PARTIAL_REASON_ALIASES = {
@@ -75,6 +79,7 @@ class SimulatorDisplay(DisplayAdapter):
         partial_streak_limit: int = 8,
         audio_start_display_grace_ms: int = 0,
         suppress_while_audio_playing: bool = True,
+        menu_navigation_update_mode: str = "full",
     ) -> None:
         self.renderer = renderer
         self.output_path = output_path
@@ -92,6 +97,9 @@ class SimulatorDisplay(DisplayAdapter):
         self.partial_streak_limit = max(1, partial_streak_limit)
         self.audio_start_display_grace_seconds = max(0, audio_start_display_grace_ms) / 1000
         self.suppress_while_audio_playing = suppress_while_audio_playing
+        self.menu_navigation_update_mode = _normalize_menu_navigation_update_mode(
+            menu_navigation_update_mode
+        )
         self._last_pushed_hash: str | None = None
         self._pending_hash: str | None = None
         self._pending_reason: str | None = None
@@ -188,13 +196,33 @@ class SimulatorDisplay(DisplayAdapter):
             return
         self._flush_physical_update()
 
+    def flush(self) -> None:
+        if not self.physical_display or not self._pending_hash:
+            return
+        if self._should_suppress_for_audio_playback(self._audio_playback_active):
+            return
+        if self._audio_grace_active():
+            return
+        if self._pending_deferred_by_audio_grace:
+            self.log.info(
+                "Audio startup grace period expired; applying deferred display update"
+            )
+            self._pending_deferred_by_audio_grace = False
+        self._flush_physical_update()
+
     def sleep(self) -> None:
+        cancelled = self._cancel_pending_update()
+        if cancelled:
+            self.log.info("Cancelled pending physical display update before sleep count=%s", cancelled)
         if self.physical_display:
             self.physical_display.sleep()
 
     def shutdown(self) -> None:
+        cancelled = self._cancel_pending_update()
+        if cancelled:
+            self.log.info("Cancelled pending physical display update during shutdown count=%s", cancelled)
         if self.physical_display:
-            self.physical_display.shutdown()
+            self.physical_display.sleep()
 
     def _request_physical_update(
         self,
@@ -206,6 +234,10 @@ class SimulatorDisplay(DisplayAdapter):
         apply_suppressed_after_request = (
             self._pending_suppressed_by_audio_playback and not audio_playing
         )
+        if reason == "menu_navigation" and self.menu_navigation_update_mode == "skip":
+            self._skipped_count += 1
+            self.log.info("Skipping physical update for menu_navigation")
+            return
         if reason == "volume_change" and not self.refresh_on_volume_change:
             self._skipped_count += 1
             self.log.info("Skipping physical update for volume_change")
@@ -577,17 +609,30 @@ class SimulatorDisplay(DisplayAdapter):
         if self.force_full_refresh or not self.partial_update_enabled:
             return "full", False, "partial_disabled_or_forced_full"
         next_update_number = self._physical_update_count + 1
-        if self.full_clear_interval and next_update_number > 1 and next_update_number % self.full_clear_interval == 0:
+        if (
+            self.full_clear_interval
+            and next_update_number > 1
+            and next_update_number % self.full_clear_interval == 0
+            and reason != "menu_navigation"
+        ):
             return "full", True, "periodic_full_clear"
         if self._last_pushed_hash is None:
             return "full", False, "startup_or_first_render"
-        if self._partial_since_clean >= self.partial_streak_limit:
+        if self._partial_since_clean >= self.partial_streak_limit and reason != "menu_navigation":
             return "full", True, "partial_streak_limit"
+        if reason == "bluetooth_pairing_status":
+            return "full", True, "bluetooth_pairing_status_clean"
         if self._last_pushed_screen_signature != next_screen:
             if self._allows_same_layout_playlist_partial(reason, next_screen):
                 return "partial", False, "same_playback_layout_playlist_switch"
             clean = self._last_pushed_screen_signature is not None
             return "full", clean, "screen_mode_or_title_changed"
+        if reason == "menu_navigation":
+            if self.menu_navigation_update_mode == "partial":
+                return "partial", False, "same_layout_partial_reason"
+            return "full", True, "menu_navigation_full_clean"
+        if self._partial_since_clean >= self.partial_streak_limit:
+            return "partial", False, "menu_navigation_defers_partial_streak_cleanup"
         if reason in FULL_UPDATE_REASONS:
             clean = reason != "startup" and self._last_update_mode == "partial"
             return "full", clean, "explicit_full_reason"
@@ -664,6 +709,13 @@ def _show_render_timings() -> bool:
     return bool(value and value.strip().lower() in {"1", "true", "yes", "on"})
 
 
+def _normalize_menu_navigation_update_mode(value: str) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"full", "partial", "skip"}:
+        return normalized
+    return "full"
+
+
 def _image_hash(image) -> str:
     hasher = hashlib.sha256()
     hasher.update(image.mode.encode("utf-8"))
@@ -686,10 +738,14 @@ def _screen_signature(state: RenderState) -> tuple[str, str, str]:
         title = "Sleep Timer"
     elif layout_type == "output":
         title = "Output"
+    elif layout_type == "bluetooth_pairing":
+        title = "Bluetooth Pairing"
     elif layout_type == "alarm":
         title = "Alarm"
     elif layout_type == "alarm_active":
         title = "ALARM"
+    elif layout_type == "gentle_wake":
+        title = "Gentle Wake"
     elif layout_type == "sleep_screen":
         title = "Sleep Screen"
     elif layout_type == "ambient":
@@ -700,6 +756,8 @@ def _screen_signature(state: RenderState) -> tuple[str, str, str]:
 
 
 def _layout_type(state: RenderState) -> str:
+    if state.alarm_runtime.phase == "WAKE_STAGE":
+        return "gentle_wake"
     if state.alarm_runtime.active:
         return "alarm_active"
     if state.mode == UIMode.AMBIENT:
@@ -718,6 +776,8 @@ def _layout_type(state: RenderState) -> str:
         return "sleep_timer"
     if state.mode == UIMode.OUTPUT_SELECT:
         return "output"
+    if state.mode == UIMode.BLUETOOTH_PAIRING:
+        return "bluetooth_pairing"
     if state.mode == UIMode.ALARM:
         return "alarm"
     if state.mode == UIMode.SOURCE_DETAIL:

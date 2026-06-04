@@ -16,6 +16,15 @@ PREFERRED_DAC_PATTERNS = (
     "innomaker",
 )
 
+USB_AUDIO_PATTERNS = (
+    "usb",
+    "qajopfn",
+    "c-media",
+    "cm108",
+    "cm119",
+    "device",
+)
+
 
 @dataclass(frozen=True)
 class AudioSelection:
@@ -115,4 +124,26 @@ def detect_preferred_dac(aplay_output: str) -> _DetectedDac:
                 name=line.strip(),
                 card_index=int(card_match.group(1)) if card_match else None,
             )
+    return _DetectedDac()
+
+
+def detect_usb_audio_device(aplay_output: str) -> _DetectedDac:
+    for line in aplay_output.splitlines():
+        lowered = line.lower()
+        if not lowered.startswith("card "):
+            continue
+        if any(pattern in lowered for pattern in PREFERRED_DAC_PATTERNS):
+            continue
+        if "vc4" in lowered or "hdmi" in lowered:
+            continue
+        if not any(pattern in lowered for pattern in USB_AUDIO_PATTERNS):
+            continue
+        match = re.search(r"card\s+(\d+):\s*([^\s\[]+)", line, re.IGNORECASE)
+        if match:
+            return _DetectedDac(name=match.group(2), card_index=int(match.group(1)))
+        card_match = re.search(r"card\s+(\d+):", line, re.IGNORECASE)
+        return _DetectedDac(
+            name=line.strip(),
+            card_index=int(card_match.group(1)) if card_match else None,
+        )
     return _DetectedDac()

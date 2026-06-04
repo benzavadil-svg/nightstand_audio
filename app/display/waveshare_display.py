@@ -271,6 +271,13 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 exc,
                 exc_info=is_debug_enabled("EPD"),
             )
+            if _is_gpio_busy_error(exc):
+                self._failed = True
+                self.log.warning(
+                    "Physical e-paper output disabled for this run because a Waveshare GPIO pin is busy. "
+                    "PNG rendering will continue. Run `python -m scripts.diagnose_gpio` on the Pi."
+                )
+                return False
             try:
                 if epd is not None:
                     epd.sleep()
@@ -573,6 +580,12 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 exc,
                 exc_info=is_debug_enabled("EPD"),
             )
+            if _is_gpio_busy_error(exc):
+                self.log.warning(
+                    "Physical e-paper output disabled for this run because a Waveshare GPIO pin is busy. "
+                    "PNG rendering will continue. Run `python -m scripts.diagnose_gpio` on the Pi."
+                )
+                return False
             self.log.warning("Continuing with PNG-only simulator output.")
             if not self.allow_hardware_fallback:
                 raise RuntimeError(
@@ -635,6 +648,12 @@ class WaveshareDisplay(ImageDisplayAdapter):
                 exc,
                 exc_info=is_debug_enabled("EPD"),
             )
+            if _is_gpio_busy_error(exc):
+                self.log.warning(
+                    "Physical e-paper output disabled for this run because a Waveshare GPIO pin is busy. "
+                    "PNG rendering will continue. Run `python -m scripts.diagnose_gpio` on the Pi."
+                )
+                return False
             self.log.warning("Continuing with PNG-only simulator output.")
             if not self.allow_hardware_fallback:
                 raise RuntimeError(
@@ -649,8 +668,6 @@ class WaveshareDisplay(ImageDisplayAdapter):
         return self._partial_supported
 
     def _partial_blocked_reason(self) -> str | None:
-        if self.display_model == "waveshare_4in2_v2" and self._previous_update_was_one_shot:
-            return "driver_sleep_or_invalid_handle"
         if self._sleeping or not self._initialized or self._epd is None:
             return "driver_sleep_or_invalid_handle"
         return None
@@ -889,6 +906,16 @@ def _env_bool(name: str, default: bool) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _is_gpio_busy_error(exc: BaseException) -> bool:
+    current: BaseException | None = exc
+    while current is not None:
+        message = str(current).lower()
+        if "gpio busy" in message or "'gpio busy'" in message:
+            return True
+        current = current.__cause__ or current.__context__
+    return False
 
 
 def display_model_spec(display_model: str | None) -> DisplayModelSpec:

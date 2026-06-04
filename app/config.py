@@ -41,6 +41,7 @@ class Settings:
     epd_partial_refresh_min_interval_ms: int
     epd_force_full_refresh: bool
     epd_force_clean_refresh: bool
+    epd_menu_navigation_update_mode: str
     epd_clock_refresh_seconds: int
     epd_disable_clock_auto_refresh: bool
     night_mode_enabled: bool
@@ -52,8 +53,10 @@ class Settings:
     active_mode_timeout_seconds: int
     ambient_clock_refresh_seconds: int
     ambient_show_playback_glyph: bool
+    input_backend: str
     audio_backend: str
     audio_device: str
+    alarm_audio_device: str
     playback_backend: str
     restore_playback_on_startup: bool
     resume_on_startup: bool
@@ -64,6 +67,7 @@ class Settings:
     epd_suppress_while_audio_playing: bool
     sleep_fade_seconds: float
     sleep_fade_steps: int
+    bluetooth_auto_reconnect_cooldown_seconds: int = 120
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -122,6 +126,11 @@ class Settings:
             ),
             epd_force_full_refresh=_env_bool("EPD_FORCE_FULL_REFRESH", False),
             epd_force_clean_refresh=_env_bool("EPD_FORCE_CLEAN_REFRESH", False),
+            epd_menu_navigation_update_mode=_normalize_choice(
+                os.getenv("EPD_MENU_NAVIGATION_UPDATE_MODE", "full"),
+                {"full", "partial", "skip"},
+                "full",
+            ),
             epd_clock_refresh_seconds=int(os.getenv("EPD_CLOCK_REFRESH_SECONDS", "60")),
             epd_disable_clock_auto_refresh=_env_bool("EPD_DISABLE_CLOCK_AUTO_REFRESH", False),
             night_mode_enabled=_env_bool("NIGHT_MODE_ENABLED", True),
@@ -135,8 +144,14 @@ class Settings:
             active_mode_timeout_seconds=int(os.getenv("ACTIVE_MODE_TIMEOUT_SECONDS", "30")),
             ambient_clock_refresh_seconds=int(os.getenv("AMBIENT_CLOCK_REFRESH_SECONDS", "60")),
             ambient_show_playback_glyph=_env_bool("AMBIENT_SHOW_PLAYBACK_GLYPH", True),
+            input_backend=_normalize_choice(
+                os.getenv("INPUT_BACKEND", "auto"),
+                {"auto", "keyboard", "gpio", "gpio_keyboard"},
+                "auto",
+            ),
             audio_backend=os.getenv("AUDIO_BACKEND", "alsa"),
             audio_device=os.getenv("AUDIO_DEVICE", "auto"),
+            alarm_audio_device=os.getenv("ALARM_AUDIO_DEVICE", "auto_usb"),
             playback_backend=_normalize_choice(
                 os.getenv("PLAYBACK_BACKEND", "auto"),
                 {"auto", "mock", "mpv"},
@@ -152,8 +167,11 @@ class Settings:
                 "EPD_SUPPRESS_WHILE_AUDIO_PLAYING",
                 False,
             ),
-            sleep_fade_seconds=float(os.getenv("SLEEP_FADE_SECONDS", "10")),
+            sleep_fade_seconds=float(os.getenv("SLEEP_FADE_SECONDS", "30")),
             sleep_fade_steps=int(os.getenv("SLEEP_FADE_STEPS", "20")),
+            bluetooth_auto_reconnect_cooldown_seconds=int(
+                os.getenv("BLUETOOTH_AUTO_RECONNECT_COOLDOWN_SECONDS", "120")
+            ),
         )
 
     def ensure_dirs(self) -> None:

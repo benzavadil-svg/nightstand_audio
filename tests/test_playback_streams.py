@@ -25,9 +25,18 @@ from app.state_store import StateStore
 class MemoryDisplay(DisplayAdapter):
     def __init__(self) -> None:
         self.last_state: RenderState | None = None
+        self.sleep_calls = 0
+        self.shutdown_calls = 0
 
     def render(self, state: RenderState, reason: str | None = None) -> None:
         self.last_state = state
+
+    def sleep(self) -> None:
+        self.sleep_calls += 1
+
+    def shutdown(self) -> None:
+        self.shutdown_calls += 1
+        self.sleep()
 
 
 class GraceMemoryDisplay(MemoryDisplay):
@@ -69,6 +78,7 @@ class CountingMediaLibrary(MediaLibrary):
         super().__init__(media_dir, store)
         self.resolved_paths: list[str] = []
         self.scan_source_calls = 0
+        self.get_queue_calls = 0
         self.start_background_scan_calls = 0
         self.cancel_background_scan_reasons: list[str] = []
 
@@ -79,6 +89,10 @@ class CountingMediaLibrary(MediaLibrary):
     def scan_source(self, source_id: str) -> int:
         self.scan_source_calls += 1
         return super().scan_source(source_id)
+
+    def get_queue(self, source_id: str) -> list[MediaItem]:
+        self.get_queue_calls += 1
+        return super().get_queue(source_id)
 
     def start_background_scan(self) -> None:
         self.start_background_scan_calls += 1
@@ -420,6 +434,9 @@ class PlaybackStreamsTest(unittest.TestCase):
             self.assertFalse(controller.store.get_item(first_id).completed)
             self.assertEqual(controller.build_render_state().mode, UIMode.AMBIENT)
 
+            controller.render()
+            self.assertGreaterEqual(controller.display.sleep_calls, 1)
+
     def test_sleep_trigger_is_idempotent_during_fade(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp) / "test.sqlite")
@@ -462,6 +479,41 @@ class PlaybackStreamsTest(unittest.TestCase):
 
             self.assertEqual(player.stop_calls, 1)
             self.assertFalse(controller._sleep_transitioning)
+
+    def test_shutdown_stops_audio_saves_position_and_sleeps_display(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                        duration_seconds=60,
+                    )
+                ]
+            )
+            player = CountingStopPlayer()
+            display = MemoryDisplay()
+            controller = NightstandController(
+                store=store,
+                library=MediaLibrary(Path(tmp) / "media", store),
+                player=player,
+                display=display,
+            )
+            controller.handle_event(InputEvent("source", "button-1"))
+            player.status().position_seconds = 22.5
+            player._started_monotonic = None
+
+            controller.shutdown("sigterm")
+
+            session = store.get_playback_session("button-1")
+            self.assertEqual(player.stop_calls, 1)
+            self.assertEqual(display.shutdown_calls, 1)
+            self.assertEqual(display.sleep_calls, 1)
+            self.assertFalse(session.is_playing)
+            self.assertAlmostEqual(session.last_position_seconds, 22.5)
 
     def test_source_button_after_sleep_resumes_pre_fade_position_even_near_eof(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -677,6 +729,46 @@ class PlaybackStreamsTest(unittest.TestCase):
 
             self.assertFalse(controller.library.is_source_complete("button-1"))
             self.assertEqual(controller.player.status().title, "Day 001")
+
+    def test_media_track_list_turn_only_moves_cached_selection(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp) / "test.sqlite")
+            store.upsert_media_items(
+                [
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/001",
+                        title="Day 001",
+                        sort_key="001",
+                    ),
+                    MediaItem(
+                        source_id="button-1",
+                        file_path="demo://bible/002",
+                        title="Day 002",
+                        sort_key="002",
+                    ),
+                ]
+            )
+            library = CountingMediaLibrary(Path(tmp) / "media", store)
+            controller = NightstandController(
+                store=store,
+                library=library,
+                player=MockPlayer(),
+                display=MemoryDisplay(),
+            )
+            controller._enter_active_mode("test")
+            controller.open_track_menu("button-1")
+            controller._dirty = False
+            controller._dirty_reason = None
+            get_queue_calls = library.get_queue_calls
+            scan_source_calls = library.scan_source_calls
+
+            controller.handle_event(InputEvent("turn", 1))
+
+            self.assertEqual(controller.nav.selected_index, 1)
+            self.assertEqual(library.get_queue_calls, get_queue_calls)
+            self.assertEqual(library.scan_source_calls, scan_source_calls)
+            self.assertEqual(controller._dirty_reason, "menu_navigation")
 
 
 if __name__ == "__main__":

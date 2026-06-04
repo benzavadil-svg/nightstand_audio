@@ -29,7 +29,9 @@ class EInkRenderer:
         draw = ImageDraw.Draw(image)
         draw.rectangle((0, 0, self.width - 1, self.height - 1), outline=0)
 
-        if state.alarm_runtime.active:
+        if state.alarm_runtime.phase == "WAKE_STAGE":
+            self._render_gentle_wake(draw, state)
+        elif state.alarm_runtime.active:
             self._render_alarm_active(draw, state)
         elif state.mode == UIMode.AMBIENT:
             self._render_ambient(draw, state)
@@ -43,6 +45,8 @@ class EInkRenderer:
             self._render_sleep_timer(draw, state)
         elif state.mode == UIMode.ALARM:
             self._render_alarm_settings(draw, state)
+        elif state.mode == UIMode.BLUETOOTH_PAIRING:
+            self._render_bluetooth_pairing(draw, state)
         elif state.mode == UIMode.OUTPUT_SELECT:
             self._render_output(draw, state)
         else:
@@ -143,16 +147,6 @@ class EInkRenderer:
         row_height = self._scaled(46)
         for absolute_index, item in visible:
             marker = ">" if absolute_index == state.selected_index else " "
-            if absolute_index == state.selected_index:
-                draw.rectangle(
-                    (
-                        self._x(42),
-                        y - self._scaled(4),
-                        self._x(758),
-                        y + row_height - self._scaled(6),
-                    ),
-                    outline=0,
-                )
             self._left_fit(
                 draw,
                 f"{marker} {item.label}",
@@ -162,20 +156,20 @@ class EInkRenderer:
                 self.font_medium,
             )
             y += row_height
-        self._bottom_hint(draw, "Turn move   Press select   Hold home")
+        self._bottom_hint(draw, "Turn move   Knob select   Hold home")
 
     def _render_detail(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
         self._center(draw, state.detail_title or "Source", self._y(90), self.font_title)
         self._center(draw, state.detail_subtitle or "Playing", self._y(172), self.font_medium)
         self._center(draw, state.playback.title, self._y(258), self.font_regular)
-        self._center(draw, "Press pauses   Hold home", self._y(328), self.font_small)
+        self._center(draw, "Knob pauses   Hold home", self._y(328), self.font_small)
         self._bottom_bar(draw, state)
 
     def _render_sleep_timer(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
         self._center(draw, "Sleep Timer", self._y(76), self.font_title)
         self._center(draw, state.sleep_timer_label, self._y(168), self.font_large)
-        self._center(draw, "Press to cycle", self._y(332), self.font_regular)
-        self._bottom_hint(draw, "Backspace home")
+        self._center(draw, "Knob cycles", self._y(332), self.font_regular)
+        self._bottom_hint(draw, "Hold knob home")
 
     def _render_alarm_settings(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
         self._center(draw, "Alarm", self._y(58), self.font_title)
@@ -187,14 +181,66 @@ class EInkRenderer:
             self._y(338),
             self.font_regular,
         )
-        self._bottom_hint(draw, "[ ] adjust   Enter toggle")
+        self._bottom_hint(draw, "Turn adjust   Knob toggle")
+
+    def _render_gentle_wake(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
+        time_text = state.now.strftime("%-I:%M")
+        self._center(draw, "Good Morning", self._y(44), self.font_title)
+        self._center(draw, time_text, self._y(112), self.font_large)
+        stage = state.alarm_runtime.wake_stage
+        total = state.alarm_runtime.wake_stages or state.alarm.wake_stages
+        label = "Gentle Wake" if stage <= 1 else "Morning Brief"
+        self._center(draw, label, self._y(260), self.font_medium)
+        self._center(
+            draw,
+            f"Stage {stage} of {total} · Volume {state.alarm_runtime.fade_volume}%",
+            self._y(316),
+            self.font_small,
+        )
+        self._bottom_hint(draw, "Knob stop   Source snooze   Hold dismiss")
 
     def _render_output(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
-        self._center(draw, "Output", self._y(80), self.font_title)
-        self._center(draw, state.output_label, self._y(170), self.font_large)
-        message = state.bluetooth.last_message or "Bluetooth/DAC/Speaker"
+        self._center(draw, "Audio Output", self._y(58), self.font_title)
+        self._center(draw, state.output_label, self._y(148), self.font_large)
+        preferred = state.bluetooth.preferred_device_name if state.bluetooth.preferred_device_mac else "Not paired"
+        self._center(draw, f"Preferred: {preferred}", self._y(286), self.font_regular)
+        message = state.bluetooth.last_message or "BossDAC / Headphones"
         self._center(draw, message, self._y(340), self.font_regular)
-        self._bottom_hint(draw, "Backspace home")
+        self._bottom_hint(draw, "Hold knob home")
+
+    def _render_bluetooth_pairing(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
+        self._left_fit(
+            draw,
+            "Bluetooth Pairing",
+            self._x(40),
+            self._y(26),
+            self.width - self._x(80),
+            self.font_title,
+        )
+        draw.line((self._x(40), self._y(92), self.width - self._x(40), self._y(92)), fill=0)
+        if not state.menu_items:
+            self._center(draw, "Scanning...", self._y(158), self.font_medium)
+            self._center(draw, state.bluetooth.last_message or "No devices yet", self._y(226), self.font_regular)
+        else:
+            y = self._y(120)
+            row_height = self._scaled(50)
+            for index, item in self._visible_menu_items(state):
+                marker = ">" if index == state.selected_index else " "
+                self._left_fit(
+                    draw,
+                    f"{marker} {item.label}",
+                    self._x(54),
+                    y,
+                    self.width - self._x(108),
+                    self.font_medium,
+                )
+                y += row_height
+            selected = state.menu_items[state.selected_index]
+            message = state.bluetooth.last_message or f"Knob pairs {selected.label}"
+            self._center(draw, message, self._y(326), self.font_small)
+            if not message.startswith("Pairing:"):
+                self._center(draw, f"Knob pairs {selected.label}", self._y(352), self.font_small)
+        self._bottom_hint(draw, "Turn select   Knob pair")
 
     def _render_alarm_active(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
         banner_height = self._y(150)
@@ -215,7 +261,7 @@ class EInkRenderer:
         )
         fade = "Fade in" if state.alarm_runtime.fading else "Playing"
         self._center(draw, fade, self._y(318), self.font_regular)
-        self._bottom_hint(draw, "Preset snoozes   Press knob stops")
+        self._bottom_hint(draw, "Knob stop   Source snooze   Hold dismiss")
 
     def _bottom_bar(self, draw: ImageDraw.ImageDraw, state: RenderState) -> None:
         top_y = self.height - self._scaled(58)
@@ -493,8 +539,9 @@ class EInkRenderer:
         y: int,
         width: int,
         font: ImageFont.ImageFont,
+        fill: int = 0,
     ) -> None:
-        draw.text((x, y), self._fit_text(draw, text, font, width), font=font, fill=0)
+        draw.text((x, y), self._fit_text(draw, text, font, width), font=font, fill=fill)
 
     def _center_in_box(
         self,

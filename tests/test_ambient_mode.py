@@ -122,6 +122,139 @@ class AmbientModeTest(unittest.TestCase):
             self.assertTrue(controller.is_ambient_mode_active)
             self.assertEqual(controller.display.last_state.mode, UIMode.AMBIENT)
 
+    def test_source_button_snoozes_active_alarm(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            controller.alarm.runtime.phase = "ALARM_ACTIVE"
+
+            controller.handle_event(InputEvent("source", "button-1"))
+
+            self.assertEqual(controller.alarm.runtime.phase, "SNOOZE")
+            self.assertIsNotNone(controller.alarm.runtime.snoozed_until)
+
+    def make_night_controller_with_alarm(
+        self,
+        tmp: str,
+        *,
+        enabled: bool,
+        hour: int,
+        minute: int,
+        wake_lead_minutes: int,
+        dismissed: bool = False,
+    ) -> NightstandController:
+        store = StateStore(Path(tmp) / "test.sqlite")
+        store.upsert_media_items(
+            [
+                MediaItem(
+                    source_id="sounds",
+                    file_path="demo://sounds/001",
+                    title="Soft Rain",
+                    sort_key="001",
+                    duration_seconds=120,
+                )
+            ]
+        )
+        alarm = store.get_alarm_config()
+        alarm.enabled = enabled
+        alarm.hour = hour
+        alarm.minute = minute
+        alarm.wake_enabled = wake_lead_minutes > 0
+        alarm.wake_lead_minutes = wake_lead_minutes
+        if dismissed:
+            alarm.last_dismissed_date = datetime(2026, 5, 29).date()
+        store.save_alarm_config(alarm)
+        return NightstandController(
+            store=store,
+            library=MediaLibrary(Path(tmp) / "media", store),
+            player=MockPlayer(),
+            display=MemoryDisplay(),
+            night_mode_enabled=True,
+            night_mode_start="22:00",
+            night_mode_end="06:00",
+            ambient_mode_enabled=True,
+        )
+
+    def test_no_alarm_ambient_starts_at_standard_time(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_night_controller_with_alarm(
+                tmp,
+                enabled=False,
+                hour=4,
+                minute=0,
+                wake_lead_minutes=30,
+            )
+
+            controller.tick(datetime(2026, 5, 29, 5, 59))
+            self.assertTrue(controller.is_night_mode_active)
+
+            controller.tick(datetime(2026, 5, 29, 6, 0))
+            self.assertFalse(controller.is_night_mode_active)
+            self.assertTrue(controller.is_ambient_mode_active)
+
+    def test_early_alarm_moves_ambient_start_to_wake_sequence(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_night_controller_with_alarm(
+                tmp,
+                enabled=True,
+                hour=4,
+                minute=0,
+                wake_lead_minutes=30,
+            )
+
+            controller.tick(datetime(2026, 5, 29, 3, 29))
+            self.assertTrue(controller.is_night_mode_active)
+
+            controller.tick(datetime(2026, 5, 29, 3, 30))
+            self.assertFalse(controller.is_night_mode_active)
+            self.assertEqual(controller.alarm.runtime.phase, "WAKE_STAGE")
+
+    def test_later_alarm_keeps_standard_ambient_start(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_night_controller_with_alarm(
+                tmp,
+                enabled=True,
+                hour=8,
+                minute=0,
+                wake_lead_minutes=30,
+            )
+
+            controller.tick(datetime(2026, 5, 29, 6, 0))
+
+            self.assertFalse(controller.is_night_mode_active)
+            self.assertTrue(controller.is_ambient_mode_active)
+
+    def test_wake_lead_crossing_midnight_can_start_ambient_previous_day(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_night_controller_with_alarm(
+                tmp,
+                enabled=True,
+                hour=0,
+                minute=10,
+                wake_lead_minutes=30,
+            )
+
+            controller.tick(datetime(2026, 5, 28, 23, 39))
+            self.assertTrue(controller.is_night_mode_active)
+
+            controller.tick(datetime(2026, 5, 28, 23, 40))
+            self.assertFalse(controller.is_night_mode_active)
+
+    def test_dismissed_alarm_does_not_return_display_to_night_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_night_controller_with_alarm(
+                tmp,
+                enabled=True,
+                hour=4,
+                minute=0,
+                wake_lead_minutes=30,
+                dismissed=True,
+            )
+
+            controller.tick(datetime(2026, 5, 29, 4, 5))
+
+            self.assertFalse(controller.is_night_mode_active)
+            self.assertTrue(controller.is_ambient_mode_active)
+
 
 if __name__ == "__main__":
     unittest.main()

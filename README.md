@@ -17,6 +17,7 @@ The goal is not to recreate a phone with apps. This is a calm nightstand media p
 - Treats each button as a persistent resumable folder playlist stream.
 - Uses a quiet icon-driven bottom status row for playback, volume, sleep timer, and output.
 - Includes structured rotating logs and diagnostics for simulator, display, input, playback, Bluetooth, and state transitions.
+- Supports dedicated Bluetooth headphones on Raspberry Pi through PipeWire/WirePlumber A2DP, with BossDAC fallback.
 
 ## Intended hardware
 
@@ -33,7 +34,51 @@ The goal is not to recreate a phone with apps. This is a calm nightstand media p
 - Wi-Fi optional
 - Always plugged in for v1
 
-Bluetooth output is planned, with software support staged after the local simulator and core Pi playback path are solid.
+Bluetooth output is now part of the tested appliance path. The current known-good setup uses Nothing Ear (a) as a single dedicated paired device, PipeWire/WirePlumber for the Bluetooth sink, MPV for playback, BossDAC as normal wired fallback, and USB DAC as alarm-only speaker output.
+
+## Known-Good Pi Appliance Setup
+
+This is the current stable hardware/software shape:
+
+- Pi Zero 2 W running headless Raspberry Pi OS / Debian with PipeWire, WirePlumber, BlueZ, MPV, SPI, and lgpio.
+- Waveshare 4.2" V2 selected with `DISPLAY_MODEL=waveshare_4in2_v2`.
+- BossDAC Mini selected automatically for normal wired playback with `AUDIO_DEVICE=auto`.
+- USB DAC selected automatically for wake/alarm speaker playback with `ALARM_AUDIO_DEVICE=auto_usb`.
+- Nothing Ear (a) paired/trusted once, then reused as the preferred Bluetooth sink.
+- Physical controls use GPIO, while keyboard input remains enabled in `run_pi_appliance` for bench testing.
+
+Run from the Pi:
+
+```bash
+cd ~/nightstand-audio
+source .venv/bin/activate
+GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_pi_appliance
+```
+
+Expected startup/audio behavior:
+
+- Startup renders Ambient or Sleep Screen before any user playback.
+- Startup does not launch MPV.
+- Pressing Button 1/2/3 launches exactly one MPV process for the selected current track.
+- If the preferred Bluetooth earbuds are connected, MPV launches with `--audio-device=pulse/bluez_output...`.
+- If Bluetooth is unavailable, MPV launches through BossDAC, typically `--audio-device=alsa/plughw:1,0`.
+- Alarm and gentle-wake audio use the USB DAC path only; they should not route to Bluetooth or BossDAC.
+
+Known-good Bluetooth playback log:
+
+```text
+[BT] Connected device=Nothing Ear (a) audio_device=pulse/bluez_output.3C_B0_ED_B9_30_FC.1
+[BT] Playback sink switched bluetooth success=true
+[PLAYBACK] device=pulse/bluez_output.3C_B0_ED_B9_30_FC.1
+[PLAYBACK] command=mpv --no-video --no-audio-display --audio-device=pulse/bluez_output.3C_B0_ED_B9_30_FC.1 ...
+```
+
+Known-good display safety log:
+
+```text
+[EPD] Waveshare GPIO safety check passed; BossDAC I2S pins are protected.
+[EPD] GPIO18 pinmux safety check passed: ... GPIO18 = PCM_CLK
+```
 
 ## Planned Hardware / Shopping List
 
@@ -63,48 +108,175 @@ This is a living hardware plan. Items are not final just because they appear her
 | Enclosure | ABS project box or sloped desktop enclosure | First physical case | TODO | Planned | Drill/cut for display, knob, 3 buttons, headphone jack, USB-C, and any speaker/output access needed |
 | Frontlight / optional later | Warm white LED strip or edge-lit diffuser parts | Optional e-ink frontlight | TODO | Planned | Not required for v1; e-ink needs frontlight, not backlight |
 
+### Final GPIO / Wiring Plan
+
+The app-owned pin map lives in `app/hardware/pin_map.py`. BCM GPIO numbers are shown first; physical header pins are included to reduce bench wiring mistakes.
+
+| Function | BCM GPIO | Physical Pin | Notes |
+| --- | ---: | ---: | --- |
+| Waveshare RST | GPIO17 | 11 | e-paper reset |
+| Waveshare BUSY | GPIO24 | 18 | e-paper busy/status |
+| Waveshare DIN / MOSI | GPIO10 | 19 | SPI MOSI |
+| Waveshare DC | GPIO25 | 22 | e-paper data/command |
+| Waveshare CLK / SCLK | GPIO11 | 23 | SPI clock |
+| Waveshare CS / CE0 | GPIO8 | 24 | SPI chip select |
+| Waveshare PWR safety config | GPIO5 | 29 | Software `PWR_PIN`; no physical PWR wire currently used |
+| BossDAC PCM_CLK | GPIO18 | 12 | Reserved I2S; never use for display/buttons/rotary |
+| BossDAC PCM_FS | GPIO19 | 35 | Reserved I2S; never use for display/buttons/rotary |
+| BossDAC PCM_DIN | GPIO20 | 38 | Reserved I2S; never use for display/buttons/rotary |
+| BossDAC PCM_DOUT | GPIO21 | 40 | Reserved I2S; never use for display/buttons/rotary |
+| Rotary A / CLK | GPIO12 | 32 | Internal pull-up; turn maps to volume/menu movement |
+| Rotary B / DT | GPIO13 | 33 | Internal pull-up; turn maps to volume/menu movement |
+| Rotary SW / click | GPIO16 | 36 | Knob press/long press |
+| Button 1 | GPIO22 | 15 | GPIO-to-GND; maps to `media/buttons/button-1` |
+| Button 2 | GPIO23 | 16 | GPIO-to-GND; maps to `media/buttons/button-2` |
+| Button 3 | GPIO26 | 37 | GPIO-to-GND; maps to `media/buttons/button-3` |
+| MonkMakes speaker | none | n/a | 5V + GND + USB DAC audio; no GPIO power switching |
+
+Waveshare stock `epdconfig.py` may use `PWR_PIN=18`, which conflicts with BossDAC `PCM_CLK`. Use `PWR_PIN=5` or another safe non-I2S GPIO. If `pinctrl get 18` shows output instead of `PCM_CLK`, stop and fix the Waveshare config before running audio.
+
 ### Audio Architecture
 
 Normal playback outputs:
 
-- Bluetooth sink -> Nothing Ear (a)
+- Bluetooth sink -> paired headphones
 - InnoMaker DAC headphone sink -> wired headphone jack
 - USB sound card sink -> MonkMakes amplified speaker / alarm fallback speaker
 
 Alarm policy:
 
 - Alarm pauses any active playback first.
-- Alarm routes to the dedicated USB sound card -> MonkMakes speaker sink by default.
-- Alarm must not depend on Bluetooth earbuds or the headphone jack being connected.
-- Future setting may allow private Bluetooth alarm mode, but not v1.
+- Alarm always routes to the dedicated USB sound card -> MonkMakes speaker sink.
+- Alarm must not use Bluetooth earbuds, the BossDAC, or the normal headphone jack.
 
-Bluetooth reconnect policy, planned for Raspberry Pi deployment:
+Bluetooth headphone policy:
 
-- The Pi should remember the selected earbuds as a trusted Bluetooth device.
-- When the earbuds leave the case and become available, the Pi should attempt to reconnect.
-- On successful connection, normal playback routes to the Bluetooth sink.
-- On disconnect, normal playback falls back to the selected/default output.
-- Alarm playback still routes to the USB sound card -> MonkMakes speaker sink by default.
+- The app is optimized for one permanent headphone device.
+- Pair once from `Home -> Output -> Pair Headphones`; the app stores the preferred device name and MAC address.
+- While Nightstand Audio is running, a background presence monitor checks for the preferred device about every 15 seconds.
+- When the earbuds leave the case and become available, the app attempts reconnect automatically.
+- If an automatic reconnect window fails, the app waits before trying again so it does not churn on a cached BlueZ device record while the earbuds are still in the case. Tune this with `BLUETOOTH_AUTO_RECONNECT_COOLDOWN_SECONDS`.
+- On successful connection, normal playback routes to the PipeWire Bluetooth sink, for example `pulse/bluez_output.3C_B0_ED_B9_30_FC.1`.
+- On disconnect, normal playback falls back to BossDAC without stopping playback.
+- Triple-clicking any source button starts a manual reconnect window.
+- Alarm playback always routes to the USB sound card -> MonkMakes speaker sink.
 
 Output priority:
 
 1. Bluetooth if the trusted earbuds are connected.
 2. InnoMaker DAC wired headphones if selected.
 3. USB sound card -> MonkMakes speaker fallback.
-4. Alarm always uses the USB sound card -> MonkMakes speaker sink unless explicitly overridden in a future version.
+4. Alarm always uses the USB sound card -> MonkMakes speaker sink.
 
-Bluetooth implementation TODOs:
+Bluetooth implementation notes:
 
-- Use `bluetoothctl` to pair, trust, and connect the selected earbuds.
-- Use PipeWire/PulseAudio to detect the Bluetooth sink.
-- Periodically attempt reconnect to the trusted device during a reconnect window.
-- Persist `preferred_output = bluetooth` when the user selects earbuds.
-- Add fallback handling when Bluetooth is unavailable.
-- Keep reconnect device-level, not tied to a specific media source.
+- The Pi path uses `bluetoothctl` for pair/trust/connect fallback.
+- PipeWire/PulseAudio sink detection uses `pactl` first and `wpctl inspect` as a fallback.
+- MPV receives Bluetooth devices as `pulse/<pipewire sink name>`, not ALSA devices.
+- The manager persists `preferred_bluetooth_device_name`, `preferred_bluetooth_device_mac`, `preferred_bluetooth_last_connected_at`, and `preferred_output`.
+- Reconnect is device-level, not tied to a specific media source.
+- A cached `bluetoothctl info <MAC>` record is not treated as presence by itself; the device must be connected, have live discovery/RSSI data, or appear during the monitor's scan sample.
+- The app does not expose multi-device Bluetooth management.
 
 Bluetooth headphone media controls are a secondary input path. Physical box controls remain primary, and the device must work completely from the knob/buttons if Bluetooth controls are unavailable.
 
-Expected Nothing Ear (a) media-control mapping:
+### Headless Bluetooth A2DP Setup
+
+On the tested headless Pi, BlueZ pairing worked before audio worked. The real blocker was that WirePlumber did not register an A2DP source endpoint for the normal headless `main` profile. The symptom was:
+
+```text
+bluetoothctl connect <MAC>
+Failed to connect: org.bluez.Error.Failed br-connection-profile-unavailable
+```
+
+and:
+
+```text
+bluetoothctl show
+# missing UUID: Audio Source
+
+wpctl status
+# missing bluez / Nothing Ear sink
+```
+
+The working fix is two app-adjacent user-level WirePlumber drop-ins on the Pi. Keep these files in place.
+
+```bash
+mkdir -p ~/.config/wireplumber/wireplumber.conf.d
+```
+
+`~/.config/wireplumber/wireplumber.conf.d/51-bluez-headless-main.conf`:
+
+```text
+wireplumber.profiles = {
+  main = {
+    monitor.bluez.seat-monitoring = disabled
+  }
+}
+```
+
+`~/.config/wireplumber/wireplumber.conf.d/53-bluez-a2dp-only.conf`:
+
+```text
+monitor.bluez.properties = {
+  bluez5.roles = [ a2dp_source ]
+  bluez5.codecs = [ sbc sbc_xq ]
+  bluez5.enable-sbc-xq = true
+  bluez5.hfphsp-backend = "none"
+}
+```
+
+Restart order matters when testing manually:
+
+```bash
+pkill -u "$USER" wireplumber
+systemctl --user stop wireplumber
+sudo systemctl restart bluetooth
+sleep 3
+systemctl --user restart pipewire pipewire-pulse wireplumber
+sleep 6
+```
+
+Confirm the Pi is advertising A2DP source support:
+
+```bash
+bluetoothctl show | grep -E 'UUID|Audio|A/V'
+```
+
+Expected:
+
+```text
+UUID: Audio Source              (0000110a-0000-1000-8000-00805f9b34fb)
+```
+
+Connect and verify a real sink appears:
+
+```bash
+bluetoothctl connect 3C:B0:ED:B9:30:FC
+sleep 8
+bluetoothctl info 3C:B0:ED:B9:30:FC | grep -E 'Connected|UUID|Audio'
+wpctl status | grep -iE 'bluez|nothing|sink|device'
+pactl list sinks short
+```
+
+Known-good output includes:
+
+```text
+Connected: yes
+Nothing Ear (a) [bluez5]
+bluez_output.3C_B0_ED_B9_30_FC.1
+```
+
+Direct MPV test:
+
+```bash
+mpv --no-video --audio-device=pulse/bluez_output.3C_B0_ED_B9_30_FC.1 \
+  "/home/bzavadil/nightstand-audio/media/buttons/button-1/001 - Day 1 - In the Beginning.mp3"
+```
+
+If `Audio Source` is missing from `bluetoothctl show`, app changes will not fix Bluetooth audio. Fix the WirePlumber/BlueZ endpoint registration first.
+
+Typical Bluetooth headphone media-control mapping:
 
 - Pinch / play-pause command -> toggle play/pause.
 - Double pinch / next command -> next track.
@@ -183,6 +355,8 @@ Stable Pi appliance command:
 GPIOZERO_PIN_FACTORY=lgpio python -m scripts.run_pi_appliance
 ```
 
+`run_live_epd` keeps keyboard input for display bench testing. `run_pi_appliance` uses `INPUT_BACKEND=gpio_keyboard`: the final GPIO22/23/26 source buttons plus GPIO12/13/16 rotary mapping remain active, and keyboard commands still work as a temporary bench fallback.
+
 Equivalent manual form:
 
 ```bash
@@ -197,6 +371,7 @@ DISPLAY_BACKEND=waveshare
 HARDWARE_FALLBACK_TO_SIMULATOR=false
 USE_REAL_EPD=true
 DISPLAY_MODEL=waveshare_4in2_v2
+INPUT_BACKEND=gpio_keyboard
 FORCE_EPD_UPDATE=false
 EPD_REINIT_EVERY_UPDATE=false
 CLEAR_BEFORE_EPD_UPDATE=false
@@ -215,6 +390,7 @@ EPD_ONE_SHOT_MAJOR_TRANSITIONS=true
 EPD_REGION_PARTIAL_ENABLED=true
 EPD_PARTIAL_STREAK_LIMIT=8
 EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500
+EPD_MENU_NAVIGATION_UPDATE_MODE=full
 EPD_FORCE_FULL_REFRESH=false
 EPD_FORCE_CLEAN_REFRESH=false
 EPD_CLOCK_REFRESH_SECONDS=60
@@ -255,6 +431,7 @@ Notes:
 - `EPD_ONE_SHOT_MAJOR_TRANSITIONS=true` uses the known-good manual push lifecycle for major transitions: fresh `EPD()`, `init()`, open `latest_screen.png`, convert to 1-bit, resize to panel size, `display()`, then `sleep()`.
 - One-shot major transitions cancel any pending debounced physical update before pushing the final rendered frame.
 - `EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500` prevents rapid partial refresh bursts.
+- `EPD_MENU_NAVIGATION_UPDATE_MODE=full` is the current 4.2" default because menu/list partial refresh uses a full-buffer partial LUT and can muddy text. Set it to `partial` only for speed experiments, or `skip` to avoid physical updates while scrolling.
 - Clock-driven e-paper refreshes happen at `EPD_CLOCK_REFRESH_SECONDS`, default `60`; set `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` to disable automatic clock refreshes.
 - SPI must already be enabled and working.
 - `GPIOZERO_PIN_FACTORY=lgpio` is required on the current Raspberry Pi OS setup.
@@ -342,10 +519,13 @@ Startup logs include a banner with display type, resolution, GPIO backend, audio
 Troubleshooting:
 
 - If the display does not update, check for `[EPD]` initialization failures and confirm `WAVESHARE_EPD_PYTHON_PATH`.
+- If the Waveshare driver logs `GPIO busy` on GPIO17/RST or another display pin, run `python -m scripts.diagnose_gpio`; the app disables physical EPD writes for that run and continues PNG/input/playback so you can debug without a crash.
 - If the display updates too often, confirm `EPD_REINIT_EVERY_UPDATE=false` and `EPD_RENDER_DEBOUNCE_MS=750`.
 - If you see ghosting or vertical bars, run `python -m scripts.clear_epd`; use `EPD_REINIT_EVERY_UPDATE=true` only for hardware debugging.
 - If keyboard controls feel wrong, enable `DEBUG_INPUT=true`.
+- If startup logs `GPIO busy` for a control pin, another process or kernel consumer is holding that line. Run `python -m scripts.diagnose_gpio`; for manual checks use one `pinctrl get <gpio>` command per pin, `gpioinfo` or `gpioinfo /dev/gpiochip0`, and `fuser -v /dev/gpiochip*`. In `INPUT_BACKEND=gpio_keyboard` mode the app falls back to keyboard input if GPIO cannot be claimed.
 - If Bluetooth/output routing is confusing, enable `DEBUG_AUDIO=true` and run `python -m scripts.log_snapshot`.
+- If Bluetooth pairing logs `Powered: no`, `org.bluez.Error.NotReady`, or an rfkill permission error, run `sudo rfkill unblock bluetooth`, `sudo systemctl restart bluetooth`, then confirm `bluetoothctl show` reports `Powered: yes` before starting the app again.
 - If UI latency is unclear, set `SHOW_RENDER_TIMINGS=true` to print render time, display push time, and total refresh latency.
 
 ## Audio Output Testing
@@ -417,15 +597,38 @@ The current stable Pi command sets `EPD_SUPPRESS_WHILE_AUDIO_PLAYING=false` beca
 Sleep timer shutdown is a dedicated transition, not a natural EOF. When sleep triggers, the app saves the current track position immediately, fades audio down, stops MPV after the fade, and keeps the saved session marked as paused due to sleep:
 
 ```text
-SLEEP_FADE_SECONDS=10
+SLEEP_FADE_SECONDS=30
 SLEEP_FADE_STEPS=20
 ```
 
 The saved resume position is the start of the fade, so pressing the same source button later resumes intentionally from that point instead of advancing because the fade ran for several more seconds.
 
-GPIO root cause note: Waveshare stock `epdconfig.py` used `PWR_PIN=18`, which conflicts with BossDAC `GPIO18 = PCM_CLK` and caused `bcm2835-i2s 3f203000.i2s: I2S SYNC error!`. Use `PWR_PIN=5` or another safe non-I2S GPIO. Never assign Waveshare control pins to GPIO18, GPIO19, GPIO20, or GPIO21.
+Gentle wake alarms treat the configured alarm time as the target wake time. By default, wake staging starts 30 minutes before the target and moves through four quiet stages before the final alarm:
 
-When BossDAC is detected and real EPD is enabled, the app checks Waveshare `epdconfig.py` and refuses physical display startup if `PWR_PIN`, `RST_PIN`, `DC_PIN`, `CS_PIN`, or `BUSY_PIN` uses GPIO18/19/20/21. The only override is explicit bench-mode `ALLOW_UNSAFE_EPD_GPIO=true`.
+```text
+wake_enabled=true
+wake_lead_minutes=30
+wake_stages=4
+stage_volume_curve=[5, 10, 20, 35]
+stage_source=sounds
+```
+
+Wake stages use the dedicated alarm speaker path, keep display updates to stage transitions, and avoid interrupting active user playback unless `interrupt_active_playback` is enabled in the alarm profile. The final alarm stage fades to the configured target volume. Knob press stops and returns to ambient, a source button snoozes, and long press dismisses the alarm for the day.
+
+Wake/alarm audio is isolated from normal playback. In appliance mode, `ALARM_AUDIO_DEVICE=auto_usb` detects a separate USB audio card and routes wake/alarm output to that USB DAC headphone jack, which feeds the internal speaker. Alarm audio should never intentionally use Bluetooth or the BossDAC normal listening path.
+
+```text
+AUDIO_DEVICE=auto
+ALARM_AUDIO_DEVICE=auto_usb
+```
+
+If the USB DAC is not detected, wake/alarm playback is disabled and logged instead of falling back to the BossDAC or Bluetooth. Use an explicit override such as `ALARM_AUDIO_DEVICE=plughw:2,0` only after confirming the USB DAC card number with `aplay -l`.
+
+Ambient mode is alarm-aware. If an enabled alarm’s wake sequence starts earlier than the standard morning ambient boundary, the display wakes at the wake sequence start. For example, a 4:00 AM alarm with a 30 minute wake lead starts the ambient/gentle wake display at 3:30 AM.
+
+GPIO root cause note: Waveshare stock `epdconfig.py` used `PWR_PIN=18`, which conflicts with BossDAC `GPIO18 = PCM_CLK` and caused `bcm2835-i2s 3f203000.i2s: I2S SYNC error!`. Use `PWR_PIN=5` or another safe non-I2S GPIO. Never assign Waveshare control pins, rotary pins, button pins, or speaker-control pins to GPIO18, GPIO19, GPIO20, or GPIO21.
+
+When BossDAC is detected and real EPD is enabled, the app checks the app-owned pin map plus Waveshare `epdconfig.py` and refuses physical display/input startup if `PWR_PIN`, `RST_PIN`, `DC_PIN`, `CS_PIN`, `BUSY_PIN`, rotary, button, or speaker-control config uses GPIO18/19/20/21. The only override is explicit bench-mode `ALLOW_UNSAFE_GPIO=true`.
 
 Rebuild the portable media cache after changing files:
 
@@ -606,7 +809,7 @@ The app is structured so hardware behavior stays behind adapters:
 
 - `PlaybackAdapter`: mock player for Mac/dev simulator, MPV player for current Raspberry Pi appliance audio, MPD adapter stubbed for later.
 - `DisplayAdapter`: PNG simulator now, optional live Waveshare e-paper output on Raspberry Pi.
-- `InputAdapter`: keyboard now, GPIO rotary/buttons later.
+- `InputAdapter`: keyboard for Mac/dev simulator, GPIO rotary/buttons plus temporary keyboard fallback for `scripts.run_pi_appliance`.
 
 Expected Pi path:
 

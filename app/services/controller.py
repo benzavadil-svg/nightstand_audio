@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import time
+import signal
 from contextlib import nullcontext
-from datetime import datetime, time as clock_time
+from datetime import datetime, time as clock_time, timedelta
 from pathlib import Path
 
 from app.display.base import DisplayAdapter
@@ -21,7 +22,7 @@ from app.models import (
 )
 from app.playback.base import PlaybackAdapter
 from app.services.alarm import AlarmService
-from app.services.bluetooth import BluetoothManager
+from app.services.bluetooth import BluetoothBackend, BluetoothManager
 from app.services.logger import get_logger
 from app.services.navigation import NavigationController, NavigationResult
 from app.services.sleep_timer import SleepTimer
@@ -35,6 +36,7 @@ class NightstandController:
         library: MediaLibrary,
         player: PlaybackAdapter,
         display: DisplayAdapter,
+        alarm_player: PlaybackAdapter | None = None,
         keyboard: InputAdapter | None = None,
         menu_timeout_seconds: int = 15,
         clock_refresh_seconds: int = 60,
@@ -52,8 +54,11 @@ class NightstandController:
         resume_on_startup: bool = False,
         playback_restore_launch: bool = False,
         validate_playlist_on_play: bool = False,
-        sleep_fade_seconds: float = 10,
+        sleep_fade_seconds: float = 30,
         sleep_fade_steps: int = 20,
+        bossdac_audio_device: str = "plughw:1,0",
+        bluetooth_backend: BluetoothBackend | None = None,
+        bluetooth_auto_reconnect_cooldown_seconds: int = 120,
     ) -> None:
         self.store = store
         self.library = library
@@ -61,8 +66,13 @@ class NightstandController:
         self.display = display
         self.keyboard = keyboard
         self.sleep_timer = SleepTimer()
-        self.alarm = AlarmService(store, library, player)
-        self.bluetooth = BluetoothManager(store)
+        self.alarm = AlarmService(store, library, player, alarm_player=alarm_player)
+        self.bluetooth = BluetoothManager(
+            store,
+            backend=bluetooth_backend,
+            bossdac_audio_device=bossdac_audio_device,
+            auto_reconnect_cooldown_seconds=bluetooth_auto_reconnect_cooldown_seconds,
+        )
         self.nav = NavigationController(menu_timeout_seconds)
         self.log_input = get_logger("INPUT")
         self.log_state = get_logger("STATE")
@@ -97,6 +107,10 @@ class NightstandController:
         self._sleep_saved_status: PlaybackStatus | None = None
         self._sleep_saved_track_index = 0
         self._sleep_original_volume = PlaybackStatus().volume
+        self._shutdown_requested = False
+        self._shutdown_reason = "normal_exit"
+        self._shutdown_complete = False
+        self._display_sleep_requested = False
         self.is_night_mode_active = False
         self.is_sleep_screen_locked = False
         self.last_display_wake_at: datetime | None = None
@@ -139,9 +153,12 @@ class NightstandController:
         steps = 0
         keyboard = self.keyboard or KeyboardInput()
         input_context = keyboard.raw_mode() if hasattr(keyboard, "raw_mode") else nullcontext()
+        previous_signal_handlers = self._install_signal_handlers()
         try:
             with input_context:
                 while True:
+                    if self._shutdown_requested:
+                        break
                     now = datetime.now()
                     event = keyboard.poll(0.25)
                     if event and self.handle_event(event):
@@ -152,14 +169,68 @@ class NightstandController:
                         break
         except KeyboardInterrupt:
             self.log_sim.info("Simulator interrupted by Ctrl+C.")
-            self._save_position()
+            self.request_shutdown("keyboard_interrupt")
         finally:
-            self.shutdown()
+            self._restore_signal_handlers(previous_signal_handlers)
+            self.shutdown(self._shutdown_reason)
 
-    def shutdown(self) -> None:
-        self._save_position()
-        self.display.shutdown()
-        self.log_sim.info("Simulator shutdown complete.")
+    def request_shutdown(self, reason: str) -> None:
+        if self._shutdown_requested:
+            return
+        self._shutdown_requested = True
+        self._shutdown_reason = reason
+        self.log_sim.info("Shutdown requested reason=%s", reason)
+
+    def shutdown(self, reason: str = "normal_exit") -> None:
+        if self._shutdown_complete:
+            return
+        self._shutdown_complete = True
+        status = self._sleep_saved_status if self._sleep_transitioning else self._status_with_queue_context()
+        try:
+            self.player.stop()
+        except Exception as exc:
+            self.log_playback.error("Playback stop during shutdown failed: %s", exc)
+        if status and status.item_id:
+            self._save_captured_status_position(
+                status,
+                is_playing=False,
+                stop_reason="sleep" if self._sleep_transitioning else self._sleep_stop_reason,
+            )
+        try:
+            self.display.shutdown()
+        except Exception as exc:
+            self.log_display.error("Display sleep during shutdown failed: %s", exc)
+        close_input = getattr(self.keyboard, "close", None)
+        if callable(close_input):
+            try:
+                close_input()
+            except Exception as exc:
+                self.log_input.error("Input adapter close failed: %s", exc)
+        self.log_sim.info("Simulator shutdown complete reason=%s", reason)
+
+    def _install_signal_handlers(self):
+        previous_handlers = {}
+        for signal_number in (signal.SIGINT, signal.SIGTERM):
+            try:
+                previous_handlers[signal_number] = signal.getsignal(signal_number)
+                signal.signal(signal_number, self._handle_shutdown_signal)
+            except (ValueError, OSError) as exc:
+                self.log_sim.warning("Unable to install signal handler signal=%s error=%s", signal_number, exc)
+        return previous_handlers
+
+    def _restore_signal_handlers(self, previous_handlers) -> None:
+        for signal_number, handler in previous_handlers.items():
+            try:
+                signal.signal(signal_number, handler)
+            except (ValueError, OSError):
+                pass
+
+    def _handle_shutdown_signal(self, signal_number, _frame) -> None:
+        try:
+            signal_name = signal.Signals(signal_number).name.lower()
+        except ValueError:
+            signal_name = f"signal_{signal_number}"
+        self.request_shutdown(signal_name)
 
     def handle_event(self, event: InputEvent) -> bool:
         self._log_input_event(event)
@@ -171,6 +242,12 @@ class NightstandController:
         if event.type == "quit":
             self._save_position()
             return True
+        if self.alarm.runtime.is_engaged and self._handle_alarm_event(event):
+            return False
+        if self.nav.current_mode == UIMode.BLUETOOTH_PAIRING:
+            if self._handle_bluetooth_pairing_event(event):
+                return False
+            self._cancel_bluetooth_pairing_if_open(event.type)
         if self._handle_sleep_screen_locked_event(event):
             return False
         if self._handle_ambient_event(event):
@@ -183,9 +260,10 @@ class NightstandController:
             self.handle_media_command(event.value)
             return False
         if event.type == "source":
-            if self.alarm.runtime.active:
-                self.alarm.snooze()
-                self._mark_dirty("alarm_toggle")
+            if self.alarm.runtime.is_engaged:
+                self.alarm.stop()
+                self._enter_ambient_mode("alarm_stop")
+                self._mark_dirty("major_layout_transition")
                 return False
             if self._record_source_button_click():
                 self.bluetooth.begin_reconnect()
@@ -199,9 +277,10 @@ class NightstandController:
         if event.type == "turn":
             self._apply_nav_result(self.nav.handle_turn(int(event.value or 0)))
         elif event.type == "press":
-            if self.alarm.runtime.active:
+            if self.alarm.runtime.is_engaged:
                 self.alarm.stop()
                 self.nav.go_home()
+                self._enter_ambient_mode("alarm_stop")
                 self._mark_dirty("major_layout_transition")
             elif self.nav.current_mode == UIMode.HOME:
                 self._queue_home_press()
@@ -209,6 +288,11 @@ class NightstandController:
                 self._apply_nav_result(self.nav.handle_press())
         elif event.type == "long_press":
             self._pending_home_press_count = 0
+            if self.alarm.runtime.is_engaged:
+                self.alarm.dismiss_for_day()
+                self._enter_ambient_mode("alarm_dismissed")
+                self._mark_dirty("major_layout_transition")
+                return False
             previous_mode = self.nav.current_mode
             self._apply_nav_result(self.nav.handle_long_press())
             if self.nav.current_mode != previous_mode:
@@ -239,11 +323,75 @@ class NightstandController:
         elif event.type == "bluetooth_success":
             self.bluetooth.begin_reconnect()
             self.bluetooth.fake_success()
+            self._apply_bluetooth_playback_device()
             self._mark_dirty("bluetooth_reconnect")
         elif event.type == "bluetooth_failure":
             self.bluetooth.begin_reconnect()
             self.bluetooth.fake_failure()
+            self._apply_bluetooth_playback_device()
             self._mark_dirty("bluetooth_reconnect")
+        return False
+
+    def _handle_bluetooth_pairing_event(self, event: InputEvent) -> bool:
+        if event.type == "turn":
+            self.bluetooth.move_pairing_selection(int(event.value or 0))
+            self.log_input.info(
+                "Bluetooth pairing selection devices=%s selected=%s",
+                len(self.bluetooth.state.discovered_devices),
+                self.bluetooth.state.selected_device_index,
+            )
+            self._open_bluetooth_pairing_menu()
+            self._mark_dirty("menu_navigation")
+            return True
+        if event.type == "press":
+            if not self.bluetooth.state.discovered_devices:
+                self.bluetooth.refresh_pairing_devices()
+            if self.bluetooth.state.discovered_devices:
+                selected = self.bluetooth.state.discovered_devices[
+                    self.bluetooth.state.selected_device_index
+                ]
+                self.log_input.info(
+                    "Bluetooth pairing selected device name=%s mac=%s",
+                    selected.name,
+                    selected.mac,
+                )
+                self.bluetooth.start_pair_selected_device()
+                self._open_bluetooth_pairing_menu()
+                self._mark_dirty("bluetooth_pairing_status")
+            else:
+                self.log_input.info("Bluetooth pairing press ignored; no discovered devices.")
+                self.bluetooth.state.last_message = "Scanning..."
+                self._open_bluetooth_pairing_menu()
+                self._mark_dirty("manual_render")
+            return True
+        if event.type == "long_press":
+            self.bluetooth.cancel_pairing("long_press")
+            self.nav.go_home()
+            self._mark_dirty("major_layout_transition")
+            return True
+        return False
+
+    def _handle_alarm_event(self, event: InputEvent) -> bool:
+        if event.type == "source":
+            self.alarm.snooze()
+            self._mark_dirty("alarm_toggle")
+            return True
+        if event.type in {"press", "stop_alarm"}:
+            self.alarm.stop()
+            self.nav.go_home()
+            self._enter_ambient_mode("alarm_stop")
+            self._mark_dirty("major_layout_transition")
+            return True
+        if event.type == "snooze":
+            self.alarm.snooze()
+            self._mark_dirty("alarm_toggle")
+            return True
+        if event.type == "long_press":
+            self.alarm.dismiss_for_day()
+            self.nav.go_home()
+            self._enter_ambient_mode("alarm_dismissed")
+            self._mark_dirty("major_layout_transition")
+            return True
         return False
 
     def handle_media_command(self, command: MediaCommand | str | int | None) -> None:
@@ -267,12 +415,22 @@ class NightstandController:
         self._flush_pending_home_press()
         self.player.tick()
         self._handle_completed_playback()
+        if self.alarm.tick(now):
+            self._mark_dirty("alarm_stage")
         self._evaluate_night_mode(now)
         self._track_playback_passive_transition(now)
-        if self.alarm.tick(now):
-            self._mark_dirty("major_layout_transition")
         if self.bluetooth.tick(now):
-            self._mark_dirty("bluetooth_reconnect")
+            if self.nav.current_mode == UIMode.BLUETOOTH_PAIRING:
+                if self.bluetooth.state.connected:
+                    self._apply_bluetooth_playback_device()
+                    self._open_output_menu()
+                    self._mark_dirty("major_layout_transition")
+                else:
+                    self._open_bluetooth_pairing_menu()
+                    self._mark_dirty("menu_navigation")
+            else:
+                self._apply_bluetooth_playback_device()
+                self._mark_dirty("bluetooth_reconnect")
         if self.sleep_timer.expired(now):
             self._begin_sleep_transition("sleep_timer")
         self._tick_sleep_transition()
@@ -302,6 +460,9 @@ class NightstandController:
             reason,
         )
         self.display.render(state, reason=reason)
+        if self._display_sleep_requested:
+            self._display_sleep_requested = False
+            self._sleep_display_best_effort("app_sleep")
         if reason == "startup" and self.startup_profiler and not self._startup_summary_logged:
             self.startup_profiler.total()
             self._startup_summary_logged = True
@@ -444,12 +605,32 @@ class NightstandController:
         if self.night_mode_start == self.night_mode_end:
             return True
         if self.night_mode_start < self.night_mode_end:
-            return self.night_mode_start <= current < self.night_mode_end
-        return current >= self.night_mode_start or current < self.night_mode_end
+            standard_active = self.night_mode_start <= current < self.night_mode_end
+            if not standard_active:
+                return False
+            return now < self._effective_ambient_start_today(now)
+        if current >= self.night_mode_start:
+            next_morning = now.date() + timedelta(days=1)
+            standard = datetime.combine(next_morning, self.night_mode_end)
+            return now < self._effective_ambient_start_for_date(next_morning, standard)
+        if current < self.night_mode_end:
+            return now < self._effective_ambient_start_today(now)
+        return False
+
+    def _effective_ambient_start_today(self, now: datetime) -> datetime:
+        standard = datetime.combine(now.date(), self.night_mode_end)
+        return self._effective_ambient_start_for_date(now.date(), standard)
+
+    def _effective_ambient_start_for_date(self, target_date, standard: datetime) -> datetime:
+        alarm_wake_start = self.alarm.wake_start_for_date(target_date, include_dismissed=True)
+        if alarm_wake_start is None:
+            return standard
+        return min(standard, alarm_wake_start)
 
     def _lock_sleep_screen(self, reason: str) -> None:
-        if self.alarm.runtime.active:
+        if self.alarm.runtime.is_engaged:
             return
+        self._cancel_bluetooth_pairing_if_open(reason)
         if not self.is_sleep_screen_locked:
             self.log_night.info("Sleep screen locked reason=%s", reason)
         self.is_sleep_screen_locked = True
@@ -475,6 +656,7 @@ class NightstandController:
     def _enter_ambient_mode(self, reason: str) -> None:
         if not self.ambient_mode_enabled or self.is_night_mode_active:
             return
+        self._cancel_bluetooth_pairing_if_open(reason)
         if not self.is_ambient_mode_active:
             self.log_ambient.info("Ambient Mode entered reason=%s", reason)
         self.is_ambient_mode_active = True
@@ -507,7 +689,9 @@ class NightstandController:
     def _return_to_sleep_screen_if_due(self, now: datetime) -> None:
         if not self.night_mode_display_lock:
             return
-        if self.is_sleep_screen_locked or self.alarm.runtime.active:
+        if self.nav.current_mode == UIMode.BLUETOOTH_PAIRING:
+            return
+        if self.is_sleep_screen_locked or self.alarm.runtime.is_engaged:
             return
         last_wake = self.last_display_wake_at or self.last_active_interaction_at or now
         if (now - last_wake).total_seconds() >= self.night_mode_wake_timeout_seconds:
@@ -516,6 +700,8 @@ class NightstandController:
 
     def _return_to_ambient_if_due(self, now: datetime) -> None:
         if not self.ambient_mode_enabled or not self.is_active_mode_active:
+            return
+        if self.nav.current_mode == UIMode.BLUETOOTH_PAIRING:
             return
         if self.player.status().state == PlaybackState.PLAYING:
             return
@@ -536,10 +722,14 @@ class NightstandController:
         self._last_playback_was_playing = is_playing
 
     def _sleep_screen_controls_locked(self) -> bool:
-        return self.is_night_mode_active and self.is_sleep_screen_locked and not self.alarm.runtime.active
+        return self.is_night_mode_active and self.is_sleep_screen_locked and not self.alarm.runtime.is_engaged
 
     def _sleep_screen_should_render(self) -> bool:
         return self._sleep_screen_controls_locked()
+
+    def _cancel_bluetooth_pairing_if_open(self, reason: str) -> None:
+        if self.nav.current_mode == UIMode.BLUETOOTH_PAIRING:
+            self.bluetooth.cancel_pairing(reason)
 
     def _render_mode(self) -> UIMode:
         if self._sleep_screen_should_render():
@@ -596,6 +786,7 @@ class NightstandController:
             item.file_path,
             position,
         )
+        self._prepare_playback_output()
         if not self._play_item_through_adapter(item, position):
             return
         if item.id:
@@ -647,6 +838,7 @@ class NightstandController:
             self.log_state.info("Sleep triggered with no active playback reason=%s", reason)
             self._enter_safe_sleep_display_state(reason)
             self._mark_dirty("playback_stop")
+            self._display_sleep_requested = True
             return
 
         captured_position = max(0.0, float(status.position_seconds))
@@ -750,12 +942,20 @@ class NightstandController:
         self._last_completed_item_id = saved_status.item_id if saved_status else self._last_completed_item_id
         self.log_state.info("Sleep transition finished; playback stopped without completion.")
         self._mark_dirty("playback_stop")
+        self._display_sleep_requested = True
 
     def _enter_safe_sleep_display_state(self, reason: str) -> None:
         if self.is_night_mode_active and self.night_mode_display_lock:
             self._lock_sleep_screen(reason)
             return
         self._enter_ambient_mode(reason)
+
+    def _sleep_display_best_effort(self, reason: str) -> None:
+        try:
+            self.display.sleep()
+            self.log_display.info("Display sleep requested reason=%s", reason)
+        except Exception as exc:
+            self.log_display.error("Display sleep failed reason=%s error=%s", reason, exc)
 
     def build_render_state(self) -> RenderState:
         now = datetime.now()
@@ -805,6 +1005,8 @@ class NightstandController:
         self._clear_sleep_stop_reason_on_intentional_play()
         if status.state in {PlaybackState.PLAYING, PlaybackState.PAUSED}:
             previous_state = status.state
+            if status.state == PlaybackState.PAUSED:
+                self._prepare_playback_output()
             self.player.toggle_play_pause()
             self._begin_audio_start_display_grace_if_needed(previous_state)
             self._save_session_from_status(
@@ -913,7 +1115,33 @@ class NightstandController:
             self.nav.open_mode(UIMode.ALARM)
             self._mark_dirty("major_layout_transition")
         elif result.action == "open_output":
-            self.nav.open_mode(UIMode.OUTPUT_SELECT)
+            self._open_output_menu()
+            self._mark_dirty("major_layout_transition")
+        elif result.action == "output_bossdac":
+            self.bluetooth.disconnect()
+            self._apply_bluetooth_playback_device()
+            self.nav.go_home()
+            self._mark_dirty("bluetooth_reconnect")
+        elif result.action == "bluetooth_pair":
+            self.bluetooth.begin_pairing()
+            self._open_bluetooth_pairing_menu()
+            self._mark_dirty("major_layout_transition")
+        elif result.action == "bluetooth_pairing_select":
+            self.bluetooth.move_pairing_selection(int(result.value or 0))
+            self._open_bluetooth_pairing_menu()
+            self._mark_dirty("menu_navigation")
+        elif result.action == "bluetooth_pair_device":
+            self.bluetooth.start_pair_selected_device()
+            self._open_bluetooth_pairing_menu()
+            self._mark_dirty("bluetooth_pairing_status")
+        elif result.action == "bluetooth_reconnect":
+            self.bluetooth.begin_reconnect(manual=True)
+            self.nav.go_home()
+            self._mark_dirty("bluetooth_reconnect")
+        elif result.action == "bluetooth_forget":
+            self.bluetooth.forget_device()
+            self._apply_bluetooth_playback_device()
+            self._open_output_menu()
             self._mark_dirty("major_layout_transition")
         elif result.action == "alarm_toggle":
             self.alarm.toggle_enabled()
@@ -922,6 +1150,31 @@ class NightstandController:
             self.alarm.adjust_time(int(result.value or 0))
             self._mark_dirty("alarm_adjust")
 
+    def _open_output_menu(self) -> None:
+        items = [MenuItem("bossdac", "BossDAC", "output_bossdac")]
+        if self.bluetooth.state.preferred_device_mac:
+            name = self.bluetooth.state.preferred_device_name
+            suffix = " connected" if self.bluetooth.state.connected else " preferred"
+            items.append(MenuItem("bluetooth-device", f"{name}{suffix}", "bluetooth_reconnect"))
+            items.append(MenuItem("reconnect", "Reconnect Headphones", "bluetooth_reconnect"))
+            items.append(MenuItem("forget", "Forget Device", "bluetooth_forget"))
+        else:
+            items.append(MenuItem("pair", "Pair Headphones", "bluetooth_pair"))
+        self.nav.open_custom_menu("Audio Output", items)
+
+    def _open_bluetooth_pairing_menu(self) -> None:
+        devices = self.bluetooth.state.discovered_devices
+        items = [
+            MenuItem(device.mac, device.name, "bluetooth_pair_device")
+            for device in devices
+        ]
+        self.nav.open_custom_menu(
+            "Bluetooth Pairing",
+            items,
+            selected_index=self.bluetooth.state.selected_device_index,
+            mode=UIMode.BLUETOOTH_PAIRING,
+        )
+
     def _play_item(self, source_id: str, item, index: int, position: float) -> None:
         self._save_position()
         previous_source = self.current_source_id
@@ -929,6 +1182,7 @@ class NightstandController:
         self.store.set_current_source_id(source_id)
         self._last_completed_item_id = None
         self._clear_sleep_stop_reason_on_intentional_play()
+        self._prepare_playback_output()
         if not self._play_item_through_adapter(item, position):
             return
         if item.id:
@@ -946,6 +1200,17 @@ class NightstandController:
             item.title,
         )
         self._mark_dirty("source_change" if previous_source != source_id else "track_change")
+
+    def _prepare_playback_output(self) -> None:
+        self.bluetooth.prepare_for_playback()
+        self._apply_bluetooth_playback_device()
+
+    def _apply_bluetooth_playback_device(self) -> None:
+        audio_device = self.bluetooth.playback_audio_device()
+        setter = getattr(self.player, "set_audio_device", None)
+        if callable(setter):
+            setter(audio_device)
+        self.output_label = self.bluetooth.output_label()
 
     def _start_track_at_index(self, source_id: str, index: int, return_home: bool = True) -> None:
         item = self.library.get_item_at_index(source_id, index)
@@ -1006,6 +1271,33 @@ class NightstandController:
                 status.position_seconds,
                 completed,
             )
+
+    def _save_captured_status_position(
+        self,
+        status: PlaybackStatus,
+        is_playing: bool,
+        stop_reason: str | None = None,
+    ) -> None:
+        if not status.source_id or not status.item_id:
+            return
+        completed = False if stop_reason == "sleep" else self._is_completed(status)
+        self.store.update_playback_position(status.item_id, status.position_seconds, completed)
+        self._save_session(
+            status.source_id,
+            status.item_id,
+            self._current_index(status.source_id, status.item_id),
+            status.position_seconds,
+            is_playing=is_playing,
+            stop_reason=stop_reason,
+        )
+        self.log_playback.info(
+            "Playback position saved during shutdown source=%s item_id=%s position=%.1fs completed=%s stop_reason=%s",
+            status.source_id,
+            status.item_id,
+            status.position_seconds,
+            completed,
+            stop_reason,
+        )
 
     def _handle_completed_playback(self) -> None:
         if self._sleep_transitioning:

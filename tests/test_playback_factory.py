@@ -2,12 +2,26 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.config import Settings
-from app.playback.factory import build_playback_adapter
+from app.playback.factory import build_alarm_playback_adapter, build_playback_adapter
 from app.playback.mock_player import MockPlayer
 from app.playback.mpv_player import MPVPlayer
 from app.services.audio import AudioSelection
+
+
+USB_APLAY_OUTPUT = """
+card 1: BossDAC [BossDAC], device 0: Boss DAC HiFi pcm512x-hifi-0 [Boss DAC HiFi pcm512x-hifi-0]
+  Subdevices: 1/1
+card 2: Device [USB Audio Device], device 0: USB Audio [USB Audio]
+  Subdevices: 1/1
+"""
+
+BOSSDAC_ONLY_APLAY_OUTPUT = """
+card 1: BossDAC [BossDAC], device 0: Boss DAC HiFi pcm512x-hifi-0 [Boss DAC HiFi pcm512x-hifi-0]
+  Subdevices: 1/1
+"""
 
 
 class PlaybackFactoryTest(unittest.TestCase):
@@ -22,6 +36,27 @@ class PlaybackFactoryTest(unittest.TestCase):
         player = build_playback_adapter(settings, _audio_selection())
 
         self.assertIsInstance(player, MockPlayer)
+
+    def test_appliance_alarm_uses_separate_usb_dac(self) -> None:
+        settings = _settings(runtime_mode="appliance", playback_backend="auto")
+        normal_player = MockPlayer()
+
+        with patch("app.playback.factory.read_aplay_cards", return_value=USB_APLAY_OUTPUT):
+            alarm_player = build_alarm_playback_adapter(settings, normal_player)
+
+        self.assertIsInstance(alarm_player, MPVPlayer)
+        self.assertIsNot(alarm_player, normal_player)
+        self.assertEqual(alarm_player.audio_device, "plughw:2,0")
+
+    def test_appliance_alarm_does_not_fallback_to_normal_dac(self) -> None:
+        settings = _settings(runtime_mode="appliance", playback_backend="auto")
+        normal_player = MockPlayer()
+
+        with patch("app.playback.factory.read_aplay_cards", return_value=BOSSDAC_ONLY_APLAY_OUTPUT):
+            alarm_player = build_alarm_playback_adapter(settings, normal_player)
+
+        self.assertIsInstance(alarm_player, MockPlayer)
+        self.assertIsNot(alarm_player, normal_player)
 
 
 def _audio_selection() -> AudioSelection:
@@ -67,6 +102,7 @@ def _settings(runtime_mode: str, playback_backend: str) -> Settings:
         epd_partial_refresh_min_interval_ms=500,
         epd_force_full_refresh=False,
         epd_force_clean_refresh=False,
+        epd_menu_navigation_update_mode="full",
         epd_clock_refresh_seconds=60,
         epd_disable_clock_auto_refresh=False,
         night_mode_enabled=True,
@@ -78,8 +114,10 @@ def _settings(runtime_mode: str, playback_backend: str) -> Settings:
         active_mode_timeout_seconds=30,
         ambient_clock_refresh_seconds=60,
         ambient_show_playback_glyph=True,
+        input_backend="keyboard",
         audio_backend="alsa",
         audio_device="auto",
+        alarm_audio_device="auto_usb",
         playback_backend=playback_backend,
         restore_playback_on_startup=True,
         resume_on_startup=False,
@@ -88,7 +126,7 @@ def _settings(runtime_mode: str, playback_backend: str) -> Settings:
         background_media_scan=True,
         audio_start_display_grace_ms=5000,
         epd_suppress_while_audio_playing=True,
-        sleep_fade_seconds=10,
+        sleep_fade_seconds=30,
         sleep_fade_steps=20,
     )
 

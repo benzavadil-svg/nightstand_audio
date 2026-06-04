@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 from importlib import import_module
 from types import ModuleType
 
-
-I2S_PROTECTED_PINS = {
-    18: "BossDAC I2S PCM_CLK",
-    19: "BossDAC I2S PCM_FS",
-    20: "BossDAC I2S PCM_DIN",
-    21: "BossDAC I2S PCM_DOUT",
-}
+from app.hardware.pin_map import (
+    DEFAULT_PI_PIN_MAP,
+    I2S_PROTECTED_PINS,
+    UnsafePinMapError,
+    allow_unsafe_gpio,
+    pin_map_conflicts,
+)
 
 WAVESHARE_CONTROL_PINS = ("PWR_PIN", "RST_PIN", "DC_PIN", "CS_PIN", "BUSY_PIN")
 
@@ -22,8 +21,21 @@ class UnsafeGpioConfigError(RuntimeError):
 
 
 def allow_unsafe_epd_gpio() -> bool:
-    value = os.getenv("ALLOW_UNSAFE_EPD_GPIO", "")
-    return value.strip().lower() in {"1", "true", "yes", "on"}
+    return allow_unsafe_gpio()
+
+
+def validate_appliance_gpio_config(log, allow_unsafe: bool | None = None) -> None:
+    allow = allow_unsafe_gpio() if allow_unsafe is None else allow_unsafe
+    conflicts = pin_map_conflicts(DEFAULT_PI_PIN_MAP)
+    if not conflicts:
+        log.info("Pi appliance GPIO pin map safety check passed.")
+        return
+    message = "Unsafe Pi appliance GPIO config: " + "; ".join(conflicts)
+    if allow:
+        log.critical("%s ALLOW_UNSAFE_GPIO=true override is active.", message)
+        return
+    log.critical(message)
+    raise UnsafePinMapError(message)
 
 
 def validate_waveshare_gpio_config(log, allow_unsafe: bool | None = None) -> None:
@@ -39,7 +51,7 @@ def validate_waveshare_gpio_config(log, allow_unsafe: bool | None = None) -> Non
         return
     message = "; ".join(conflicts)
     if allow:
-        log.critical("%s ALLOW_UNSAFE_EPD_GPIO=true override is active.", message)
+        log.critical("%s ALLOW_UNSAFE_GPIO=true override is active.", message)
         return
     log.critical(message)
     raise UnsafeGpioConfigError(message)
@@ -74,7 +86,7 @@ def verify_gpio18_pcm_clk(log, allow_unsafe: bool | None = None) -> bool:
             f"pinctrl output={output!r}. Stopping physical EPD updates."
         )
         if allow:
-            log.critical("%s ALLOW_UNSAFE_EPD_GPIO=true override is active.", message)
+            log.critical("%s ALLOW_UNSAFE_GPIO=true override is active.", message)
             return True
         log.critical(message)
         return False

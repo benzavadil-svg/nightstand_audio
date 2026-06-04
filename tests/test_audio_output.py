@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts import test_audio_output
-from app.services.audio import AudioOutputSelector, detect_preferred_dac
+from app.services.audio import AudioOutputSelector, detect_preferred_dac, detect_usb_audio_device
 
 
 APLAY_OUTPUT = """
@@ -30,6 +30,15 @@ card 2: BossDAC [BossDAC], device 0: Boss DAC HiFi pcm512x-hifi-0 [Boss DAC HiFi
   Subdevices: 1/1
 """
 
+USB_AUDIO_APLAY_OUTPUT = """
+card 0: vc4hdmi0 [vc4-hdmi-0], device 0: MAI PCM i2s-hifi-0 [MAI PCM i2s-hifi-0]
+  Subdevices: 1/1
+card 1: BossDAC [BossDAC], device 0: Boss DAC HiFi pcm512x-hifi-0 [Boss DAC HiFi pcm512x-hifi-0]
+  Subdevices: 1/1
+card 2: Device [USB Audio Device], device 0: USB Audio [USB Audio]
+  Subdevices: 1/1
+"""
+
 
 class AudioOutputSelectionTest(unittest.TestCase):
     def test_dac_detection_prefers_hifiberry_pcm512x_card(self) -> None:
@@ -49,6 +58,18 @@ class AudioOutputSelectionTest(unittest.TestCase):
 
         self.assertEqual(detected.name, "BossDAC")
         self.assertEqual(detected.card_index, 2)
+
+    def test_usb_audio_detection_ignores_bossdac_and_hdmi(self) -> None:
+        detected = detect_usb_audio_device(USB_AUDIO_APLAY_OUTPUT)
+
+        self.assertEqual(detected.name, "Device")
+        self.assertEqual(detected.card_index, 2)
+
+    def test_usb_audio_detection_does_not_return_bossdac(self) -> None:
+        detected = detect_usb_audio_device(BOSSDAC_APLAY_OUTPUT)
+
+        self.assertIsNone(detected.name)
+        self.assertIsNone(detected.card_index)
 
     def test_auto_selects_plughw_for_bossdac(self) -> None:
         with patch("app.services.audio.read_aplay_cards", return_value=BOSSDAC_APLAY_OUTPUT):

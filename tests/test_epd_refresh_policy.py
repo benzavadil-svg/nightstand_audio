@@ -96,7 +96,7 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             ("full", True),
         )
 
-    def test_menu_and_clock_changes_are_partial_updates(self) -> None:
+    def test_menu_navigation_is_clean_full_by_default_and_clock_is_partial(self) -> None:
         display = self.make_display()
         display._last_pushed_hash = "already-rendered"
         menu_screen = ("MENU", "Home", "menu")
@@ -105,12 +105,61 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
 
         self.assertEqual(
             display._classify_update("menu_navigation", menu_screen)[:2],
-            ("partial", False),
+            ("full", True),
         )
         display._last_pushed_screen_signature = home_screen
         self.assertEqual(
             display._classify_update("clock_refresh", home_screen)[:2],
             ("partial", False),
+        )
+
+    def test_menu_navigation_partial_can_be_explicitly_enabled(self) -> None:
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            partial_update_enabled=True,
+            full_clear_interval=50,
+            menu_navigation_update_mode="partial",
+        )
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("MENU", "Home", "menu")
+
+        self.assertEqual(
+            display._classify_update("menu_navigation", ("MENU", "Home", "menu"))[:3],
+            ("partial", False, "same_layout_partial_reason"),
+        )
+
+    def test_menu_navigation_physical_update_can_be_skipped(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            menu_navigation_update_mode="skip",
+        )
+        display._last_pushed_hash = "old-hash"
+        display._last_pushed_screen_signature = ("MENU", "Home", "menu")
+
+        display._request_physical_update(
+            "menu-hash",
+            "menu_navigation",
+            ("MENU", "Home", "menu"),
+        )
+
+        self.assertIsNone(display._pending_hash)
+        self.assertEqual(display._skipped_count, 1)
+        self.assertEqual(physical.one_shot_calls, [])
+        self.assertEqual(physical.render_path_calls, [])
+
+    def test_bluetooth_pairing_status_uses_clean_full_update(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        pairing_screen = ("BLUETOOTH_PAIRING", "Bluetooth Pairing", "bluetooth_pairing")
+        display._last_pushed_screen_signature = pairing_screen
+
+        self.assertEqual(
+            display._classify_update("bluetooth_pairing_status", pairing_screen)[:3],
+            ("full", True, "bluetooth_pairing_status_clean"),
         )
 
     def test_4in2_display_model_uses_same_refresh_policy_classification(self) -> None:
@@ -182,14 +231,48 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             ("full", True),
         )
 
-    def test_eight_partial_updates_force_clean_full_update(self) -> None:
-        display = self.make_display()
+    def test_menu_navigation_defers_partial_streak_cleanup(self) -> None:
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            partial_update_enabled=True,
+            full_clear_interval=50,
+            menu_navigation_update_mode="partial",
+        )
         display._last_pushed_hash = "already-rendered"
         display._last_pushed_screen_signature = ("MENU", "Home", "menu")
         display._partial_since_clean = 8
 
         self.assertEqual(
             display._classify_update("menu_navigation", ("MENU", "Home", "menu"))[:2],
+            ("partial", False),
+        )
+
+    def test_menu_navigation_defers_periodic_full_clear(self) -> None:
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            partial_update_enabled=True,
+            full_clear_interval=50,
+            menu_navigation_update_mode="partial",
+        )
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("MENU", "Home", "menu")
+        display._physical_update_count = 49
+
+        self.assertEqual(
+            display._classify_update("menu_navigation", ("MENU", "Home", "menu"))[:3],
+            ("partial", False, "same_layout_partial_reason"),
+        )
+
+    def test_non_menu_update_still_cleans_after_partial_streak_limit(self) -> None:
+        display = self.make_display()
+        display._last_pushed_hash = "already-rendered"
+        display._last_pushed_screen_signature = ("HOME", "Clock", "idle_home")
+        display._partial_since_clean = 8
+
+        self.assertEqual(
+            display._classify_update("playback_toggle", ("HOME", "Clock", "idle_home"))[:2],
             ("full", True),
         )
 
@@ -199,6 +282,7 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             output_path=Path(tempfile.mkdtemp()) / "screen.png",
             partial_update_enabled=True,
             partial_streak_limit=2,
+            menu_navigation_update_mode="partial",
         )
         display._last_pushed_hash = "already-rendered"
         display._last_pushed_screen_signature = ("MENU", "Home", "menu")
@@ -206,7 +290,7 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
 
         self.assertEqual(
             display._classify_update("menu_navigation", ("MENU", "Home", "menu"))[:2],
-            ("full", True),
+            ("partial", False),
         )
 
     def test_volume_change_physical_update_is_enabled_by_default(self) -> None:
@@ -513,7 +597,7 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
         self.assertEqual(len(physical.one_shot_calls), 1)
         self.assertIsNone(display._pending_hash)
 
-    def test_minor_same_screen_update_still_uses_debounced_fast_path(self) -> None:
+    def test_minor_same_screen_menu_update_uses_clean_full_path_by_default(self) -> None:
         physical = FakePhysicalDisplay()
         display = SimulatorDisplay(
             renderer=None,
@@ -530,9 +614,8 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
             ("MENU", "Home", "menu"),
         )
 
-        self.assertEqual(display._pending_hash, "menu-hash")
-        self.assertEqual(display._pending_dirty_region.name, "menu_list")
-        self.assertEqual(physical.one_shot_calls, [])
+        self.assertIsNone(display._pending_hash)
+        self.assertEqual(len(physical.one_shot_calls), 1)
 
     def test_dirty_regions_merge_for_quick_partial_changes(self) -> None:
         physical = FakePhysicalDisplay()

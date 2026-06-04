@@ -119,9 +119,20 @@ class PlaybackSession:
     updated_at: datetime | None = None
 
 
+DEFAULT_BLUETOOTH_DEVICE_NAME = "Headphones"
+
+
+@dataclass
+class BluetoothDevice:
+    mac: str
+    name: str
+    connected: bool = False
+    trusted: bool = False
+
+
 @dataclass
 class BluetoothRuntimeState:
-    trusted_device_name: str = "Nothing Ear (a)"
+    trusted_device_name: str = DEFAULT_BLUETOOTH_DEVICE_NAME
     preferred_output: str = "dac"
     active_sink: str = "dac"
     connected: bool = False
@@ -129,6 +140,13 @@ class BluetoothRuntimeState:
     reconnect_started_at: datetime | None = None
     reconnect_timeout_seconds: int = 30
     last_message: str = ""
+    phase: str = "UNPAIRED"
+    preferred_device_name: str = DEFAULT_BLUETOOTH_DEVICE_NAME
+    preferred_device_mac: str = ""
+    bluetooth_audio_device: str = ""
+    last_successful_connection_at: datetime | None = None
+    discovered_devices: list[BluetoothDevice] = field(default_factory=list)
+    selected_device_index: int = 0
 
 
 @dataclass
@@ -141,6 +159,13 @@ class AlarmConfig:
     fade_in_seconds: int = 60
     snooze_minutes: int = 9
     last_triggered_date: date | None = None
+    wake_enabled: bool = True
+    wake_lead_minutes: int = 30
+    wake_stages: int = 4
+    stage_volume_curve: list[int] = field(default_factory=lambda: [5, 10, 20, 35])
+    stage_source: str = "sounds"
+    interrupt_active_playback: bool = False
+    last_dismissed_date: date | None = None
 
     def label(self) -> str:
         suffix = "AM" if self.hour < 12 else "PM"
@@ -150,10 +175,21 @@ class AlarmConfig:
 
 @dataclass
 class AlarmRuntimeState:
+    phase: str = "IDLE"
     active: bool = False
     fading: bool = False
     fade_volume: int = 0
     snoozed_until: datetime | None = None
+    wake_stage: int = 0
+    wake_stages: int = 0
+    stage_label: str = ""
+    target_volume: int = 0
+    queued: bool = False
+    output_label: str = "Alarm Speaker"
+
+    @property
+    def is_engaged(self) -> bool:
+        return self.phase in {"WAKE_STAGE", "ALARM_ACTIVE", "SNOOZE"}
 
 
 class UIMode(str, Enum):
@@ -165,6 +201,7 @@ class UIMode(str, Enum):
     SLEEP_TIMER = "SLEEP_TIMER"
     ALARM = "ALARM"
     OUTPUT_SELECT = "OUTPUT_SELECT"
+    BLUETOOTH_PAIRING = "BLUETOOTH_PAIRING"
 
 
 @dataclass
