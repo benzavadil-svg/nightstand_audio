@@ -568,12 +568,18 @@ class SubprocessBluetoothBackend:
 
         def read_stream(stream) -> None:
             try:
-                for line in iter(stream.readline, ""):
+                while True:
+                    try:
+                        line = stream.readline()
+                    except (OSError, ValueError):
+                        break
+                    if line == "":
+                        break
                     output_queue.put(line)
             finally:
                 try:
                     stream.close()
-                except OSError:
+                except (OSError, ValueError):
                     pass
 
         def send(command: str) -> bool:
@@ -583,9 +589,16 @@ class SubprocessBluetoothBackend:
                 process.stdin.write(command + "\n")
                 process.stdin.flush()
                 return True
-            except OSError as exc:
+            except (OSError, ValueError) as exc:
                 output.append(f"bluetoothctl stdin closed while sending {command}: {exc}\n")
                 return False
+
+        def drain_pending_output() -> None:
+            while True:
+                try:
+                    output.append(output_queue.get_nowait())
+                except queue.Empty:
+                    return
 
         try:
             process = subprocess.Popen(
@@ -650,11 +663,11 @@ class SubprocessBluetoothBackend:
             send("scan off")
             send("quit")
             try:
-                stdout, stderr = process.communicate(timeout=5)
+                process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 process.kill()
-                stdout, stderr = process.communicate()
-            output.extend(part for part in (stdout, stderr) if part)
+                process.wait(timeout=5)
+            drain_pending_output()
             return "".join(output)
         except OSError as exc:
             self.log.warning("Bluetooth pairing session failed error=%s", exc)
@@ -675,19 +688,35 @@ class SubprocessBluetoothBackend:
 
         def read_stream(stream) -> None:
             try:
-                for line in iter(stream.readline, ""):
+                while True:
+                    try:
+                        line = stream.readline()
+                    except (OSError, ValueError):
+                        break
+                    if line == "":
+                        break
                     output_queue.put(line)
             finally:
                 try:
                     stream.close()
-                except OSError:
+                except (OSError, ValueError):
                     pass
 
         def send(command: str) -> None:
             if process is None or process.stdin is None:
                 return
-            process.stdin.write(command + "\n")
-            process.stdin.flush()
+            try:
+                process.stdin.write(command + "\n")
+                process.stdin.flush()
+            except (OSError, ValueError) as exc:
+                output.append(f"bluetoothctl stdin closed while sending {command}: {exc}\n")
+
+        def drain_pending_output() -> None:
+            while True:
+                try:
+                    output.append(output_queue.get_nowait())
+                except queue.Empty:
+                    return
 
         try:
             process = subprocess.Popen(
@@ -746,11 +775,11 @@ class SubprocessBluetoothBackend:
             send("scan off")
             send("quit")
             try:
-                stdout, stderr = process.communicate(timeout=5)
+                process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 process.kill()
-                stdout, stderr = process.communicate()
-            output.extend(part for part in (stdout, stderr) if part)
+                process.wait(timeout=5)
+            drain_pending_output()
             return "".join(output)
         except OSError as exc:
             self.log.warning("Bluetooth reconnect session failed error=%s", exc)
