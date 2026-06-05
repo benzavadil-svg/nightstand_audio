@@ -104,6 +104,7 @@ def _settings(runtime_mode: str, playback_backend: str) -> Settings:
         epd_force_clean_refresh=False,
         epd_menu_navigation_update_mode="full",
         epd_clock_partial_update_enabled=False,
+        epd_playlist_switch_partial_update_enabled=False,
         epd_clock_refresh_seconds=60,
         epd_disable_clock_auto_refresh=False,
         night_mode_enabled=True,

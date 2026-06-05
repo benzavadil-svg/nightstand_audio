@@ -53,13 +53,43 @@ class EpaperRefreshPolicyTest(unittest.TestCase):
         display._last_pushed_hash = "already-rendered"
         self.assertEqual(display._classify_update("source_change")[:2], ("full", False))
 
-    def test_playback_home_playlist_switch_can_use_partial_main_content(self) -> None:
+    def test_playback_home_playlist_switch_is_full_clean_by_default(self) -> None:
         physical = FakePhysicalDisplay()
         display = SimulatorDisplay(
             renderer=None,
             output_path=Path(tempfile.mkdtemp()) / "screen.png",
             physical_display=physical,
             one_shot_major_transitions=True,
+        )
+        display._last_pushed_hash = "old-hash"
+        display._last_pushed_screen_signature = ("HOME", "Bible in a Year", "playback_home")
+
+        self.assertEqual(
+            display._classify_update(
+                "source_change",
+                ("HOME", "Sleep Baseball", "playback_home"),
+            )[:3],
+            ("full", True, "screen_mode_or_title_changed"),
+        )
+
+        display._request_physical_update(
+            "new-hash",
+            "source_change",
+            ("HOME", "Sleep Baseball", "playback_home"),
+        )
+
+        self.assertEqual(display._pending_update_mode, "full")
+        self.assertIsNone(display._pending_dirty_region)
+        self.assertEqual(len(physical.one_shot_calls), 1)
+
+    def test_playback_home_playlist_switch_partial_can_be_explicitly_enabled(self) -> None:
+        physical = FakePhysicalDisplay()
+        display = SimulatorDisplay(
+            renderer=None,
+            output_path=Path(tempfile.mkdtemp()) / "screen.png",
+            physical_display=physical,
+            one_shot_major_transitions=True,
+            playlist_switch_partial_update_enabled=True,
         )
         display._last_pushed_hash = "old-hash"
         display._last_pushed_screen_signature = ("HOME", "Bible in a Year", "playback_home")

@@ -309,6 +309,7 @@ EPD_PARTIAL_STREAK_LIMIT=8
 EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500
 EPD_MENU_NAVIGATION_UPDATE_MODE=full
 EPD_CLOCK_PARTIAL_UPDATE_ENABLED=false
+EPD_PLAYLIST_SWITCH_PARTIAL_UPDATE_ENABLED=false
 EPD_FORCE_FULL_REFRESH=false
 EPD_FORCE_CLEAN_REFRESH=false
 EPD_CLOCK_REFRESH_SECONDS=60
@@ -360,13 +361,13 @@ Live logs include `partial_supported`, `partial_api`, `init_part_called`, `selec
 
 `EPD_ONE_SHOT_MAJOR_TRANSITIONS=true` is the current default for major transitions. It matches the working manual push lifecycle: create a fresh selected-driver `EPD()`, call `init()`, open `data/latest_screen.png`, convert to 1-bit, resize to `epd.width`/`epd.height`, call `display(epd.getbuffer(img))`, then call `sleep()`. The display scheduler cancels pending debounced physical updates before this one-shot push so a stale queued frame cannot immediately overwrite the transition.
 
-Partial updates are only allowed for same-layout changes after a clean screen is already displayed. HOME-to-MENU, MENU-to-HOME, HOME-to-SLEEP_TIMER, source/track-list changes, and title/layout changes use full clean refreshes to avoid mixed stale regions. One exception is switching playlists while already on the playback home layout; that can use a `main_content` partial refresh because the clock and bottom status row remain stable. Same-layout partial refresh requests carry named dirty regions (`clock`, `main_content`, `bottom_bar`, `menu_list`, `sleep_timer_value`). The selected driver path logs `region_emulated=true` when the installed driver only supports full-buffer partial refresh.
+Partial updates are only allowed for same-layout value changes after a clean screen is already displayed. HOME-to-MENU, MENU-to-HOME, HOME-to-SLEEP_TIMER, source/track-list changes, title/layout changes, and Button 1/2/3 source title changes use full clean refreshes by default to avoid mixed stale regions. Same-layout partial refresh requests carry named dirty regions (`clock`, `main_content`, `bottom_bar`, `menu_list`, `sleep_timer_value`). The selected driver path logs `region_emulated=true` when the installed driver only supports full-buffer partial refresh.
 
 `EPD_REINIT_EVERY_UPDATE=false` is the appliance default. Set it to `true` only for hardware debugging if you need the old bring-up behavior.
 
 `CLEAR_BEFORE_EPD_UPDATE=false` is the default. Set it to `true` only if you intentionally want `Clear()` before every forced display write.
 
-`EPD_RENDER_DEBOUNCE_MS=750` coalesces rapid sequential state changes into one physical display write. Volume changes refresh by default with `EPD_REFRESH_ON_VOLUME_CHANGE=true`; `EPD_VOLUME_REFRESH_DEBOUNCE_MS=600` waits briefly until knob movement settles before pushing the final value. `EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500` prevents rapid partial-refresh bursts. `EPD_PARTIAL_STREAK_LIMIT=8` forces a clean full refresh after eight consecutive partial updates. `EPD_MENU_NAVIGATION_UPDATE_MODE=full` keeps menu/list labels clean on the 4.2" V2 panel because its partial API is full-buffer partial, not true windowed row refresh. `EPD_CLOCK_PARTIAL_UPDATE_ENABLED=false` applies the same caution to idle minute updates so the clock does not slowly turn muddy. `EPD_CLOCK_REFRESH_SECONDS=60` prevents second-by-second e-paper refreshes, and `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` disables automatic clock refreshes entirely.
+`EPD_RENDER_DEBOUNCE_MS=750` coalesces rapid sequential state changes into one physical display write. Volume changes refresh by default with `EPD_REFRESH_ON_VOLUME_CHANGE=true`; `EPD_VOLUME_REFRESH_DEBOUNCE_MS=600` waits briefly until knob movement settles before pushing the final value. `EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500` prevents rapid partial-refresh bursts. `EPD_PARTIAL_STREAK_LIMIT=8` forces a clean full refresh after eight consecutive partial updates. `EPD_MENU_NAVIGATION_UPDATE_MODE=full` keeps menu/list labels clean on the 4.2" V2 panel because its partial API is full-buffer partial, not true windowed row refresh. `EPD_CLOCK_PARTIAL_UPDATE_ENABLED=false` applies the same caution to idle minute updates so the clock does not slowly turn muddy. `EPD_PLAYLIST_SWITCH_PARTIAL_UPDATE_ENABLED=false` keeps Button 1/2/3 source/title switches on clean full transitions. `EPD_CLOCK_REFRESH_SECONDS=60` prevents second-by-second e-paper refreshes, and `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` disables automatic clock refreshes entirely.
 
 Set `EPD_DISABLE_PARTIAL=true` if partial refresh artifacts show up during real use and you want to avoid `init_Part()` / `display_Partial()` entirely. Set `EPD_PARTIAL_UPDATE_ENABLED=false` to keep app policy from requesting partial updates.
 

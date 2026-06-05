@@ -81,6 +81,7 @@ class SimulatorDisplay(DisplayAdapter):
         suppress_while_audio_playing: bool = True,
         menu_navigation_update_mode: str = "full",
         clock_partial_update_enabled: bool = False,
+        playlist_switch_partial_update_enabled: bool = False,
     ) -> None:
         self.renderer = renderer
         self.output_path = output_path
@@ -102,6 +103,7 @@ class SimulatorDisplay(DisplayAdapter):
             menu_navigation_update_mode
         )
         self.clock_partial_update_enabled = clock_partial_update_enabled
+        self.playlist_switch_partial_update_enabled = playlist_switch_partial_update_enabled
         self._last_pushed_hash: str | None = None
         self._pending_hash: str | None = None
         self._pending_reason: str | None = None
@@ -680,6 +682,8 @@ class SimulatorDisplay(DisplayAdapter):
         reason: str,
         next_screen: tuple[str, str, str] | None,
     ) -> bool:
+        if not self.playlist_switch_partial_update_enabled:
+            return False
         if reason != "source_change":
             return False
         if not self._last_pushed_screen_signature or not next_screen:

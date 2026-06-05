@@ -392,6 +392,7 @@ EPD_PARTIAL_STREAK_LIMIT=8
 EPD_PARTIAL_REFRESH_MIN_INTERVAL_MS=500
 EPD_MENU_NAVIGATION_UPDATE_MODE=full
 EPD_CLOCK_PARTIAL_UPDATE_ENABLED=false
+EPD_PLAYLIST_SWITCH_PARTIAL_UPDATE_ENABLED=false
 EPD_FORCE_FULL_REFRESH=false
 EPD_FORCE_CLEAN_REFRESH=false
 EPD_CLOCK_REFRESH_SECONDS=60
@@ -435,6 +436,7 @@ Notes:
 - `EPD_MENU_NAVIGATION_UPDATE_MODE=full` is the current 4.2" default because menu/list partial refresh uses a full-buffer partial LUT and can muddy text. Set it to `partial` only for speed experiments, or `skip` to avoid physical updates while scrolling.
 - Clock-driven e-paper refreshes happen at `EPD_CLOCK_REFRESH_SECONDS`, default `60`; set `EPD_DISABLE_CLOCK_AUTO_REFRESH=true` to disable automatic clock refreshes.
 - `EPD_CLOCK_PARTIAL_UPDATE_ENABLED=false` keeps idle minute updates out of the 4.2" V2 panel's full-buffer partial LUT path. Set it to `true` only if you want to test faster clock updates and can tolerate ghosting.
+- `EPD_PLAYLIST_SWITCH_PARTIAL_UPDATE_ENABLED=false` keeps Button 1/2/3 source/title changes on clean full transitions. Set it to `true` only for speed experiments.
 - SPI must already be enabled and working.
 - `GPIOZERO_PIN_FACTORY=lgpio` is required on the current Raspberry Pi OS setup.
 - Set `EPD_REINIT_EVERY_UPDATE=true` only for hardware debugging if you need the old bring-up behavior.
