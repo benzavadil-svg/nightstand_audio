@@ -166,6 +166,30 @@ class PlaybackStreamsTest(unittest.TestCase):
             self.assertEqual(status.item_id, first.item_id)
             self.assertGreaterEqual(status.position_seconds, 0.3)
 
+    def test_same_source_button_toggles_pause_after_normal_start(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+
+            controller.handle_event(InputEvent("source", "button-1"))
+            self.assertEqual(controller.player.status().state, PlaybackState.PLAYING)
+
+            controller.handle_event(InputEvent("source", "button-1"))
+
+            self.assertEqual(controller.player.status().state, PlaybackState.PAUSED)
+
+    def test_duplicate_source_press_after_slow_start_is_ignored(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = self.make_controller(tmp)
+            controller._slow_source_start_threshold_seconds = 0
+            controller._post_slow_source_start_ignore_seconds = 2
+
+            controller.handle_event(InputEvent("source", "button-1"))
+            self.assertEqual(controller.player.status().state, PlaybackState.PLAYING)
+
+            controller.handle_event(InputEvent("source", "button-1"))
+
+            self.assertEqual(controller.player.status().state, PlaybackState.PLAYING)
+
     def test_startup_restore_never_touches_or_launches_player(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp) / "test.sqlite")

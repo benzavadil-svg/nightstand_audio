@@ -131,6 +131,11 @@ class NightstandController:
         self._source_button_click_count = 0
         self._last_source_button_click_at = 0.0
         self._source_button_click_window_seconds = 1.0
+        self._source_starting_id: str | None = None
+        self._ignore_source_toggle_id: str | None = None
+        self._ignore_source_toggle_until = 0.0
+        self._slow_source_start_threshold_seconds = 1.0
+        self._post_slow_source_start_ignore_seconds = 2.0
         self._audio_route_switch_recovery_until = 0.0
         self._audio_route_switch_recovery_attempted = False
         self._audio_route_switch_status: PlaybackStatus | None = None
@@ -759,6 +764,25 @@ class NightstandController:
         self.log_playback.info("Playback flow step=button_press source=%s", source_id)
         status = self.player.status()
         active_source = status.source_id or self.current_source_id
+        now = time.monotonic()
+        if self._source_starting_id == source_id:
+            self.log_playback.info(
+                "Playback flow step=ignore_duplicate_source_while_starting source=%s",
+                source_id,
+            )
+            return
+        if (
+            self._ignore_source_toggle_id == source_id
+            and now < self._ignore_source_toggle_until
+            and active_source == source_id
+            and status.state in {PlaybackState.PLAYING, PlaybackState.PAUSED}
+        ):
+            self.log_playback.info(
+                "Playback flow step=ignore_duplicate_source_after_slow_start source=%s remaining_ms=%d",
+                source_id,
+                int((self._ignore_source_toggle_until - now) * 1000),
+            )
+            return
         if active_source == source_id and status.state in {PlaybackState.PLAYING, PlaybackState.PAUSED}:
             self.log_playback.info("Playback flow step=toggle_existing_source source=%s", source_id)
             self.toggle_play_pause_or_resume()
@@ -767,47 +791,70 @@ class NightstandController:
         self.start_source(source_id)
 
     def start_source(self, source_id: str) -> None:
-        if self.validate_playlist_on_play:
-            self.library.ensure_source_ready(source_id)
-        else:
-            self.library.ensure_source_index_available(source_id)
-        if self.library.is_source_complete(source_id):
-            self._show_completed_source(source_id)
-            return
-        item, index, position = self._session_cursor(source_id)
-        if not item:
+        started_at = time.monotonic()
+        started_successfully = False
+        self._source_starting_id = source_id
+        try:
+            if self.validate_playlist_on_play:
+                self.library.ensure_source_ready(source_id)
+            else:
+                self.library.ensure_source_index_available(source_id)
             if self.library.is_source_complete(source_id):
                 self._show_completed_source(source_id)
-            return
-        self._save_position()
-        previous_source = self.current_source_id
-        self.current_source_id = source_id
-        self.store.set_current_source_id(source_id)
-        self._last_completed_item_id = None
-        self.log_playback.info(
-            "Playback flow step=player_launch source=%s file=%s position=%.1fs",
-            source_id,
-            item.file_path,
-            position,
-        )
-        self._prepare_playback_output()
-        if not self._play_item_through_adapter(item, position):
-            return
-        if item.id:
-            self.store.mark_started(item.id)
-        self._save_session(source_id, item.id, index, position, is_playing=True)
-        self._detail_title = self.library.get_source_label(source_id)
-        self._detail_subtitle = "Now playing"
-        self.nav.go_home()
-        if previous_source != source_id:
-            self.log_state.info("Active source changed from=%s to=%s", previous_source, source_id)
-        self.log_playback.info(
-            "Playlist stream resumed source=%s track_index=%s position=%.1fs",
-            source_id,
-            index,
-            position,
-        )
-        self._mark_dirty("source_change" if previous_source != source_id else "playback_start")
+                return
+            item, index, position = self._session_cursor(source_id)
+            if not item:
+                if self.library.is_source_complete(source_id):
+                    self._show_completed_source(source_id)
+                return
+            self._save_position()
+            previous_source = self.current_source_id
+            self.current_source_id = source_id
+            self.store.set_current_source_id(source_id)
+            self._last_completed_item_id = None
+            self.log_playback.info(
+                "Playback flow step=player_launch source=%s file=%s position=%.1fs",
+                source_id,
+                item.file_path,
+                position,
+            )
+            self._prepare_playback_output()
+            if not self._play_item_through_adapter(item, position):
+                return
+            started_successfully = True
+            if item.id:
+                self.store.mark_started(item.id)
+            self._save_session(source_id, item.id, index, position, is_playing=True)
+            self._detail_title = self.library.get_source_label(source_id)
+            self._detail_subtitle = "Now playing"
+            self.nav.go_home()
+            if previous_source != source_id:
+                self.log_state.info("Active source changed from=%s to=%s", previous_source, source_id)
+            self.log_playback.info(
+                "Playlist stream resumed source=%s track_index=%s position=%.1fs",
+                source_id,
+                index,
+                position,
+            )
+            self._mark_dirty("source_change" if previous_source != source_id else "playback_start")
+        finally:
+            self._source_starting_id = None
+            duration = time.monotonic() - started_at
+            if (
+                started_successfully
+                and duration >= self._slow_source_start_threshold_seconds
+                and self._post_slow_source_start_ignore_seconds > 0
+            ):
+                self._ignore_source_toggle_id = source_id
+                self._ignore_source_toggle_until = (
+                    time.monotonic() + self._post_slow_source_start_ignore_seconds
+                )
+                self.log_playback.info(
+                    "Playback flow step=slow_source_start_duplicate_guard source=%s duration_ms=%.1f ignore_ms=%d",
+                    source_id,
+                    duration * 1000,
+                    int(self._post_slow_source_start_ignore_seconds * 1000),
+                )
 
     def resume_last(self) -> None:
         status = self.player.status()
